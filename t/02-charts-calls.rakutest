@@ -1,0 +1,31 @@
+use v6.d;
+use Test;
+use lib '.';
+use lib './lib';
+
+use JavaScript::D3;
+
+use Data::Generators;
+
+use Test;
+
+plan 3;
+
+## 1
+ok js-d3-bar-chart(random-real(12, 10), height => 500, background => 'rgb(60,60,60)');
+
+## 2
+my %h2 = ('a' ... 'j') Z=> (^10);
+ok js-d3-bar-chart(%h2, height => 500, background => 'rgb(60,60,60)');
+
+## 3
+ok js-d3-histogram(
+        random-real(12, 10),
+        height => 500,
+        background => 'rgb(60,60,60)',
+        title => 'Try it!',
+        x-axis-label => 'My X',
+        y-axis-label => 'My Y',
+        margins => %(top => 80, left => 60));
+
+done-testing;
