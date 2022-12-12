@@ -1,0 +1,33 @@
+{
+  "name": "JavaScript::D3",
+  "description": "A package for code generation using the primitives of JavaScript's D3.",
+  "version": "0.0.1",
+  "perl": "6.d",
+  "authors": [
+    "Anton Antonov"
+  ],
+  "auth": "zef:antononcube",
+  "depends": [
+    "JSON::Fast:ver<0.17+>"
+  ],
+  "build-depends": [],
+  "test-depends": [],
+  "provides": {
+    "JavaScript::D3": "lib/JavaScript/D3.rakumod",
+    "JavaScript::D3::Plot": "lib/JavaScript/D3/Plot.rakumod"
+  },
+  "resources": [
+  ],
+  "license": "Artistic-2.0",
+  "tags": [
+    "chart",
+    "code",
+    "d3",
+    "graphics",
+    "javascript",
+    "js",
+    "plot"
+  ],
+  "api": "1",
+  "source-url": "https://github.com/antononcube/Raku-JavaScript-D3"
+}
