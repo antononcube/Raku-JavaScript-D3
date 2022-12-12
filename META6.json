@@ -1,6 +1,6 @@
 {
   "name": "JavaScript::D3",
-  "description": "A package for code generation using the primitives of JavaScript's D3.",
+  "description": "A package for generation of JavaScript's D3 code for making plots and charts.",
   "version": "0.0.1",
   "perl": "6.d",
   "authors": [
@@ -14,7 +14,8 @@
   "test-depends": [],
   "provides": {
     "JavaScript::D3": "lib/JavaScript/D3.rakumod",
-    "JavaScript::D3::Plot": "lib/JavaScript/D3/Plot.rakumod"
+    "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
+    "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod"
   },
   "resources": [
   ],

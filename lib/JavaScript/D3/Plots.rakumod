@@ -2,13 +2,13 @@ use v6.d;
 
 use JSON::Fast;
 
-unit module JavaScript::D3::Plot;
+unit module JavaScript::D3::Plots;
 
 #============================================================
 # JavaScript plot template parts
 #============================================================
 
-our $jsPlotPreparation = q:to/END/;
+my $jsPlotPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
@@ -56,7 +56,7 @@ svg
   .call(d3.axisLeft(y));
 END
 
-our $jsPlotEnding = q:to/END/;
+my $jsPlotEnding = q:to/END/;
 }) })(element);
 END
 

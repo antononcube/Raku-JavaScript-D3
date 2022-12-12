@@ -1,6 +1,7 @@
 use v6.d;
 
-use JavaScript::D3::Plot;
+use JavaScript::D3::Charts;
+use JavaScript::D3::Plots;
 
 unit module JavaScript::D3;
 
@@ -17,8 +18,8 @@ require(['d3'], function(d3) {
 });
 END
 
-multi js-d3-config(:$v=7) is export {
-    return $jsD3ConfigCode.subst('$VER',$v);
+multi js-d3-config(:$v = 7) is export {
+    return $jsD3ConfigCode.subst('$VER', $v);
 }
 
 #============================================================
@@ -26,7 +27,7 @@ multi js-d3-config(:$v=7) is export {
 proto js-d3-list-plot($data, |) is export {*}
 
 multi js-d3-list-plot($data, Str :$background= 'white', Str :$color= 'steelblue', :$width = 600, :$height = 400) {
-    return JavaScript::D3::Plot::ListPlot($data,
+    return JavaScript::D3::Plots::ListPlot($data,
             :$background,
             :$color,
             :$width,
@@ -38,10 +39,21 @@ multi js-d3-list-plot($data, Str :$background= 'white', Str :$color= 'steelblue'
 proto js-d3-list-line-plot($data, |) is export {*}
 
 multi js-d3-list-line-plot($data, Str :$background= 'white', Str :$color= 'steelblue', :$width = 600, :$height = 400) {
-    return JavaScript::D3::Plot::ListLinePlot($data,
+    return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
             :$width,
             :$height);
 }
 
+#============================================================
+#| Make a list plot (scatter plot) for a list of numbers or a list of x-y coordinates.
+proto js-d3-bar-chart($data, |) is export {*}
+
+multi js-d3-bar-chart($data, Str :$background= 'white', Str :$color= 'steelblue', :$width = 600, :$height = 400) {
+    return JavaScript::D3::Charts::BarChart($data,
+            :$background,
+            :$color,
+            :$width,
+            :$height);
+}
