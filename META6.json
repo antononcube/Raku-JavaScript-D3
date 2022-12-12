@@ -19,6 +19,7 @@
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod"
   },
   "resources": [
+    "Tests-for-JavaScript-D3.ipynb"
   ],
   "license": "Artistic-2.0",
   "tags": [
