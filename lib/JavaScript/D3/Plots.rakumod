@@ -100,6 +100,10 @@ my $jsPlotEnding = q:to/END/;
 }) })(element);
 END
 
+our sub GetPlotPreparationCode() {
+    return $jsPlotPreparation;
+}
+
 #============================================================
 # Process margins
 #============================================================
