@@ -11,7 +11,7 @@ my $jsPlotPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 40, bottom: 30, left: 30},
+var margin = {top: 30, right: 30, bottom: 30, left: 30},
     width = $WIDTH - margin.left - margin.right,
     height = $HEIGHT - margin.top - margin.bottom;
 
@@ -25,6 +25,19 @@ var svg = d3
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")")
+
+// Obtain title
+var title = $TITLE
+
+if ( title.length > 0 ) {
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        //.style("text-decoration", "underline")
+        .text(title);
+}
 
 // Optain data
 var data = $DATA
@@ -81,16 +94,17 @@ our proto ListPlot($data, |) is export {*}
 
 our multi ListPlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
-    my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_ ) })>>.Hash;
+    my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_) })>>.Hash;
     return ListPlot(@dataPairs, |%args);
 }
 
 our multi ListPlot(@data where @data.all ~~ Map,
-                   Str :$background='white',
-                   Str :$color='steelblue',
+                   Str :$background= 'white',
+                   Str :$color= 'steelblue',
                    :$width = 600,
-                   :$height = 400) {
-    my $jsData = to-json(@data,:!pretty);
+                   :$height = 400,
+                   Str :$title = '') {
+    my $jsData = to-json(@data, :!pretty);
 
     my $jsScatterPlot = [$jsPlotPreparation, $jsScatterPlotPart, $jsPlotEnding].join("\n");
 
@@ -100,6 +114,7 @@ our multi ListPlot(@data where @data.all ~~ Map,
             .subst('$POINT_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
 }
 
 #============================================================
@@ -123,16 +138,17 @@ our proto ListLinePlot($data, |) is export {*}
 
 our multi ListLinePlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
-    my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_ ) })>>.Hash;
+    my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_) })>>.Hash;
     return ListLinePlot(@dataPairs, |%args);
 }
 
 our multi ListLinePlot(@data where @data.all ~~ Map,
-                   Str :$background='white',
-                   Str :$color='steelblue',
-                   :$width = 600,
-                   :$height = 400) {
-    my $jsData = to-json(@data,:!pretty);
+                       Str :$background= 'white',
+                       Str :$color= 'steelblue',
+                       :$width = 600,
+                       :$height = 400,
+                       Str :$title = '') {
+    my $jsData = to-json(@data, :!pretty);
 
     my $jsScatterPlot = [$jsPlotPreparation, $jsPathPlotPart, $jsPlotEnding].join("\n");
 
@@ -142,4 +158,5 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
             .subst('$LINE_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
 }

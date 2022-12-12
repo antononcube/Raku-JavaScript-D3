@@ -11,7 +11,7 @@ my $jsChartPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
-var margin = {top: 10, right: 40, bottom: 30, left: 30},
+var margin = {top: 30, right: 30, bottom: 30, left: 30},
     width = $WIDTH - margin.left - margin.right,
     height = $HEIGHT - margin.top - margin.bottom;
 
@@ -25,6 +25,19 @@ var svg = d3
   .append("g")
     .attr("transform",
           "translate(" + margin.left + "," + margin.top + ")")
+
+// Obtain title
+var title = $TITLE
+
+if ( title.length > 0 ) {
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        //.style("text-decoration", "underline")
+        .text(title);
+}
 
 // Optain data
 var data = $DATA
@@ -94,7 +107,8 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :$background='white',
                    Str :$color='steelblue',
                    :$width = 600,
-                   :$height = 400) {
+                   :$height = 400,
+                   Str :$title = '') {
     my $jsData = to-json(@data,:!pretty);
 
     my &jsChart = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
@@ -105,6 +119,7 @@ our multi BarChart(@data where @data.all ~~ Map,
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
 }
 
 #============================================================
@@ -158,7 +173,8 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                    Str :$background='white',
                    Str :$color='steelblue',
                    :$width = 600,
-                   :$height = 400) {
+                   :$height = 400,
+                    Str :$title = '') {
     my $jsData = to-json(@data,:!pretty);
 
     my $jsChart = [$jsChartPreparation, $jsHistogramPart, $jsChartEnding].join("\n");
@@ -169,4 +185,5 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
 }
