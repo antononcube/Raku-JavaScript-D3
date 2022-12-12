@@ -7,7 +7,6 @@ unit module JavaScript::D3::Plots;
 #============================================================
 # JavaScript plot template parts
 #============================================================
-
 my $jsPlotPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 

@@ -7,8 +7,7 @@ unit module JavaScript::D3::Charts;
 #============================================================
 # JavaScript chart template parts
 #============================================================
-
-our $jsChartPreparation = q:to/END/;
+my $jsChartPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
@@ -30,9 +29,6 @@ var svg = d3
 // Optain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o.Value; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o.Value; }))
-
 END
 
 my $jsChartEnding = q:to/END/;
@@ -42,7 +38,13 @@ END
 #============================================================
 # BarChart
 #============================================================
-our $jsBarChartPart = q:to/END/;
+# See https://d3-graph-gallery.com/graph/barplot_basic.html
+
+my $jsBarChartPart = q:to/END/;
+
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o.Value; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o.Value; }))
+
 // X axis
 var x = d3.scaleBand()
   .range([ 0, width ])
@@ -95,9 +97,73 @@ our multi BarChart(@data where @data.all ~~ Map,
                    :$height = 400) {
     my $jsData = to-json(@data,:!pretty);
 
-    my $jsScatterPlot = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
+    my &jsChart = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
 
-    return  $jsScatterPlot
+    return  &jsChart
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+}
+
+#============================================================
+# Histogram
+#============================================================
+# See https://d3-graph-gallery.com/graph/histogram_basic.html
+my $jsHistogramPart = q:to/END/;
+ var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
+ var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+
+ // X axis: scale and draw:
+  var x = d3.scaleLinear()
+      .domain([valueMin, valueMax])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.Value })
+      .range([0, width]);
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // set the parameters for the histogram
+  var histogram = d3.histogram()
+      .value(function(d) { return d; })   // I need to give the vector of value
+      .domain(x.domain())  // then the domain of the graphic
+      .thresholds(x.ticks(70)); // then the numbers of bins
+
+  // And apply this function to data to get the bins
+  var bins = histogram(data);
+
+  // Y axis: scale and draw:
+  var y = d3.scaleLinear()
+      .range([height, 0]);
+      y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+  svg.append("g")
+      .call(d3.axisLeft(y));
+
+  // append the bar rectangles to the svg element
+  svg.selectAll("rect")
+      .data(bins)
+      .enter()
+      .append("rect")
+        .attr("x", 1)
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .style("fill", $FILL_COLOR)
+END
+
+#| Makes a histogram for a list of numbers.
+our proto Histogram($data, |) is export {*}
+
+our multi Histogram(@data where @data.all ~~ Numeric,
+                   Str :$background='white',
+                   Str :$color='steelblue',
+                   :$width = 600,
+                   :$height = 400) {
+    my $jsData = to-json(@data,:!pretty);
+
+    my $jsChart = [$jsChartPreparation, $jsHistogramPart, $jsChartEnding].join("\n");
+
+    return  $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')

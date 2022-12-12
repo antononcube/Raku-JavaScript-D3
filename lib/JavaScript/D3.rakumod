@@ -47,11 +47,23 @@ multi js-d3-list-line-plot($data, Str :$background= 'white', Str :$color= 'steel
 }
 
 #============================================================
-#| Make a list plot (scatter plot) for a list of numbers or a list of x-y coordinates.
+#| Make a bar chart for a list of numbers, hash with numeric values, or a dataset with columns C<<Label Value>>.
 proto js-d3-bar-chart($data, |) is export {*}
 
 multi js-d3-bar-chart($data, Str :$background= 'white', Str :$color= 'steelblue', :$width = 600, :$height = 400) {
     return JavaScript::D3::Charts::BarChart($data,
+            :$background,
+            :$color,
+            :$width,
+            :$height);
+}
+
+#============================================================
+#| Make a histogram for a list of numbers.
+proto js-d3-histogram($data, |) is export {*}
+
+multi js-d3-histogram($data, Str :$background= 'white', Str :$color= 'steelblue', :$width = 600, :$height = 400) {
+    return JavaScript::D3::Charts::Histogram($data,
             :$background,
             :$color,
             :$width,
