@@ -1,6 +1,7 @@
 use v6.d;
 
 use JSON::Fast;
+use Hash::Merge;
 
 unit module JavaScript::D3::Plots;
 
@@ -11,7 +12,7 @@ my $jsPlotPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
-var margin = {top: 30, right: 30, bottom: 30, left: 30},
+var margin = $MARGINS,
     width = $WIDTH - margin.left - margin.right,
     height = $HEIGHT - margin.top - margin.bottom;
 
@@ -37,6 +38,33 @@ if ( title.length > 0 ) {
         .style("font-size", "16px")
         //.style("text-decoration", "underline")
         .text(title);
+}
+
+// Obtain x-axis label
+var xAxisLabel = $X_AXIS_LABEL
+var xAxisLabelFontSize = 12
+
+if ( xAxisLabel.length > 0 ) {
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", height + margin.bottom - xAxisLabelFontSize/2)
+        .attr("text-anchor", "middle")
+        .style("font-size", xAxisLabelFontSize.toString() + "px")
+        .text(xAxisLabel);
+}
+
+// Obtain y-axis label
+var yAxisLabel = $Y_AXIS_LABEL
+var yAxisLabelFontSize = 12
+
+if ( yAxisLabel.length > 0 ) {
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", - (height / 2))
+        .attr("y", 0 - margin.left + yAxisLabelFontSize)
+        .attr("text-anchor", "middle")
+        .style("font-size", yAxisLabelFontSize.toString() + "px")
+        .text(yAxisLabel);
 }
 
 // Optain data
@@ -73,6 +101,20 @@ my $jsPlotEnding = q:to/END/;
 END
 
 #============================================================
+# Process margins
+#============================================================
+
+our sub ProcessMargins($margins is copy) {
+    my %defaultMargins = %( top => 40, bottom => 40, left => 40, right => 40);
+    if $margins.isa(Whatever) {
+        $margins = %defaultMargins
+    }
+    die "The argument margins is expected to be a Map or Whatever." unless $margins ~~ Map;
+    $margins = merge-hash(%defaultMargins, $margins);
+    return $margins;
+}
+
+#============================================================
 # ListPlot
 #============================================================
 
@@ -103,10 +145,16 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    Str :$color= 'steelblue',
                    :$width = 600,
                    :$height = 400,
-                   Str :$title = '') {
+                   Str :plot-label(:$title) = '',
+                   Str :$x-axis-label = '',
+                   Str :$y-axis-label = '',
+                   :$margins is copy = Whatever
+                   ) {
     my $jsData = to-json(@data, :!pretty);
 
     my $jsScatterPlot = [$jsPlotPreparation, $jsScatterPlotPart, $jsPlotEnding].join("\n");
+
+    $margins = ProcessMargins($margins);
 
     return  $jsScatterPlot
             .subst('$DATA', $jsData)
@@ -115,6 +163,9 @@ our multi ListPlot(@data where @data.all ~~ Map,
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
 }
 
 #============================================================
@@ -147,8 +198,14 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
                        Str :$color= 'steelblue',
                        :$width = 600,
                        :$height = 400,
-                       Str :$title = '') {
+                       Str :plot-label(:$title) = '',
+                       Str :$x-axis-label = '',
+                       Str :$y-axis-label = '',
+                       :$margins is copy = Whatever
+                       ) {
     my $jsData = to-json(@data, :!pretty);
+
+    $margins = ProcessMargins($margins);
 
     my $jsScatterPlot = [$jsPlotPreparation, $jsPathPlotPart, $jsPlotEnding].join("\n");
 
@@ -159,4 +216,7 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
 }

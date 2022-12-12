@@ -1,6 +1,7 @@
 use v6.d;
 
 use JSON::Fast;
+use JavaScript::D3::Plots;
 
 unit module JavaScript::D3::Charts;
 
@@ -11,7 +12,7 @@ my $jsChartPreparation = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 
 // set the dimensions and margins of the graph
-var margin = {top: 30, right: 30, bottom: 30, left: 30},
+var margin = $MARGINS,
     width = $WIDTH - margin.left - margin.right,
     height = $HEIGHT - margin.top - margin.bottom;
 
@@ -37,6 +38,33 @@ if ( title.length > 0 ) {
         .style("font-size", "16px")
         //.style("text-decoration", "underline")
         .text(title);
+}
+
+// Obtain x-axis label
+var xAxisLabel = $X_AXIS_LABEL
+var xAxisLabelFontSize = 12
+
+if ( xAxisLabel.length > 0 ) {
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", height + margin.bottom - xAxisLabelFontSize/2)
+        .attr("text-anchor", "middle")
+        .style("font-size", xAxisLabelFontSize.toString() + "px")
+        .text(xAxisLabel);
+}
+
+// Obtain y-axis label
+var yAxisLabel = $Y_AXIS_LABEL
+var yAxisLabelFontSize = 12
+
+if ( yAxisLabel.length > 0 ) {
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", - (height / 2))
+        .attr("y", 0 - margin.left + yAxisLabelFontSize)
+        .attr("text-anchor", "middle")
+        .style("font-size", yAxisLabelFontSize.toString() + "px")
+        .text(yAxisLabel);
 }
 
 // Optain data
@@ -108,18 +136,27 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :$color='steelblue',
                    :$width = 600,
                    :$height = 400,
-                   Str :$title = '') {
+                   Str :plot-label(:$title) = '',
+                   Str :$x-axis-label = '',
+                   Str :$y-axis-label = '',
+                   :$margins is copy = Whatever
+                   ) {
     my $jsData = to-json(@data,:!pretty);
 
-    my &jsChart = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
+    $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    return  &jsChart
+    my $jsChart = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
+
+    return  $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
 }
 
 #============================================================
@@ -174,8 +211,14 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                    Str :$color='steelblue',
                    :$width = 600,
                    :$height = 400,
-                    Str :$title = '') {
+                    Str :plot-label(:$title) = '',
+                    Str :$x-axis-label = '',
+                    Str :$y-axis-label = '',
+                    :$margins is copy = Whatever
+                    ) {
     my $jsData = to-json(@data,:!pretty);
+
+    $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
     my $jsChart = [$jsChartPreparation, $jsHistogramPart, $jsChartEnding].join("\n");
 
@@ -186,4 +229,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
 }
