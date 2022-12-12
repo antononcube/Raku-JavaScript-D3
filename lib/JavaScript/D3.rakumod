@@ -23,7 +23,7 @@ multi js-d3-config(:$v = 7) is export {
 }
 
 #============================================================
-#| Make a list plot (scatter plot) for a list of numbers or a list of x-y coordinates.
+#| Makes a list plot (scatter plot) for a list of numbers or a list of x-y coordinates.
 proto js-d3-list-plot($data, |) is export {*}
 
 multi js-d3-list-plot($data,
@@ -32,7 +32,7 @@ multi js-d3-list-plot($data,
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins is copy = Whatever) {
+                      :$margins = Whatever) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
             :$color,
@@ -43,7 +43,7 @@ multi js-d3-list-plot($data,
 }
 
 #============================================================
-#| Make a list line plot for a list of numbers or a list of x-y coordinates.
+#| Makes a list line plot for a list of numbers or a list of x-y coordinates.
 proto js-d3-list-line-plot($data, |) is export {*}
 
 multi js-d3-list-line-plot($data,
@@ -52,7 +52,7 @@ multi js-d3-list-line-plot($data,
                            :$width = 600, :$height = 400,
                            Str :plot-label(:$title) = '',
                            Str :$x-axis-label = '', Str :$y-axis-label = '',
-                           :$margins is copy = Whatever) {
+                           :$margins = Whatever) {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
@@ -63,7 +63,7 @@ multi js-d3-list-line-plot($data,
 }
 
 #============================================================
-#| Make a bar chart for a list of numbers, hash with numeric values, or a dataset with columns C<<Label Value>>.
+#| Makes a bar chart for a list of numbers, hash with numeric values, or a dataset with columns C<<Label Value>>.
 proto js-d3-bar-chart($data, |) is export {*}
 
 multi js-d3-bar-chart($data,
@@ -72,7 +72,7 @@ multi js-d3-bar-chart($data,
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins is copy = Whatever) {
+                      :$margins = Whatever) {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
             :$color,
@@ -83,7 +83,7 @@ multi js-d3-bar-chart($data,
 }
 
 #============================================================
-#| Make a histogram for a list of numbers.
+#| Makes a histogram for a list of numbers.
 proto js-d3-histogram($data, |) is export {*}
 
 multi js-d3-histogram($data,
@@ -92,7 +92,7 @@ multi js-d3-histogram($data,
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins is copy = Whatever) {
+                      :$margins = Whatever) {
     return JavaScript::D3::Charts::Histogram($data,
             :$background,
             :$color,
@@ -100,4 +100,50 @@ multi js-d3-histogram($data,
             :$title,
             :$x-axis-label, :$y-axis-label,
             :$margins);
+}
+
+#============================================================
+#| Makes a bubble chart for a list of numeric triplets or list of Maps with key C<<x y z>>.
+proto js-d3-bubble-chart($data, |) is export {*}
+
+multi js-d3-bubble-chart($data,
+                         Str :$background= 'white',
+                         Str :$color= 'steelblue',
+                         Numeric :$opacity = 0.7,
+                         :$width = 600, :$height = 400,
+                         Str :plot-label(:$title) = '',
+                         Str :$x-axis-label = '', Str :$y-axis-label = '',
+                         :$margins = Whatever,
+                         :$tooltip = Whatever) {
+    return JavaScript::D3::Charts::BubbleChart($data,
+            :$background,
+            :$color,
+            :$opacity,
+            :$width, :$height,
+            :$title,
+            :$x-axis-label, :$y-axis-label,
+            :$margins,
+            :$tooltip);
+}
+
+#============================================================
+#| Makes a density-2D chart for a list of numeric pairs or list of Maps with key C<<x y>>.
+proto js-d3-density2d-chart($data, |) is export {*}
+
+multi js-d3-density2d-chart($data,
+                            Str :$background= 'white',
+                            Str :$color= 'steelblue',
+                            :$width = 600, :$height = 400,
+                            Str :plot-label(:$title) = '',
+                            Str :$x-axis-label = '', Str :$y-axis-label = '',
+                            :$margins = Whatever,
+                            :$method = Whatever) {
+    return JavaScript::D3::Charts::Bin2DChart($data,
+            :$background,
+            :$color,
+            :$width, :$height,
+            :$title,
+            :$x-axis-label, :$y-axis-label,
+            :$margins,
+            :$method);
 }
