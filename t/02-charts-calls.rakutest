@@ -6,10 +6,11 @@ use lib './lib';
 use JavaScript::D3;
 
 use Data::Generators;
+use Data::Reshapers;
 
 use Test;
 
-plan 3;
+plan 5;
 
 ## 1
 ok js-d3-bar-chart(random-real(12, 10), height => 500, background => 'rgb(60,60,60)');
@@ -27,5 +28,28 @@ ok js-d3-histogram(
         x-axis-label => 'My X',
         y-axis-label => 'My Y',
         margins => %(top => 80, left => 60));
+
+## 4
+my @arr4 = transpose( (random-real(12, 12), random-real(12, 12), random-real(12, 12)) );
+ok js-d3-bubble-chart(
+        @arr4,
+        height => 500,
+        background => 'rgb(60,60,60)',
+        title => 'Try it!',
+        x-axis-label => 'My X',
+        y-axis-label => 'My Y',
+        margins => %(top => 80, left => 60));
+
+## 5
+my @arr5 = transpose( (random-real(12, 12), random-real(12, 12)) );
+ok js-d3-density2d-chart(
+        @arr5,
+        height => 500,
+        background => 'rgb(60,60,60)',
+        title => 'Try it!',
+        x-axis-label => 'My X',
+        y-axis-label => 'My Y',
+        margins => %(top => 80, left => 60));
+
 
 done-testing;
