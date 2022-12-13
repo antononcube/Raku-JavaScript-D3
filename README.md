@@ -67,7 +67,7 @@ In the lists below the highest priority items are placed first.
 #### Multiple dataset
 
 1. [ ] TODO List plot
-2. [ ] TODO List line plot
+2. [X] TODO List line plot
 3. [ ] TODO Date list plot 
 4. [ ] TODO Box plot 
 
@@ -94,12 +94,14 @@ In the lists below the highest priority items are placed first.
 
 ### Decorations
 
-User specified:
+User specified or automatic:
 
 1. [X] DONE Plot label / title
 2. [X] DONE Axes labels
 3. [X] DONE Plot margins
-4. [ ] TODO Plot legends
+4. [X] DONE Plot legends (automatic for multi-datasets plots and chart)
+5. [ ] TODO Title style (font size, color, face)
+6. [ ] TODO Axes labels style (font size, color, face)
 
 ### Infrastructural
 
