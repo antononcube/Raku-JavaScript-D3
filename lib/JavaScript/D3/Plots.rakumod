@@ -96,6 +96,35 @@ svg
   .call(d3.axisLeft(y));
 END
 
+# See https://d3-graph-gallery.com/graph/custom_legend.html
+my $jsGroupsLegend = q:to/END/;
+// create a list of keys
+var keys = data.map(function(o) { return o.group; })
+keys = [...new Set(keys)];
+
+// Add one dot in the legend for each name.
+svg.selectAll("mydots")
+  .data(keys)
+  .enter()
+  .append("circle")
+    .attr("cx", $LEGEND_X_POS)
+    .attr("cy", function(d,i){ return $LEGEND_Y_POS + i*$LEGEND_Y_GAP}) // 100 is where the first dot appears. 25 is the distance between dots
+    .attr("r", 7)
+    .style("fill", function(d){ return myColor(d)})
+
+// Add one dot in the legend for each name.
+svg.selectAll("mylabels")
+  .data(keys)
+  .enter()
+  .append("text")
+    .attr("x", $LEGEND_X_POS + 20)
+    .attr("y", function(d,i){ return $LEGEND_Y_POS + i*$LEGEND_Y_GAP}) // 100 is where the first dot appears. 25 is the distance between dots
+    .style("fill", function(d){ return myColor(d)})
+    .text(function(d){ return d})
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+END
+
 my $jsPlotEnding = q:to/END/;
 }) })(element);
 END
@@ -240,13 +269,17 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
 
     # Select code fragment to splice in
-    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !! $jsPathPlotPart;
+    my $jsPlotMiddle = $jsPathPlotPart;
+    if $hasGroups {
+        $jsPlotMiddle = $jsMultiPathPlotPart ~ "\n" ~ $jsGroupsLegend;
+        $margins<right> = $margins<right> + 100;
+    }
 
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsScatterPlot = [$jsPlotPreparation, $jsPlotMiddle, $jsPlotEnding].join("\n");
+    my $jsLinePlot = [$jsPlotPreparation, $jsPlotMiddle, $jsPlotEnding].join("\n");
 
-    return  $jsScatterPlot
+    return  $jsLinePlot
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$LINE_COLOR', '"' ~ $color ~ '"')
@@ -256,4 +289,7 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', ($width - $margins<right>).Str)
+            .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25')
 }
