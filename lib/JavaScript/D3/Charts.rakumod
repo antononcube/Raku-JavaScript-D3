@@ -322,12 +322,12 @@ const showTooltip = function(event, d) {
       .style("opacity", 1)
       .html("Group: " + d.group + '<br/>value: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString())
       .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2+30 + "px")
+      .style("top", (event.y)/2+10 + "px")
   }
   const moveTooltip = function(event, d) {
     tooltip
       .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2+30 + "px")
+      .style("top", (event.y)/2+10 + "px")
   }
   const hideTooltip = function(event, d) {
     tooltip
@@ -381,9 +381,20 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
 
     # Select code fragment to splice in
     my $jsChartMiddle = do given $tooltip {
-        when $_.isa(Whatever) && $hasGroups { $jsTooltipMultiBubbleChartPart}
-        when $_ ~~ Bool && $_ && $hasGroups { $jsTooltipMultiBubbleChartPart}
-        when $_ ~~ Bool && !$_ && $hasGroups { $jsMultiBubbleChartPart}
+        when $_.isa(Whatever) && $hasGroups || $_ ~~ Bool && $_ && $hasGroups {
+
+            my $n = @data.map(*<group>).unique>>.chars.max;
+            $margins<right> = $margins<right> + ($n + 1) * 14;
+
+            $jsTooltipMultiBubbleChartPart ~ "\n" ~ JavaScript::D3::Plots::GetLegendCode
+        }
+        when $_ ~~ Bool && !$_ && $hasGroups {
+
+            my $n = @data.map(*<group>).unique>>.chars.max;
+            $margins<right> = $margins<right> + ($n + 1) * 14;
+
+            $jsMultiBubbleChartPart ~ "\n" ~ JavaScript::D3::Plots::GetLegendCode
+        }
         when $_ ~~ Bool && $_ && !$hasGroups {
             @data = @data.map({ $_.push(group=>'All') });
             $jsTooltipMultiBubbleChartPart
@@ -408,6 +419,9 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', ($width - $margins<right>).Str)
+            .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25')
 }
 
 #============================================================

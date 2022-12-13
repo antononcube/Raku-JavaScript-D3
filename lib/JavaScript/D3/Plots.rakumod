@@ -129,9 +129,18 @@ my $jsPlotEnding = q:to/END/;
 }) })(element);
 END
 
+#============================================================
+# JavaScript code accessors
+#============================================================
+
 our sub GetPlotPreparationCode() {
     return $jsPlotPreparation;
 }
+
+our sub GetLegendCode() {
+    return $jsGroupsLegend;
+}
+
 
 #============================================================
 # Process margins
@@ -273,7 +282,7 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
     if $hasGroups {
         $jsPlotMiddle = $jsMultiPathPlotPart ~ "\n" ~ $jsGroupsLegend;
         my $n = @data.map(*<group>).unique>>.chars.max;
-        $margins<right> = $margins<right> + $n * 7;
+        $margins<right> = $margins<right> + ($n + 1) * 7;
     }
 
     my $jsData = to-json(@data, :!pretty);
