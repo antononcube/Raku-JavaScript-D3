@@ -10,17 +10,23 @@ use Data::Generators;
 
 use Test;
 
-plan 6;
+plan 8;
 
-my @ds2 = random-tabular-dataset(120, <x y>,
+my @dsXY = random-tabular-dataset(120, <x y>,
         generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
                         y => { random-real(400, $_) } });
+
+my @dsXYG = random-tabular-dataset(120, <x y group>,
+        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
+                        y => { random-real(400, $_) },
+                        group => <a b c d> });
 
 ## 1
 ok js-d3-list-plot(random-real(12, 100));
 
 ## 2
-ok js-d3-list-plot(random-real(12, 100), height => 500,
+ok js-d3-list-plot(random-real(12, 100),
+        height => 500,
         background => 'gray',
         title => 'Try it!',
         x-axis-label => 'My X',
@@ -28,7 +34,8 @@ ok js-d3-list-plot(random-real(12, 100), height => 500,
         margins => %(top => 80));
 
 ## 3
-ok js-d3-list-plot(@ds2, height => 500,
+ok js-d3-list-plot(@dsXY,
+        height => 500,
         background => 'gray',
         title => 'Try it!',
         x-axis-label => 'My X',
@@ -39,7 +46,8 @@ ok js-d3-list-plot(@ds2, height => 500,
 ok js-d3-list-line-plot(random-real(12, 100));
 
 ## 5
-ok js-d3-list-line-plot(random-real(12, 100), height => 500,
+ok js-d3-list-line-plot(random-real(12, 100),
+        height => 500,
         background => 'gray',
         title => 'Try it!',
         x-axis-label => 'My X',
@@ -47,11 +55,25 @@ ok js-d3-list-line-plot(random-real(12, 100), height => 500,
         margins => %(top => 80));
 
 ## 6
-ok js-d3-list-line-plot(@ds2, height => 500,
+ok js-d3-list-line-plot(@dsXY,
+        height => 500,
         background => 'gray',
         title => 'Try it!',
         x-axis-label => 'My X',
         y-axis-label => 'My Y',
         margins => %(top => 80));
+
+
+## 7
+ok js-d3-list-line-plot(@dsXY,
+        height => 500,
+        background => 'gray',
+        title => 'Try it!',
+        x-axis-label => 'My X',
+        y-axis-label => 'My Y',
+        margins => %(top => 80));
+
+## 8
+ok js-d3-list-line-plot(@dsXYG);
 
 done-testing;
