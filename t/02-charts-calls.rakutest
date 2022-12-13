@@ -1,19 +1,16 @@
 use v6.d;
-use Test;
+
 use lib '.';
 use lib './lib';
 
 use JavaScript::D3;
-
-use Data::Generators;
-use Data::Reshapers;
 
 use Test;
 
 plan 6;
 
 ## 1
-ok js-d3-bar-chart(random-real(12, 10), height => 500, background => 'rgb(60,60,60)');
+ok js-d3-bar-chart((rand xx 12).List, height => 500, background => 'rgb(60,60,60)');
 
 ## 2
 my %h2 = ('a' ... 'j') Z=> (^10);
@@ -21,7 +18,7 @@ ok js-d3-bar-chart(%h2, height => 500, background => 'rgb(60,60,60)');
 
 ## 3
 ok js-d3-histogram(
-        random-real(12, 10),
+        rand xx 10,
         height => 500,
         background => 'rgb(60,60,60)',
         title => 'Try it!',
@@ -30,7 +27,11 @@ ok js-d3-histogram(
         margins => %(top => 80, left => 60));
 
 ## 4
-my @arr4 = transpose( (random-real(12, 12), random-real(12, 12), random-real(12, 12)) );
+#my @arr4 = transpose( (random-real(12, 12), random-real(12, 12), random-real(12, 12)) );
+my @arr4 = [[7.6706971586134465e0, 11.164018810445313e0, 3.412828259371985e0], [9.166512990782927e0, 3.4914992791167094e0, 1.4401698695667982e0], [1.2141358909960767e0, 5.926413769639126e0, 5.131863438948219e0],
+            [10.445544356608925e0, 2.5777109778910527e0, 0.005869503474493776e0], [5.669452063629155e0, 2.7577675820848038e0, 7.68102630333005e0], [0.7335784724742944e0, 9.717231980745646e0, 10.359195707079543e0],
+            [0.46799553633318824e0, 9.489140645255576e0, 8.696677234747453e0], [10.979475890816063e0, 4.031940420894502e0, 6.799235362794455e0], [6.651681918794817e0, 2.0068855092785087e0, 4.780310902209751e0],
+            [4.566226529825254e0, 10.90113236046407e0, 10.194997848829178e0], [9.701169729527527e0, 6.722976363678477e0, 10.979218321700538e0], [9.853038015265529e0, 7.328942474577429e0, 3.7431697815382052e0]];
 ok js-d3-bubble-chart(
         @arr4,
         height => 500,
@@ -42,12 +43,17 @@ ok js-d3-bubble-chart(
 
 
 ## 5
-my @arr5 = random-tabular-dataset(100, <x y z group>,
-        generators => { x => { random-real(20, $_) },
-                        y => { random-variate(NormalDistribution.new(200,50), $_) },
-                        z => { random-variate(NormalDistribution.new(20,12), $_) },
-                        group => <a barista c>
-        } );
+#my @arr5 = random-tabular-dataset(100, <x y z group>,
+#        generators => { x => { random-real(20, $_) },
+#                        y => { random-variate(NormalDistribution.new(200,50), $_) },
+#                        z => { random-variate(NormalDistribution.new(20,12), $_) },
+#                        group => <a barista c>
+#        } );
+my @arr5 = [{:group("barista"), :x(19.36066099833271e0), :y(180.92097075001297e0), :z(29.117170401658356e0)}, {:group("barista"), :x(4.827750692650509e0), :y(151.2388158509741e0), :z(25.99351097971951e0)},
+            {:group("a"), :x(10.033917761350013e0), :y(164.09623609253512e0), :z(10.001520819243131e0)}, {:group("barista"), :x(19.034436020345915e0), :y(249.78455635268742e0), :z(14.54843217853557e0)},
+            {:group("c"), :x(5.169242587880445e0), :y(255.1903631536258e0), :z(6.419489430280219e0)}, {:group("c"), :x(9.079882869990312e0), :y(134.9326731880518e0), :z(17.97330597612081e0)},
+            {:group("c"), :x(1.3032714465236594e0), :y(187.94054399955792e0), :z(16.670587608991706e0)}, {:group("c"), :x(15.599332587178798e0), :y(260.55631450084576e0), :z(30.716870071245154e0)},
+            {:group("c"), :x(5.891894272272786e0), :y(59.06960079922433e0), :z(35.23606391246632e0)}, {:group("barista"), :x(1.3772445682176482e0), :y(186.67532789719405e0), :z(5.150724974748972e0)}];
 ok js-d3-bubble-chart(
         @arr5,
         height => 500,
@@ -58,9 +64,9 @@ ok js-d3-bubble-chart(
         margins => %(top => 80, left => 60));
 
 ## 6
-my @arr6 = transpose( (random-real(12, 12), random-real(12, 12)) );
+my @arr6 = do for ^12 { (rand, rand, rand) } ;
 ok js-d3-density2d-chart(
-        @arr5,
+        @arr6,
         height => 500,
         background => 'rgb(60,60,60)',
         title => 'Try it!',

@@ -6,26 +6,32 @@ use lib './lib';
 
 use JavaScript::D3;
 
-use Data::Generators;
-
 use Test;
 
 plan 8;
 
-my @dsXY = random-tabular-dataset(120, <x y>,
-        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
-                        y => { random-real(400, $_) } });
+#my @dsXY = random-tabular-dataset(12, <x y>,
+#        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
+#                        y => { random-real(400, $_) } });
+my @dsXY = [{:x(18.44193433951788e0), :y(393.17809757025526e0)}, {:x(17.3810240767343e0), :y(273.73524913533555e0)}, {:x(6.74822921399435e0), :y(284.64701050256554e0)},
+            {:x(33.12676277233732e0), :y(367.87025801505905e0)}, {:x(29.360113552246453e0), :y(346.41753370557103e0)}, {:x(26.14755093451985e0), :y(226.10944668510191e0)},
+            {:x(18.4093226066732e0), :y(53.129912177713834e0)}, {:x(34.350674655309454e0), :y(61.078113101833374e0)}, {:x(41.136946202641894e0), :y(52.797551561648916e0)},
+            {:x(61.9475390216227e0), :y(196.50927122018098e0)}, {:x(16.07845927581193e0), :y(128.69859187230782e0)}, {:x(17.33293691771654e0), :y(122.70510305598417e0)}];
 
-my @dsXYG = random-tabular-dataset(120, <x y group>,
-        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
-                        y => { random-real(400, $_) },
-                        group => <a b c d> });
+#my @dsXYG = random-tabular-dataset(12, <x y group>,
+#        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
+#                        y => { random-real(400, $_) },
+#                        group => <a b c d> });
+my @dsXYG = [{:group("c"), :x(36.76449617736303e0), :y(208.09994227661667e0)}, {:group("d"), :x(38.26054718688302e0), :y(233.44049333827604e0)}, {:group("d"), :x(31.398379384273944e0), :y(385.38199254721275e0)},
+             {:group("a"), :x(28.820495464506802e0), :y(297.0157022707852e0)}, {:group("b"), :x(26.4091338504342e0), :y(279.9478171139661e0)}, {:group("d"), :x(33.50969881911225e0), :y(245.72026529056572e0)},
+             {:group("c"), :x(25.567333844254474e0), :y(331.8210516364763e0)}, {:group("b"), :x(37.23217634596619e0), :y(247.12722165664132e0)}, {:group("a"), :x(32.356841891576806e0), :y(346.19385230785167e0)},
+             {:group("c"), :x(37.98089056518958e0), :y(313.74285209487294e0)}, {:group("c"), :x(15.21769308572128e0), :y(324.70401574669194e0)}, {:group("b"), :x(48.30592423079918e0), :y(87.1655519541188e0)}];
 
 ## 1
-ok js-d3-list-plot(random-real(12, 100));
+ok js-d3-list-plot((rand xx 100).List);
 
 ## 2
-ok js-d3-list-plot(random-real(12, 100),
+ok js-d3-list-plot((rand xx 100).List,
         height => 500,
         background => 'gray',
         title => 'Try it!',
@@ -43,10 +49,10 @@ ok js-d3-list-plot(@dsXY,
         margins => %(top => 80));
 
 ## 4
-ok js-d3-list-line-plot(random-real(12, 100));
+ok js-d3-list-line-plot((rand xx 100).List);
 
 ## 5
-ok js-d3-list-line-plot(random-real(12, 100),
+ok js-d3-list-line-plot((rand xx 100).List,
         height => 500,
         background => 'gray',
         title => 'Try it!',
