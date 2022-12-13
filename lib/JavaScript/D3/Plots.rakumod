@@ -188,13 +188,13 @@ svg.append('path')
   .attr('fill', 'none');
 END
 
-
+# See https://d3-graph-gallery.com/graph/line_several_group.html
 my $jsMultiPathPlotPart = q:to/END/;
 // group the data: I want to draw one line per group
 const sumstat = d3.group(data, d => d.group); // nest function allows to group the calculation per level of a factor
 
 
-// Add a scale for bubble color
+// Add a scale for line color
 var myColor = d3.scaleOrdinal()
     .domain(data.map(function(o) { return o.group; }))
     .range(d3.schemeSet2);
