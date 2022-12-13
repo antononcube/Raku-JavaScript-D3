@@ -10,7 +10,7 @@ use Data::Reshapers;
 
 use Test;
 
-plan 5;
+plan 6;
 
 ## 1
 ok js-d3-bar-chart(random-real(12, 10), height => 500, background => 'rgb(60,60,60)');
@@ -40,8 +40,25 @@ ok js-d3-bubble-chart(
         y-axis-label => 'My Y',
         margins => %(top => 80, left => 60));
 
+
 ## 5
-my @arr5 = transpose( (random-real(12, 12), random-real(12, 12)) );
+my @arr5 = random-tabular-dataset(100, <x y z group>,
+        generators => { x => { random-real(20, $_) },
+                        y => { random-variate(NormalDistribution.new(200,50), $_) },
+                        z => { random-variate(NormalDistribution.new(20,12), $_) },
+                        group => <a barista c>
+        } );
+ok js-d3-bubble-chart(
+        @arr5,
+        height => 500,
+        background => 'rgb(60,60,60)',
+        title => 'Try it!',
+        x-axis-label => 'My X',
+        y-axis-label => 'My Y',
+        margins => %(top => 80, left => 60));
+
+## 6
+my @arr6 = transpose( (random-real(12, 12), random-real(12, 12)) );
 ok js-d3-density2d-chart(
         @arr5,
         height => 500,
