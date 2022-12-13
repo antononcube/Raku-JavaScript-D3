@@ -272,7 +272,8 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
     my $jsPlotMiddle = $jsPathPlotPart;
     if $hasGroups {
         $jsPlotMiddle = $jsMultiPathPlotPart ~ "\n" ~ $jsGroupsLegend;
-        $margins<right> = $margins<right> + 100;
+        my $n = @data.map(*<group>).unique>>.chars.max;
+        $margins<right> = $margins<right> + $n * 7;
     }
 
     my $jsData = to-json(@data, :!pretty);
