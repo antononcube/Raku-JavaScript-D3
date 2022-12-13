@@ -52,14 +52,16 @@ multi js-d3-list-line-plot($data,
                            :$width = 600, :$height = 400,
                            Str :plot-label(:$title) = '',
                            Str :$x-axis-label = '', Str :$y-axis-label = '',
-                           :$margins = Whatever) {
+                           :$margins = Whatever,
+                           :$legends = Whatever) {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
             :$width, :$height,
             :$title,
             :$x-axis-label, :$y-axis-label,
-            :$margins);
+            :$margins,
+            :$legends);
 }
 
 #============================================================
@@ -114,7 +116,8 @@ multi js-d3-bubble-chart($data,
                          Str :plot-label(:$title) = '',
                          Str :$x-axis-label = '', Str :$y-axis-label = '',
                          :$margins = Whatever,
-                         :$tooltip = Whatever) {
+                         :$tooltip = Whatever,
+                         :$legends = Whatever) {
     return JavaScript::D3::Charts::BubbleChart($data,
             :$background,
             :$color,
@@ -123,7 +126,8 @@ multi js-d3-bubble-chart($data,
             :$title,
             :$x-axis-label, :$y-axis-label,
             :$margins,
-            :$tooltip);
+            :$tooltip,
+            :$legends);
 }
 
 #============================================================

@@ -371,7 +371,8 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
                       :$margins is copy = Whatever,
-                      :$tooltip = Whatever
+                      :$tooltip = Whatever,
+                      :$legends = Whatever
                       ) {
     # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
@@ -381,25 +382,26 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
 
     # Select code fragment to splice in
     my $jsChartMiddle = do given $tooltip {
-        when $_.isa(Whatever) && $hasGroups || $_ ~~ Bool && $_ && $hasGroups {
-
-            my $n = @data.map(*<group>).unique>>.chars.max;
-            $margins<right> = $margins<right> + ($n + 1) * 14;
-
-            $jsTooltipMultiBubbleChartPart ~ "\n" ~ JavaScript::D3::Plots::GetLegendCode
+        when ($_.isa(Whatever) || $_ ~~ Bool && $_) && $hasGroups {
+            $jsTooltipMultiBubbleChartPart
         }
         when $_ ~~ Bool && !$_ && $hasGroups {
-
-            my $n = @data.map(*<group>).unique>>.chars.max;
-            $margins<right> = $margins<right> + ($n + 1) * 14;
-
-            $jsMultiBubbleChartPart ~ "\n" ~ JavaScript::D3::Plots::GetLegendCode
+            $jsMultiBubbleChartPart
         }
         when $_ ~~ Bool && $_ && !$hasGroups {
             @data = @data.map({ $_.push(group=>'All') });
             $jsTooltipMultiBubbleChartPart
         }
         default { $jsBubbleChartPart }
+    }
+
+    # Chose to add legend code fragment or not
+    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    given $legends {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+            $margins<right> = $margins<right> + ($maxGroupChars + 1) * 12;
+            $jsChartMiddle ~=  "\n" ~ JavaScript::D3::Plots::GetLegendCode
+        }
     }
 
     my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode,

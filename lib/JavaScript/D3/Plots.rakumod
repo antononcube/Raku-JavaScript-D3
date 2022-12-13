@@ -269,7 +269,8 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
                        Str :plot-label(:$title) = '',
                        Str :$x-axis-label = '',
                        Str :$y-axis-label = '',
-                       :$margins is copy = Whatever
+                       :$margins is copy = Whatever,
+                       :$legends = Whatever
                        ) {
 
     $margins = ProcessMargins($margins);
@@ -278,11 +279,15 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
 
     # Select code fragment to splice in
-    my $jsPlotMiddle = $jsPathPlotPart;
-    if $hasGroups {
-        $jsPlotMiddle = $jsMultiPathPlotPart ~ "\n" ~ $jsGroupsLegend;
-        my $n = @data.map(*<group>).unique>>.chars.max;
-        $margins<right> = $margins<right> + ($n + 1) * 7;
+    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !! $jsPathPlotPart;
+
+    # Chose to add legend code fragment or not
+    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    given $legends {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+            $margins<right> = $margins<right> + ($maxGroupChars + 1) * 12;
+            $jsPlotMiddle ~=  "\n" ~ $jsGroupsLegend;
+        }
     }
 
     my $jsData = to-json(@data, :!pretty);
