@@ -399,7 +399,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
     my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
-            $margins<right> = $margins<right> + ($maxGroupChars + 1) * 12;
+            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
             $jsChartMiddle ~=  "\n" ~ JavaScript::D3::Plots::GetLegendCode
         }
     }
@@ -421,7 +421,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
-            .subst(:g, '$LEGEND_X_POS', ($width - $margins<right>).Str)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25')
 }

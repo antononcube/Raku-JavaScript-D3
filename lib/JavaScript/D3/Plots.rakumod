@@ -109,7 +109,7 @@ svg.selectAll("mydots")
   .append("circle")
     .attr("cx", $LEGEND_X_POS)
     .attr("cy", function(d,i){ return $LEGEND_Y_POS + i*$LEGEND_Y_GAP}) // 100 is where the first dot appears. 25 is the distance between dots
-    .attr("r", 7)
+    .attr("r", 6)
     .style("fill", function(d){ return myColor(d)})
 
 // Add one dot in the legend for each name.
@@ -117,12 +117,14 @@ svg.selectAll("mylabels")
   .data(keys)
   .enter()
   .append("text")
-    .attr("x", $LEGEND_X_POS + 20)
+    .attr("x", $LEGEND_X_POS + 12)
     .attr("y", function(d,i){ return $LEGEND_Y_POS + i*$LEGEND_Y_GAP}) // 100 is where the first dot appears. 25 is the distance between dots
     .style("fill", function(d){ return myColor(d)})
     .text(function(d){ return d})
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle")
+    .style("font-size", "12px")
+    .attr("font-family", "Courier")
 END
 
 my $jsPlotEnding = q:to/END/;
@@ -285,7 +287,7 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
     my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
-            $margins<right> = $margins<right> + ($maxGroupChars + 1) * 12;
+            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
             $jsPlotMiddle ~=  "\n" ~ $jsGroupsLegend;
         }
     }
@@ -304,7 +306,7 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
-            .subst(:g, '$LEGEND_X_POS', ($width - $margins<right>).Str)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25')
 }
