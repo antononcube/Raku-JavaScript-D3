@@ -376,9 +376,10 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
     # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    # Groups and
+    # Groups
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
 
+    # Select code fragment to splice in
     my $jsChartMiddle = do given $tooltip {
         when $_.isa(Whatever) && $hasGroups { $jsTooltipMultiBubbleChartPart}
         when $_ ~~ Bool && $_ && $hasGroups { $jsTooltipMultiBubbleChartPart}
