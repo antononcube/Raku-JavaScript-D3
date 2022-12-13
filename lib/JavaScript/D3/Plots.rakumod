@@ -189,6 +189,32 @@ svg.append('path')
 END
 
 
+my $jsMultiPathPlotPart = q:to/END/;
+// group the data: I want to draw one line per group
+const sumstat = d3.group(data, d => d.group); // nest function allows to group the calculation per level of a factor
+
+
+// Add a scale for bubble color
+var myColor = d3.scaleOrdinal()
+    .domain(data.map(function(o) { return o.group; }))
+    .range(d3.schemeSet2);
+
+// Draw the line
+svg.selectAll(".line")
+      .data(sumstat)
+      .join("path")
+        .attr("fill", "none")
+        .attr("stroke", function(d){ return myColor(d[0]) })
+        .attr("stroke-width", 1.5)
+        .attr("d", function(d){
+          return d3.line()
+            .x(function(d) { return x(d.x); })
+            .y(function(d) { return y(+d.y); })
+            (d[1])
+        })
+
+END
+
 our proto ListLinePlot($data, |) is export {*}
 
 our multi ListLinePlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
@@ -207,11 +233,18 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
                        Str :$y-axis-label = '',
                        :$margins is copy = Whatever
                        ) {
-    my $jsData = to-json(@data, :!pretty);
 
     $margins = ProcessMargins($margins);
 
-    my $jsScatterPlot = [$jsPlotPreparation, $jsPathPlotPart, $jsPlotEnding].join("\n");
+    # Groups
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    # Select code fragment to splice in
+    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !! $jsPathPlotPart;
+
+    my $jsData = to-json(@data, :!pretty);
+
+    my $jsScatterPlot = [$jsPlotPreparation, $jsPlotMiddle, $jsPlotEnding].join("\n");
 
     return  $jsScatterPlot
             .subst('$DATA', $jsData)
