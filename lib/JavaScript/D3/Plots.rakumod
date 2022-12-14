@@ -8,9 +8,11 @@ unit module JavaScript::D3::Plots;
 #============================================================
 # JavaScript plot template parts
 #============================================================
-my $jsPlotPreparation = q:to/END/;
+my $jsPlotStarting = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
+END
 
+my $jsPlotMarginsAndLabels = q:to/END/;
 // set the dimensions and margins of the graph
 var margin = $MARGINS,
     width = $WIDTH - margin.left - margin.right,
@@ -66,7 +68,9 @@ if ( yAxisLabel.length > 0 ) {
         .style("font-size", yAxisLabelFontSize.toString() + "px")
         .text(yAxisLabel);
 }
+END
 
+my $jsPlotDataAndScales = q:to/END/;
 // Optain data
 var data = $DATA
 
@@ -95,6 +99,8 @@ svg
   .append('g')
   .call(d3.axisLeft(y));
 END
+
+my $jsPlotPreparation = $jsPlotStarting ~ "\n" ~ $jsPlotMarginsAndLabels ~ "\n" ~ $jsPlotDataAndScales;
 
 # See https://d3-graph-gallery.com/graph/custom_legend.html
 my $jsGroupsLegend = q:to/END/;
@@ -134,6 +140,14 @@ END
 #============================================================
 # JavaScript code accessors
 #============================================================
+
+our sub GetPlotStartingCode() {
+    return $jsPlotStarting;
+}
+
+our sub GetPlotEndingCode() {
+    return $jsPlotEnding;
+}
 
 our sub GetPlotPreparationCode() {
     return $jsPlotPreparation;
