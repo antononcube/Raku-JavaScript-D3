@@ -6,9 +6,8 @@ This package is intended to be used in Jupyter notebooks with the
 [Raku kernel implemented by Brian Duggan](https://github.com/bduggan/raku-jupyter-kernel), [BD1].
 The commands of the package generate JavaScript code produce (nice) [D3.js](https://d3js.org/) plots or charts.
 
-See the Jupyter notebook 
-["Tests-for-JavaScript-D3"](./resources/Tests-for-JavaScript-D3.ipynb)
-for illustrative examples.
+For illustrative examples see the Jupyter notebook 
+["Tests-for-JavaScript-D3"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/Tests-for-JavaScript-D3.ipynb).
 
 The (original versions of the) JavaScript snippets used in this package are taken from 
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
@@ -126,14 +125,14 @@ In the lists below the highest priority items are placed first.
 
 1. [X] DONE List plot
 3. [X] DONE List line plot
-5. [ ] TODO Date list plot
+5. [X] DONE Date list plot
 7. [ ] TODO Box plot
 
 #### Multiple dataset
 
 1. [ ] TODO List plot
 2. [X] TODO List line plot
-3. [ ] TODO Date list plot 
+3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
 
 ### Charts
@@ -180,16 +179,26 @@ User specified or automatic:
 
 2. [ ] Better, comprehensive type checking
    
-   - Using the type system of "Data::Reshapers" would be ideal, 
+   - Using the type system of "Data::Reshapers", [AAp1], would be ideal, 
      but I do not want to introduce such a "heavy" dependency.
    
 3. [ ] JavaScript code snippets management
 
-   - If they become too many
+   - If they become too many.
 
 --------
 
 ## Implementation details
+
+### Splicing of JavaScript snippets
+
+The package works by splicing of parametrized JavaScript code snippets and replacing the parameters
+with concrete values.
+
+In a sense, JavaScript macros are used to construct the final code through text manipulation.
+(Probably, unsound software-engineering-wise, but it works.)
+
+### History
 
 Initially  the commands of this package were executed in
 [Jupyter notebook with Raku kernel](https://raku.land/cpan:BDUGGAN/Jupyter::Kernel)
