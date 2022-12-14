@@ -247,7 +247,6 @@ my $jsMultiPathPlotPart = q:to/END/;
 // group the data: I want to draw one line per group
 const sumstat = d3.group(data, d => d.group); // nest function allows to group the calculation per level of a factor
 
-
 // Add a scale for line color
 var myColor = d3.scaleOrdinal()
     .domain(data.map(function(o) { return o.group; }))
@@ -319,6 +318,111 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
+            .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25')
+}
+
+
+#============================================================
+# DateListPlot
+#============================================================
+my $jsPlotDateDataAndScales = q:to/END/;
+// Optain data
+var data = $DATA
+
+data = data.map(function(d){
+  return { x : d3.timeParse("%Y-%m-%d")(d.date), y : d.value }
+})
+
+var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
+
+// Add X axis --> it is a date format
+var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.x; }))
+      .range([ 0, width ]);
+
+svg
+  .append('g')
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x))
+
+// Y scale and Axis
+var y = d3.scaleLinear()
+    .domain([yMin, yMax])
+    .range([height, 0]);
+
+svg
+  .append('g')
+  .call(d3.axisLeft(y));
+
+// prepare a helper function
+var lineFunc = d3.line()
+  .x(function(d) { return x(d.x) })
+  .y(function(d) { return y(d.y) })
+
+// Add the path using this helper function
+svg.append('path')
+  .attr('d', lineFunc(data))
+  .attr('stroke', "steelblue")
+  .attr('fill', 'none');
+
+END
+
+our proto DateListPlot($data, |) is export {*}
+
+our multi DateListPlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
+    my $k = 1;
+    my @dataPairs = |$data.map({ <date value> Z=> (DateTime.new($k++), $_) })>>.Hash;
+    return DateListPlot(@dataPairs, |%args);
+}
+
+our multi DateListPlot(@data where @data.all ~~ Map,
+                       Str :$background= 'white',
+                       Str :$color= 'steelblue',
+                       :$width = 600,
+                       :$height = 400,
+                       Str :plot-label(:$title) = '',
+                       Str :date-axis-label(:$x-axis-label) = '',
+                       Str :value-axis-label(:$y-axis-label) = '',
+                       Str :$time-parse-spec = '%Y-%m-%d',
+                       :$margins is copy = Whatever,
+                       :$legends = Whatever
+                       ) {
+
+    $margins = ProcessMargins($margins);
+
+    # Groups
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    # Select code fragment to splice in
+    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !!  $jsPathPlotPart;
+
+    # Chose to add legend code fragment or not
+    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    given $legends {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
+            $jsPlotMiddle ~=  "\n" ~ $jsGroupsLegend;
+        }
+    }
+
+    my $jsData = to-json(@data, :!pretty);
+
+    my $jsLinePlot = [$jsPlotStarting, $jsPlotMarginsAndLabels, $jsPlotDateDataAndScales, $jsPlotMiddle, $jsPlotEnding].join("\n");
+
+    return  $jsLinePlot
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')

@@ -69,6 +69,31 @@ multi js-d3-list-line-plot($data,
 }
 
 #============================================================
+#| Makes a list line plot for a list of numbers or a list of x-y coordinates.
+proto js-d3-date-list-plot($data, |) is export {*}
+
+multi js-d3-date-list-plot($data,
+                           Str :$background= 'white',
+                           Str :$color= 'steelblue',
+                           :$width = 600, :$height = 400,
+                           Str :plot-label(:$title) = '',
+                           Str :date-axis-label(:$x-axis-label) = '',
+                           Str :value-axis-label(:$y-axis-label) = '',
+                           Str :$time-parse-spec = "%Y-%m-%d",
+                           :$margins = Whatever,
+                           :$legends = Whatever) {
+    return JavaScript::D3::Plots::DateListPlot($data,
+            :$background,
+            :$color,
+            :$width, :$height,
+            :$title,
+            :$x-axis-label, :$y-axis-label,
+            :$time-parse-spec,
+            :$margins,
+            :$legends);
+}
+
+#============================================================
 #| Makes a bar chart for a list of numbers, hash with numeric values, or a dataset with columns C<<Label Value>>.
 proto js-d3-bar-chart($data, |) is export {*}
 
