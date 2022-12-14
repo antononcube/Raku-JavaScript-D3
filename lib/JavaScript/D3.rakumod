@@ -19,7 +19,11 @@ require(['d3'], function(d3) {
 END
 
 multi js-d3-config(:$v = 7) is export {
-    return $jsD3ConfigCode.subst('$VER', $v);
+    return
+            (JavaScript::D3::Plots::GetPlotStartingCode(),
+             $jsD3ConfigCode.subst('$VER', $v),
+             JavaScript::D3::Plots::GetPlotEndingCode(),
+            ).join("\n");
 }
 
 #============================================================
