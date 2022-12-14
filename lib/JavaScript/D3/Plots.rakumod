@@ -328,12 +328,16 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
 #============================================================
 # DateListPlot
 #============================================================
+# See https://d3-graph-gallery.com/graph/line_basic.html
 my $jsPlotDateDataAndScales = q:to/END/;
 // Optain data
 var data = $DATA
 
 data = data.map(function(d){
-  return { x : d3.timeParse("%Y-%m-%d")(d.date), y : d.value }
+  var d2 = d;
+  d2["x"] = d3.timeParse("%Y-%m-%d")(d.date);
+  if ( "value" in d ) { d2["y"] = d.value; }
+  return d2
 })
 
 var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
@@ -357,17 +361,7 @@ var y = d3.scaleLinear()
 svg
   .append('g')
   .call(d3.axisLeft(y));
-
-// prepare a helper function
-var lineFunc = d3.line()
-  .x(function(d) { return x(d.x) })
-  .y(function(d) { return y(d.y) })
-
-// Add the path using this helper function
-svg.append('path')
-  .attr('d', lineFunc(data))
-  .attr('stroke', "steelblue")
-  .attr('fill', 'none');
+END
 
 END
 
