@@ -204,7 +204,7 @@ User specified or automatic:
    - Using the type system of "Data::Reshapers", [AAp1], would be ideal, 
      but I do not want to introduce such a "heavy" dependency.
 
-3. [X] DONE CLI scritp
+3. [X] DONE CLI script
 
 4. [ ] TODO JavaScript code snippets management
 
