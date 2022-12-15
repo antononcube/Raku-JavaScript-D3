@@ -14,7 +14,7 @@ my %nameToFunc =
         'list-plot' => &js-d3-list-plot;
 
 #| Makes textual (terminal) plots.
-multi sub MAIN(Str $cmd, #= Graphic command.
+multi sub MAIN(Str $cmd, #= Graphics command.
                *@points is copy, #= Data points.
                Str :p(:$point-char) = '*', #= Plot points character.
                UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
@@ -44,7 +44,7 @@ multi sub MAIN(Str $cmd, #= Graphic command.
 }
 
 #| Makes textual (terminal) plots by splitting a string of data points.
-multi sub MAIN(Str $cmd, #= Graphic command.
+multi sub MAIN(Str $cmd, #= Graphics command.
                Str $words, #= String with data points.
                UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
                UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
@@ -77,7 +77,7 @@ multi sub MAIN(Str $cmd, #= Graphic command.
 
 #| Makes textual (terminal) plots from pipeline input
 multi sub MAIN(
-        Str $cmd,
+        Str $cmd, #= Graphics command.
         UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
         UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
         Str :t(:$title) = '', #= Title of the plot.
