@@ -18,12 +18,15 @@ require(['d3'], function(d3) {
 });
 END
 
-multi js-d3-config(:$v = 7) is export {
-    return
-            (JavaScript::D3::Plots::GetPlotStartingCode(),
-             $jsD3ConfigCode.subst('$VER', $v),
-             JavaScript::D3::Plots::GetPlotEndingCode(),
-            ).join("\n");
+multi js-d3-config(:$v = 7, Bool :$direct = True) is export {
+    if $direct {
+        return $jsD3ConfigCode.subst('$VER', $v);
+    } else {
+        return (JavaScript::D3::Plots::GetPlotStartingCode(),
+                $jsD3ConfigCode.subst('$VER', $v),
+                JavaScript::D3::Plots::GetPlotEndingCode(),
+        ).join("\n");
+    }
 }
 
 #============================================================
@@ -35,15 +38,18 @@ multi js-d3-list-plot($data,
                       Str :$color= 'steelblue',
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
-                      Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins = Whatever) {
+                      Str :x-label(:$x-axis-label) = '',
+                      Str :y-label(:$y-axis-label) = '',
+                      :$margins = Whatever,
+                      Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
             :$color,
             :$width, :$height,
             :$title,
             :$x-axis-label, :$y-axis-label,
-            :$margins);
+            :$margins,
+            :$format);
 }
 
 #============================================================
@@ -55,9 +61,11 @@ multi js-d3-list-line-plot($data,
                            Str :$color= 'steelblue',
                            :$width = 600, :$height = 400,
                            Str :plot-label(:$title) = '',
-                           Str :$x-axis-label = '', Str :$y-axis-label = '',
+                           Str :x-label(:$x-axis-label) = '',
+                           Str :y-label(:$y-axis-label) = '',
                            :$margins = Whatever,
-                           :$legends = Whatever) {
+                           :$legends = Whatever,
+                           Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
@@ -65,7 +73,8 @@ multi js-d3-list-line-plot($data,
             :$title,
             :$x-axis-label, :$y-axis-label,
             :$margins,
-            :$legends);
+            :$legends,
+            :$format);
 }
 
 #============================================================
@@ -81,7 +90,8 @@ multi js-d3-date-list-plot($data,
                            Str :value-axis-label(:$y-axis-label) = '',
                            Str :$time-parse-spec = "%Y-%m-%d",
                            :$margins = Whatever,
-                           :$legends = Whatever) {
+                           :$legends = Whatever,
+                           Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::DateListPlot($data,
             :$background,
             :$color,
@@ -90,7 +100,8 @@ multi js-d3-date-list-plot($data,
             :$x-axis-label, :$y-axis-label,
             :$time-parse-spec,
             :$margins,
-            :$legends);
+            :$legends,
+            :$format);
 }
 
 #============================================================
@@ -102,15 +113,18 @@ multi js-d3-bar-chart($data,
                       Str :$color= 'steelblue',
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
-                      Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins = Whatever) {
+                      Str :x-label(:$x-axis-label) = '',
+                      Str :y-label(:$y-axis-label) = '',
+                      :$margins = Whatever,
+                      Str :$format = 'jupyter' ) {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
             :$color,
             :$width, :$height,
             :$title,
             :$x-axis-label, :$y-axis-label,
-            :$margins);
+            :$margins,
+            :$format);
 }
 
 #============================================================
@@ -122,15 +136,18 @@ multi js-d3-histogram($data,
                       Str :$color= 'steelblue',
                       :$width = 600, :$height = 400,
                       Str :plot-label(:$title) = '',
-                      Str :$x-axis-label = '', Str :$y-axis-label = '',
-                      :$margins = Whatever) {
+                      Str :x-label(:$x-axis-label) = '',
+                      Str :y-label(:$y-axis-label) = '',
+                      :$margins = Whatever,
+                      Str :$format = 'jupyter' ) {
     return JavaScript::D3::Charts::Histogram($data,
             :$background,
             :$color,
             :$width, :$height,
             :$title,
             :$x-axis-label, :$y-axis-label,
-            :$margins);
+            :$margins,
+            :$format);
 }
 
 #============================================================
@@ -143,10 +160,12 @@ multi js-d3-bubble-chart($data,
                          Numeric :$opacity = 0.7,
                          :$width = 600, :$height = 400,
                          Str :plot-label(:$title) = '',
-                         Str :$x-axis-label = '', Str :$y-axis-label = '',
+                         Str :x-label(:$x-axis-label) = '',
+                         Str :y-label(:$y-axis-label) = '',
                          :$margins = Whatever,
                          :$tooltip = Whatever,
-                         :$legends = Whatever) {
+                         :$legends = Whatever,
+                         Str :$format = 'jupyter' ) {
     return JavaScript::D3::Charts::BubbleChart($data,
             :$background,
             :$color,
@@ -156,7 +175,8 @@ multi js-d3-bubble-chart($data,
             :$x-axis-label, :$y-axis-label,
             :$margins,
             :$tooltip,
-            :$legends);
+            :$legends,
+            :$format);
 }
 
 #============================================================
@@ -168,9 +188,11 @@ multi js-d3-density2d-chart($data,
                             Str :$color= 'steelblue',
                             :$width = 600, :$height = 400,
                             Str :plot-label(:$title) = '',
-                            Str :$x-axis-label = '', Str :$y-axis-label = '',
+                            Str :x-label(:$x-axis-label) = '',
+                            Str :y-label(:$y-axis-label) = '',
                             :$margins = Whatever,
-                            :$method = Whatever) {
+                            :$method = Whatever,
+                            Str :$format = 'jupyter' ) {
     return JavaScript::D3::Charts::Bin2DChart($data,
             :$background,
             :$color,
@@ -178,5 +200,6 @@ multi js-d3-density2d-chart($data,
             :$title,
             :$x-axis-label, :$y-axis-label,
             :$margins,
-            :$method);
+            :$method,
+            :$format);
 }

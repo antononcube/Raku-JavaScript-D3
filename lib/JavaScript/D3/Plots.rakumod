@@ -8,6 +8,18 @@ unit module JavaScript::D3::Plots;
 #============================================================
 # JavaScript plot template parts
 #============================================================
+my $jsPlotStartingHTML = q:to/END/;
+<!DOCTYPE html>
+<head>
+    <script src="https://d3js.org/d3.v7.js"></script>
+</head>
+<body>
+
+<div id="my_dataviz"></div>
+
+<script>
+END
+
 my $jsPlotStarting = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 END
@@ -133,6 +145,12 @@ svg.selectAll("mylabels")
     .attr("font-family", "Courier")
 END
 
+my $jsPlotEndingHTML = q:to/END/;
+</script>
+</body>
+</html>
+END
+
 my $jsPlotEnding = q:to/END/;
 }) })(element);
 END
@@ -141,16 +159,22 @@ END
 # JavaScript code accessors
 #============================================================
 
-our sub GetPlotStartingCode() {
-    return $jsPlotStarting;
+our sub GetPlotStartingCode(Str $format = 'jupyter') {
+    return $format.lc eq 'jupyter' ?? $jsPlotStarting !! $jsPlotStartingHTML;
 }
 
-our sub GetPlotEndingCode() {
-    return $jsPlotEnding;
+our sub GetPlotEndingCode(Str $format = 'jupyter') {
+    return $format.lc eq 'jupyter' ?? $jsPlotEnding !! $jsPlotEndingHTML;
 }
 
-our sub GetPlotPreparationCode() {
-    return $jsPlotPreparation;
+our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
+    return
+            $format.lc eq 'jupyter' ??
+            $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
+}
+
+our sub GetPlotPreparationCode(Str $format = 'jupyter') {
+    return GetPlotStartingCode($format) ~ "\n" ~ GetPlotMarginsAndLabelsCode($format) ~ "\n" ~ $jsPlotDataAndScales;
 }
 
 our sub GetLegendCode() {
@@ -206,24 +230,32 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    Str :plot-label(:$title) = '',
                    Str :$x-axis-label = '',
                    Str :$y-axis-label = '',
-                   :$margins is copy = Whatever
+                   :$margins is copy = Whatever,
+                   Str :$format = 'jupyter'
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsScatterPlot = [$jsPlotPreparation, $jsScatterPlotPart, $jsPlotEnding].join("\n");
+    my $jsScatterPlot = [GetPlotPreparationCode($format), $jsScatterPlotPart, GetPlotEndingCode($format)].join("\n");
 
     $margins = ProcessMargins($margins);
 
-    return  $jsScatterPlot
-            .subst('$DATA', $jsData)
-            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$POINT_COLOR', '"' ~ $color ~ '"')
-            .subst(:g, '$WIDTH', $width.Str)
-            .subst(:g, '$HEIGHT', $height.Str)
-            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+    my $res =
+            $jsScatterPlot
+                    .subst('$DATA', $jsData)
+                    .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+                    .subst('$POINT_COLOR', '"' ~ $color ~ '"')
+                    .subst(:g, '$WIDTH', $width.Str)
+                    .subst(:g, '$HEIGHT', $height.Str)
+                    .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+                    .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+                    .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
 }
 
 #============================================================
@@ -285,7 +317,8 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
                        Str :$x-axis-label = '',
                        Str :$y-axis-label = '',
                        :$margins is copy = Whatever,
-                       :$legends = Whatever
+                       :$legends = Whatever,
+                       Str :$format = 'jupyter'
                        ) {
 
     $margins = ProcessMargins($margins);
@@ -307,21 +340,28 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
 
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsLinePlot = [$jsPlotPreparation, $jsPlotMiddle, $jsPlotEnding].join("\n");
+    my $jsLinePlot = [GetPlotPreparationCode($format), $jsPlotMiddle, GetPlotEndingCode($format)].join("\n");
 
-    return  $jsLinePlot
-            .subst('$DATA', $jsData)
-            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$LINE_COLOR', '"' ~ $color ~ '"')
-            .subst(:g, '$WIDTH', $width.Str)
-            .subst(:g, '$HEIGHT', $height.Str)
-            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
-            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
-            .subst(:g, '$LEGEND_Y_POS', '0')
-            .subst(:g, '$LEGEND_Y_GAP', '25')
+    my $res =
+            $jsLinePlot
+                    .subst('$DATA', $jsData)
+                    .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+                    .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+                    .subst(:g, '$WIDTH', $width.Str)
+                    .subst(:g, '$HEIGHT', $height.Str)
+                    .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+                    .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+                    .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+                    .subst(:g, '$MARGINS', to-json($margins):!pretty)
+                    .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
+                    .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25');
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"');
+    }
+
+    return $res;
 }
 
 
@@ -383,7 +423,8 @@ our multi DateListPlot(@data where @data.all ~~ Map,
                        Str :value-axis-label(:$y-axis-label) = '',
                        Str :$time-parse-spec = '%Y-%m-%d',
                        :$margins is copy = Whatever,
-                       :$legends = Whatever
+                       :$legends = Whatever,
+                       Str :$format = 'jupyter'
                        ) {
 
     $margins = ProcessMargins($margins);
@@ -392,7 +433,7 @@ our multi DateListPlot(@data where @data.all ~~ Map,
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
 
     # Select code fragment to splice in
-    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !!  $jsPathPlotPart;
+    my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !! $jsPathPlotPart;
 
     # Chose to add legend code fragment or not
     my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
@@ -405,7 +446,8 @@ our multi DateListPlot(@data where @data.all ~~ Map,
 
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsLinePlot = [$jsPlotStarting, $jsPlotMarginsAndLabels, $jsPlotDateDataAndScales, $jsPlotMiddle, $jsPlotEnding].join("\n");
+    my $jsLinePlot = [$jsPlotStarting, $jsPlotMarginsAndLabels, $jsPlotDateDataAndScales, $jsPlotMiddle, $jsPlotEnding]
+            .join("\n");
 
     return  $jsLinePlot
             .subst('$DATA', $jsData)

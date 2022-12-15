@@ -139,13 +139,16 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :plot-label(:$title) = '',
                    Str :$x-axis-label = '',
                    Str :$y-axis-label = '',
-                   :$margins is copy = Whatever
+                   :$margins is copy = Whatever,
+                   Str :$format = 'jupyter'
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    my $jsChart = [$jsChartPreparation, $jsBarChartPart, $jsChartEnding].join("\n");
+    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
+                   $jsBarChartPart,
+                   JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
     return  $jsChart
             .subst('$DATA', $jsData)
@@ -214,14 +217,16 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                     Str :plot-label(:$title) = '',
                     Str :$x-axis-label = '',
                     Str :$y-axis-label = '',
-                    :$margins is copy = Whatever
+                    :$margins is copy = Whatever,
+                    Str :$format = 'jupyter'
                     ) {
     my $jsData = to-json(@data, :!pretty);
 
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    my $jsChart = [$jsChartPreparation, $jsHistogramPart, $jsChartEnding].join("\n");
-
+    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
+                   $jsHistogramPart,
+                   JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
     return  $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
@@ -372,7 +377,8 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :$y-axis-label = '',
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
-                      :$legends = Whatever
+                      :$legends = Whatever,
+                      Str :$format = 'jupyter'
                       ) {
     # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
@@ -404,9 +410,9 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
         }
     }
 
-    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode,
+    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
                    $jsChartMiddle,
-                   $jsChartEnding].join("\n");
+                   JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
     my $jsData = to-json(@data, :!pretty);
 
@@ -529,7 +535,8 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      Str :$x-axis-label = '',
                      Str :$y-axis-label = '',
                      :$margins is copy = Whatever,
-                     :$method is copy = Whatever
+                     :$method is copy = Whatever,
+                     Str :$format = 'jupyter'
                      ) {
     my $jsData = to-json(@data, :!pretty);
 
@@ -541,9 +548,9 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
     die 'The argument method is expected to be one of \'rectbin\', \'hexbin\', or Whatever'
     unless $method ~~ Str && $method ∈ <rect rectangle rectbin hex hexagon hexbin>;
 
-    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode,
+    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
                    $method eq 'rectbin' ?? $jsRectbinChartPart !! $jsHexbinChartPart,
-                   $jsChartEnding].join("\n");
+                   JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
     return  $jsChart
             .subst('$DATA', $jsData)

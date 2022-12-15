@@ -1,0 +1,99 @@
+#!/usr/bin/env raku
+use v6.d;
+
+use JavaScript::D3;
+
+my %*SUB-MAIN-OPTS = :named-anywhere;
+
+my %nameToFunc =
+        'bar-chart' => &js-d3-bar-chart,
+        'bubble-chart' => &js-d3-bubble-chart,
+        'date-list-plot' => &js-d3-date-list-plot,
+        'histogram' => &js-d3-histogram,
+        'list-line-plot' => &js-d3-list-line-plot,
+        'list-plot' => &js-d3-list-plot;
+
+#| Makes textual (terminal) plots.
+multi sub MAIN(Str $cmd, #= Graphic command.
+               *@points is copy, #= Data points.
+               Str :p(:$point-char) = '*', #= Plot points character.
+               UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
+               UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+               Str :t(:$title) = '', #= Title of the plot.
+               Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
+               Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
+               Str :$background = 'white', #= Image background color
+               Str :$color = 'steelblue', #= Color.
+               Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
+               ) {
+
+    die "The first argument is expected to be one of { %nameToFunc.keys }"
+    unless %nameToFunc{$cmd}:exists;
+
+    my &func = %nameToFunc{$cmd};
+
+    my $res = &func(
+    @points,
+    :$width, :$height,
+    :$title,
+    :$x-label, :$y-label,
+    :$background,
+    :$color,
+    :$format);
+    say $res;
+}
+
+#| Makes textual (terminal) plots by splitting a string of data points.
+multi sub MAIN(Str $cmd, #= Graphic command.
+               Str $words, #= String with data points.
+               UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
+               UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+               Str :t(:$title) = '', #= Title of the plot.
+               Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
+               Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
+               Str :$background = 'white', #= Image background color
+               Str :$color = 'steelblue', #= Color.
+               Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
+               ) {
+
+    my @data;
+    if $words.contains(',') {
+        @data = $words.split(/\s/)>>.split(/','/)>>.Numeric;
+    } else {
+        @data = $words.split(/\D/)>>.Numeric;
+    }
+
+    note @data.raku;
+
+    MAIN($cmd,
+            @data,
+            :$width, :$height,
+            :$title,
+            :$x-label, :$y-label,
+            :$background,
+            :$color,
+            :$format);
+}
+
+#| Makes textual (terminal) plots from pipeline input
+multi sub MAIN(
+        Str $cmd,
+        UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
+        UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+        Str :t(:$title) = '', #= Title of the plot.
+        Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
+        Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
+        Str :$background = 'white', #= Image background color
+        Str :$color = 'steelblue', #= Color.
+        Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
+               ) {
+    my $words = lines.join(' ');
+    MAIN($cmd,
+            $words,
+            :$width, :$height,
+            :$title,
+            :$x-label, :$y-label,
+            :$background,
+            :$color,
+            :$format);
+}
