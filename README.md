@@ -210,20 +210,22 @@ User specified or automatic:
 
 ### Infrastructural
 
-1. [ ] TODO Support for different JavaScript wrapper styles
+1. [X] DONE Support for different JavaScript wrapper styles
   
-   - Jupyter cell execution ready
+   - [X] DONE Jupyter cell execution ready
    
-   - Standard HTML
+   - [X] DONE Standard HTML
    
-   - Result output within a JSON format
+   - Result output with JSON format?
 
-2. [ ] Better, comprehensive type checking
+2. [ ] TODO Better, comprehensive type checking
    
    - Using the type system of "Data::Reshapers", [AAp1], would be ideal, 
      but I do not want to introduce such a "heavy" dependency.
-   
-3. [ ] JavaScript code snippets management
+
+3. [X] DONE CLI scritp
+
+4. [ ] TODO JavaScript code snippets management
 
    - If they become too many.
 
