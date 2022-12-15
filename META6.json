@@ -1,7 +1,7 @@
 {
   "name": "JavaScript::D3",
-  "description": "A package for generation of JavaScript's D3 code for making plots and charts.",
-  "version": "0.0.1",
+  "description": "Generation of JavaScript's D3 code for plots and charts.",
+  "version": "0.1.0",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
