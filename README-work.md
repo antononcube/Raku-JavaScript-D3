@@ -122,25 +122,6 @@ The package provides a CLI script that can be used to generate HTML files with p
 ```shell
 js-d3-graphics --help
 ```
-```
-# Usage:
-#   js-d3-graphics <cmd> [<points> ...] [-p|--point-char=<Str>] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--format=<Str>] -- Makes textual (terminal) plots.
-#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--format=<Str>] -- Makes textual (terminal) plots by splitting a string of data points.
-#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--format=<Str>] -- Makes textual (terminal) plots from pipeline input
-#   
-#     <cmd>                    Graphics command.
-#     [<points> ...]           Data points.
-#     -p|--point-char=<Str>    Plot points character. [default: '*']
-#     -w|--width[=UInt]        Width of the plot. (-1 for Whatever.) [default: 800]
-#     -h|--height[=UInt]       Height of the plot. (-1 for Whatever.) [default: 600]
-#     -t|--title=<Str>         Title of the plot. [default: '']
-#     --x-label=<Str>          Label of the X-axis. If Whatever, then no label is placed. [default: '']
-#     --y-label=<Str>          Label of the Y-axis. If Whatever, then no label is placed. [default: '']
-#     --background=<Str>       Image background color [default: 'white']
-#     --color=<Str>            Color. [default: 'steelblue']
-#     --format=<Str>           Output format, one of 'jupyter' or 'html'. [default: 'html']
-#     <words>                  String with data points.
-```
 
 Here is an usage example that produces a list line plot:
 
