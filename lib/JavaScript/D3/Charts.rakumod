@@ -150,7 +150,7 @@ our multi BarChart(@data where @data.all ~~ Map,
                    $jsBarChartPart,
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
-    return  $jsChart
+    my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
@@ -159,7 +159,13 @@ our multi BarChart(@data where @data.all ~~ Map,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
 }
 
 #============================================================
@@ -227,7 +233,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
                    $jsHistogramPart,
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
-    return  $jsChart
+    my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
@@ -236,7 +242,13 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
 }
 
 #============================================================
@@ -416,7 +428,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
 
     my $jsData = to-json(@data, :!pretty);
 
-    return  $jsChart
+    my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
@@ -429,7 +441,13 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
-            .subst(:g, '$LEGEND_Y_GAP', '25')
+            .subst(:g, '$LEGEND_Y_GAP', '25');
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
 }
 
 #============================================================
@@ -552,7 +570,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                    $method eq 'rectbin' ?? $jsRectbinChartPart !! $jsHexbinChartPart,
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
-    return  $jsChart
+    my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
@@ -561,5 +579,11 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
 }
