@@ -239,23 +239,16 @@ our multi ListPlot(@data where @data.all ~~ Map,
 
     $margins = ProcessMargins($margins);
 
-    my $res =
-            $jsScatterPlot
-                    .subst('$DATA', $jsData)
-                    .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-                    .subst('$POINT_COLOR', '"' ~ $color ~ '"')
-                    .subst(:g, '$WIDTH', $width.Str)
-                    .subst(:g, '$HEIGHT', $height.Str)
-                    .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-                    .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-                    .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+    return $jsScatterPlot
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$POINT_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
-
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
 }
 
 #============================================================
@@ -342,26 +335,20 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
 
     my $jsLinePlot = [GetPlotPreparationCode($format), $jsPlotMiddle, GetPlotEndingCode($format)].join("\n");
 
-    my $res =
-            $jsLinePlot
-                    .subst('$DATA', $jsData)
-                    .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-                    .subst('$LINE_COLOR', '"' ~ $color ~ '"')
-                    .subst(:g, '$WIDTH', $width.Str)
-                    .subst(:g, '$HEIGHT', $height.Str)
-                    .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-                    .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-                    .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-                    .subst(:g, '$MARGINS', to-json($margins):!pretty)
-                    .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
-                    .subst(:g, '$LEGEND_Y_POS', '0')
+    return $jsLinePlot
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
+            .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"');
-    }
-
-    return $res;
 }
 
 
