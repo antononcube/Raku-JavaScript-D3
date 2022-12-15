@@ -24,6 +24,7 @@
   "license": "Artistic-2.0",
   "tags": [
     "chart",
+    "cli",
     "code",
     "d3",
     "graphics",
