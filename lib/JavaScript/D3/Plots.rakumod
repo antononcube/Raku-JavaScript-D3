@@ -1,7 +1,8 @@
 use v6.d;
 
-use JSON::Fast;
 use Hash::Merge;
+use JSON::Fast;
+use JavaScript::D3::Predicates;
 
 unit module JavaScript::D3::Plots;
 
@@ -250,6 +251,10 @@ END
 
 our proto ListPlot($data, |) is export {*}
 
+our multi ListPlot($data where $data ~~ Seq, *%args) {
+    return ListPlot($data.List, |%args);
+}
+
 our multi ListPlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
     my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_) })>>.Hash;
@@ -339,6 +344,10 @@ svg.selectAll(".line")
 END
 
 our proto ListLinePlot($data, |) is export {*}
+
+our multi ListLinePlot($data where $data ~~ Seq, *%args) {
+    return ListLinePlot($data.List, |%args);
+}
 
 our multi ListLinePlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
@@ -449,13 +458,22 @@ END
 
 our proto DateListPlot($data, |) is export {*}
 
+our multi DateListPlot($data where $data ~~ Seq, *%args) {
+    return DateListPlot($data.List, |%args);
+}
+
 our multi DateListPlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
-    my @dataPairs = |$data.map({ <date value> Z=> (DateTime.new($k++), $_) })>>.Hash;
+    my @dataPairs = $data.map({ <date value> Z=> (DateTime.new($k++), $_) })>>.Hash;
     return DateListPlot(@dataPairs, |%args);
 }
 
-our multi DateListPlot(@data where @data.all ~~ Map,
+our multi DateListPlot($data where is-positional-of-str-date-time-value-lists($data), *%args) {
+    my @dataPairs = $data.map({ <date value> Z=> $_.List })>>.Hash;
+    return DateListPlot(@dataPairs, |%args);
+}
+
+our multi DateListPlot($data where is-str-time-series($data),
                        Str :$background= 'white',
                        Str :$color= 'steelblue',
                        :$width = 600,
@@ -475,13 +493,13 @@ our multi DateListPlot(@data where @data.all ~~ Map,
     $margins = ProcessMargins($margins);
 
     # Groups
-    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+    my Bool $hasGroups = [&&] $data.map({ so $_<group> });
 
     # Select code fragment to splice in
     my $jsPlotMiddle = $hasGroups ?? $jsMultiPathPlotPart !! $jsPathPlotPart;
 
     # Chose to add legend code fragment or not
-    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    my $maxGroupChars = $hasGroups ?? $data.map(*<group>).unique>>.chars.max !! 'all'.chars;
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
@@ -489,7 +507,7 @@ our multi DateListPlot(@data where @data.all ~~ Map,
         }
     }
 
-    my $jsData = to-json(@data, :!pretty);
+    my $jsData = to-json($data, :!pretty);
 
     my $jsLinePlot = [$jsPlotStarting,
                       $jsPlotMarginsAndLabels,
