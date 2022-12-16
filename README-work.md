@@ -126,7 +126,7 @@ js-d3-graphics --help
 Here is an usage example that produces a list line plot:
 
 ```
- js-d3-graphics list-line-plot 1 2 2 12 33 41 15 5 -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
+js-d3-graphics list-line-plot 1 2 2 12 33 41 15 5 -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
 ```
 
 Here is an example that produces bubble chart:
@@ -186,8 +186,12 @@ User specified or automatic:
 2. [X] DONE Axes labels
 3. [X] DONE Plot margins
 4. [X] DONE Plot legends (automatic for multi-datasets plots and chart)
-5. [ ] TODO Title style (font size, color, face)
-6. [ ] TODO Axes labels style (font size, color, face)
+5. [X] DONE Plot grid lines 
+     - [X] DONE Automatic 
+     - [X] DONE User specified number of ticks
+6. [ ] TODO Title style (font size, color, face)
+7. [ ] TODO Axes labels style (font size, color, face)
+8. [ ] TODO Grid lines style
 
 ### Infrastructural
 
