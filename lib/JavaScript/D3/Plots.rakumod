@@ -83,7 +83,7 @@ if ( yAxisLabel.length > 0 ) {
 END
 
 my $jsPlotDataAndScales = q:to/END/;
-// Optain data
+// Obtain data
 var data = $DATA
 
 var xMin = Math.min.apply(Math, data.map(function(o) { return o.x; }))
@@ -173,8 +173,19 @@ our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
             $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
-our sub GetPlotPreparationCode(Str $format = 'jupyter') {
-    return GetPlotStartingCode($format) ~ "\n" ~ GetPlotMarginsAndLabelsCode($format) ~ "\n" ~ $jsPlotDataAndScales;
+our sub GetPlotDataAndScalesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataAndScales) {
+    my $res = $codeFragment;
+    if $nXTicks > 0 {
+        $res = $res.subst('.call(d3.axisBottom(x))', ".call(d3.axisBottom(x).ticks($nXTicks).tickSizeInner(-height))");
+    }
+    if $nYTicks > 0 {
+        $res = $res.subst('.call(d3.axisLeft(y))', ".call(d3.axisLeft(y).ticks($nYTicks).tickSizeInner(-width))");
+    }
+    return $res;
+}
+
+our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0) {
+    return GetPlotStartingCode($format) ~ "\n" ~ GetPlotMarginsAndLabelsCode($format) ~ "\n" ~ GetPlotDataAndScalesCode($nXTicks, $nYTicks);
 }
 
 our sub GetLegendCode() {
@@ -189,11 +200,34 @@ our sub GetLegendCode() {
 our sub ProcessMargins($margins is copy) {
     my %defaultMargins = %( top => 40, bottom => 40, left => 40, right => 40);
     if $margins.isa(Whatever) {
-        $margins = %defaultMargins
+        $margins = %defaultMargins;
     }
     die "The argument margins is expected to be a Map or Whatever." unless $margins ~~ Map;
     $margins = merge-hash(%defaultMargins, $margins);
     return $margins;
+}
+
+#============================================================
+# Process grid lines
+#============================================================
+
+our sub ProcessGridLines($gridLines is copy) {
+    my @defaultGridLines = (5, 5);
+    $gridLines = do given $gridLines {
+        when $_ ~~ Bool && !$_ { (0, 0) }
+        when $_ ~~ Bool && $_ { @defaultGridLines }
+        when $_.isa(Whatever) { @defaultGridLines; }
+        when $_ ~~ List && $_.elems == 1 { ($_[0], @defaultGridLines[1]) }
+        when $_ ~~ List && $_.elems == 2 { $_ }
+        when $_ ~~ Int && $_ ≥ 0 { ($_, $_) }
+    }
+
+    $gridLines = $gridLines.map({ $_.isa(Whatever) ?? 0 !! $_ }).List;
+
+    die "The argument grid-lines is expected to be a non-negative integer, Whatever, or a two element list of those type of values."
+    unless $gridLines ~~ List && $gridLines.elems == 2 && $gridLines.all ~~ UInt;
+
+    return $gridLines;
 }
 
 #============================================================
@@ -230,12 +264,17 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    Str :plot-label(:$title) = '',
                    Str :$x-axis-label = '',
                    Str :$y-axis-label = '',
+                   :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
                    Str :$format = 'jupyter'
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsScatterPlot = [GetPlotPreparationCode($format), $jsScatterPlotPart, GetPlotEndingCode($format)].join("\n");
+    $grid-lines = ProcessGridLines($grid-lines);
+
+    my $jsScatterPlot = [GetPlotPreparationCode($format, |$grid-lines),
+                         $jsScatterPlotPart,
+                         GetPlotEndingCode($format)].join("\n");
 
     $margins = ProcessMargins($margins);
 
@@ -315,12 +354,15 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
                        Str :plot-label(:$title) = '',
                        Str :$x-axis-label = '',
                        Str :$y-axis-label = '',
+                       :$grid-lines is copy = False,
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
                        Str :$format = 'jupyter'
                        ) {
 
     $margins = ProcessMargins($margins);
+
+    $grid-lines = ProcessGridLines($grid-lines);
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
@@ -339,7 +381,9 @@ our multi ListLinePlot(@data where @data.all ~~ Map,
 
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsLinePlot = [GetPlotPreparationCode($format), $jsPlotMiddle, GetPlotEndingCode($format)].join("\n");
+    my $jsLinePlot = [GetPlotPreparationCode($format, |$grid-lines),
+                      $jsPlotMiddle,
+                      GetPlotEndingCode($format)].join("\n");
 
     my $res = $jsLinePlot
             .subst('$DATA', $jsData)
@@ -420,10 +464,13 @@ our multi DateListPlot(@data where @data.all ~~ Map,
                        Str :date-axis-label(:$x-axis-label) = '',
                        Str :value-axis-label(:$y-axis-label) = '',
                        Str :$time-parse-spec = '%Y-%m-%d',
+                       :$grid-lines is copy = False,
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
                        Str :$format = 'jupyter'
                        ) {
+
+    $grid-lines = ProcessGridLines($grid-lines);
 
     $margins = ProcessMargins($margins);
 
@@ -444,7 +491,11 @@ our multi DateListPlot(@data where @data.all ~~ Map,
 
     my $jsData = to-json(@data, :!pretty);
 
-    my $jsLinePlot = [$jsPlotStarting, $jsPlotMarginsAndLabels, $jsPlotDateDataAndScales, $jsPlotMiddle, $jsPlotEnding]
+    my $jsLinePlot = [$jsPlotStarting,
+                      $jsPlotMarginsAndLabels,
+                      GetPlotDataAndScalesCode(|$grid-lines, $jsPlotDateDataAndScales),
+                      $jsPlotMiddle,
+                      $jsPlotEnding]
             .join("\n");
 
     my $res = $jsLinePlot

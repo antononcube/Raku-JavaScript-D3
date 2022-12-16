@@ -82,6 +82,8 @@ END
 # See https://d3-graph-gallery.com/graph/barplot_basic.html
 
 my $jsBarChartPart = q:to/END/;
+// Obtain data
+var data = $DATA
 
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o.Value; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o.Value; }))
@@ -139,17 +141,25 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :plot-label(:$title) = '',
                    Str :$x-axis-label = '',
                    Str :$y-axis-label = '',
+                   :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
                    Str :$format = 'jupyter'
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
+    # Grid lines
+    $grid-lines = JavaScript::D3::Plots::ProcessGridLines($grid-lines);
+
+    # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
-                   $jsBarChartPart,
+    # Stencil code
+    my $jsChart = [JavaScript::D3::Plots::GetPlotStartingCode($format),
+                   JavaScript::D3::Plots::GetPlotMarginsAndLabelsCode($format),
+                   JavaScript::D3::Plots::GetPlotDataAndScalesCode(|$grid-lines, $jsBarChartPart),
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
+    # Concrete values
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
@@ -173,35 +183,38 @@ our multi BarChart(@data where @data.all ~~ Map,
 #============================================================
 # See https://d3-graph-gallery.com/graph/histogram_basic.html
 my $jsHistogramPart = q:to/END/;
- var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
- var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+// Obtain data
+var data = $DATA
 
- // X axis: scale and draw:
-  var x = d3.scaleLinear()
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+
+// X axis: scale and draw:
+var x = d3.scaleLinear()
       .domain([valueMin, valueMax])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.Value })
       .range([0, width]);
-  svg.append("g")
+svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
-  // set the parameters for the histogram
-  var histogram = d3.histogram()
+// set the parameters for the histogram
+var histogram = d3.histogram()
       .value(function(d) { return d; })   // I need to give the vector of value
       .domain(x.domain())  // then the domain of the graphic
       .thresholds(x.ticks(70)); // then the numbers of bins
 
-  // And apply this function to data to get the bins
-  var bins = histogram(data);
+// And apply this function to data to get the bins
+var bins = histogram(data);
 
-  // Y axis: scale and draw:
-  var y = d3.scaleLinear()
+// Y axis: scale and draw:
+var y = d3.scaleLinear()
       .range([height, 0]);
       y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
-  svg.append("g")
+svg.append("g")
       .call(d3.axisLeft(y));
 
-  // append the bar rectangles to the svg element
-  svg.selectAll("rect")
+// append the bar rectangles to the svg element
+svg.selectAll("rect")
       .data(bins)
       .enter()
       .append("rect")
@@ -223,16 +236,25 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                     Str :plot-label(:$title) = '',
                     Str :$x-axis-label = '',
                     Str :$y-axis-label = '',
+                    :$grid-lines is copy = False,
                     :$margins is copy = Whatever,
                     Str :$format = 'jupyter'
                     ) {
     my $jsData = to-json(@data, :!pretty);
 
+    # Grid lines
+    $grid-lines = JavaScript::D3::Plots::ProcessGridLines($grid-lines);
+
+    # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
-    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
-                   $jsHistogramPart,
+    # Stencil code
+    my $jsChart = [JavaScript::D3::Plots::GetPlotStartingCode($format),
+                   JavaScript::D3::Plots::GetPlotMarginsAndLabelsCode($format),
+                   JavaScript::D3::Plots::GetPlotDataAndScalesCode(|$grid-lines, $jsHistogramPart),
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
+
+    # Concrete values
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
@@ -387,11 +409,15 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
+                      :$grid-lines is copy = False,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
                       :$legends = Whatever,
                       Str :$format = 'jupyter'
                       ) {
+    # Grid lines
+    $grid-lines = JavaScript::D3::Plots::ProcessGridLines($grid-lines);
+
     # Margins
     $margins = JavaScript::D3::Plots::ProcessMargins($margins);
 
@@ -422,7 +448,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
         }
     }
 
-    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format),
+    my $jsChart = [JavaScript::D3::Plots::GetPlotPreparationCode($format, |$grid-lines),
                    $jsChartMiddle,
                    JavaScript::D3::Plots::GetPlotEndingCode($format)].join("\n");
 
@@ -552,6 +578,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      Str :plot-label(:$title) = '',
                      Str :$x-axis-label = '',
                      Str :$y-axis-label = '',
+                     :$grid-lines is copy = False,
                      :$margins is copy = Whatever,
                      :$method is copy = Whatever,
                      Str :$format = 'jupyter'

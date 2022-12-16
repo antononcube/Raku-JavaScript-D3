@@ -9,6 +9,7 @@ my %nameToFunc =
         'bar-chart' => &js-d3-bar-chart,
         'bubble-chart' => &js-d3-bubble-chart,
         'date-list-plot' => &js-d3-date-list-plot,
+        'density2d-chart' => &js-d3-density2d-chart,
         'histogram' => &js-d3-histogram,
         'list-line-plot' => &js-d3-list-line-plot,
         'list-plot' => &js-d3-list-plot;
@@ -24,6 +25,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
                Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
                Str :$background = 'white', #= Image background color
                Str :$color = 'steelblue', #= Color.
+               Bool :$grid-lines = False, #= Should grid lines be drawn or not?
                Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
                ) {
 
@@ -39,6 +41,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
     :$x-label, :$y-label,
     :$background,
     :$color,
+    :$grid-lines,
     :$format);
     say $res;
 }
@@ -53,6 +56,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
                Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
                Str :$background = 'white', #= Image background color
                Str :$color = 'steelblue', #= Color.
+               Bool :$grid-lines = False, #= Should grid lines be drawn or not?
                Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
                ) {
 
@@ -72,6 +76,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
             :$x-label, :$y-label,
             :$background,
             :$color,
+            :$grid-lines,
             :$format);
 }
 
@@ -85,6 +90,7 @@ multi sub MAIN(
         Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
         Str :$background = 'white', #= Image background color
         Str :$color = 'steelblue', #= Color.
+        Bool :$grid-lines = False, #= Should grid lines be drawn or not?
         Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
                ) {
     my $words = lines.join(' ');
@@ -95,5 +101,6 @@ multi sub MAIN(
             :$x-label, :$y-label,
             :$background,
             :$color,
+            :$grid-lines,
             :$format);
 }
