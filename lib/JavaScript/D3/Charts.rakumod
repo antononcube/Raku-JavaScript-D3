@@ -413,6 +413,10 @@ our multi BubbleChart($data where is-positional-of-lists($data, 3), *%args) {
     return BubbleChart(@data2, |%args);
 }
 
+our multi BubbleChart($data where is-positional-of-lists($data, 2), *%args) {
+    return BubbleChart($data.map({ [|$_, 1] }), |%args);
+}
+
 our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :$background= 'white',
                       Str :$color= 'steelblue',
