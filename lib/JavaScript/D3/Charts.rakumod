@@ -2,6 +2,7 @@ use v6.d;
 
 use JSON::Fast;
 use JavaScript::D3::Plots;
+use JavaScript::D3::Predicates;
 
 unit module JavaScript::D3::Charts;
 
@@ -407,8 +408,8 @@ our multi BubbleChart($data where $data ~~ Seq, *%args) {
     return BubbleChart($data.List, |%args);
 }
 
-our multi BubbleChart(@data where @data.all ~~ List, *%args) {
-    my @data2 = @data.map({ %( <x y z>.Array Z=> $_.Array) });
+our multi BubbleChart($data where is-positional-of-lists($data, 3), *%args) {
+    my @data2 = $data.map({ %( <x y z>.Array Z=> $_.Array) });
     return BubbleChart(@data2, |%args);
 }
 
