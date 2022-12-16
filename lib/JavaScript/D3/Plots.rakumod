@@ -295,6 +295,7 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    Str :$y-axis-label = '',
                    :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
+                   :$legends = Whatever,
                    Str :$format = 'jupyter'
                    ) {
     my $jsData = to-json(@data, :!pretty);
@@ -308,11 +309,21 @@ our multi ListPlot(@data where @data.all ~~ Map,
     # Select code fragment to splice in
     my $jsPlotMiddle = $hasGroups ?? $jsMultiScatterPlotPart !! $jsScatterPlotPart;
 
+    # Chose to add legend code fragment or not
+    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    given $legends {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
+            $jsPlotMiddle ~=  "\n" ~ $jsGroupsLegend;
+        }
+    }
+
     # Stencil
     my $jsScatterPlot = [GetPlotPreparationCode($format, |$grid-lines),
                          $jsPlotMiddle,
                          GetPlotEndingCode($format)].join("\n");
 
+    # Process margins
     $margins = ProcessMargins($margins);
 
     # Concrete parameters
@@ -325,7 +336,10 @@ our multi ListPlot(@data where @data.all ~~ Map,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
+            .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25');
 
     if $format.lc eq 'html' {
         $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;

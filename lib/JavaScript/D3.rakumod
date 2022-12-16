@@ -42,6 +42,7 @@ multi js-d3-list-plot($data,
                       Str :y-label(:$y-axis-label) = '',
                       :$grid-lines = False,
                       :$margins = Whatever,
+                      :$legends = Whatever,
                       Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
@@ -51,6 +52,7 @@ multi js-d3-list-plot($data,
             :$x-axis-label, :$y-axis-label,
             :$grid-lines,
             :$margins,
+            :$legends,
             :$format);
 }
 
