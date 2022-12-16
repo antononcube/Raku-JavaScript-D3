@@ -354,6 +354,11 @@ our multi ListLinePlot($data where $data ~~ Seq, *%args) {
     return ListLinePlot($data.List, |%args);
 }
 
+our multi ListLinePlot($data where is-positional-of-lists($data, 2), *%args) {
+    my @dataPairs = |$data.map({ <x y> Z=> $_.List })>>.Hash;
+    return ListLinePlot(@dataPairs, |%args);
+}
+
 our multi ListLinePlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
     my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_) })>>.Hash;
