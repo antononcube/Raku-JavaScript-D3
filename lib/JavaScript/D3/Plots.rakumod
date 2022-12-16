@@ -249,6 +249,25 @@ svg
     .attr("fill", $POINT_COLOR)
 END
 
+my $jsMultiScatterPlotPart = q:to/END/;
+// Add a scale for dot color
+var myColor = d3.scaleOrdinal()
+    .domain(data.map(function(o) { return o.group; }))
+    .range(d3.schemeSet2);
+
+// Add dots
+svg
+  .selectAll("whatever")
+  .data(data)
+  .enter()
+  .append("circle")
+    .attr("cx", function(d){ return x(d.x) })
+    .attr("cy", function(d){ return y(d.y) })
+    .attr("r", 3)
+    .attr("color", "blue")
+    .attr("fill", function (d) { return myColor(d.group) } )
+END
+
 our proto ListPlot($data, |) is export {*}
 
 our multi ListPlot($data where $data ~~ Seq, *%args) {
@@ -280,14 +299,23 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
+    # Grid lines
     $grid-lines = ProcessGridLines($grid-lines);
 
+    # Groups
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    # Select code fragment to splice in
+    my $jsPlotMiddle = $hasGroups ?? $jsMultiScatterPlotPart !! $jsScatterPlotPart;
+
+    # Stencil
     my $jsScatterPlot = [GetPlotPreparationCode($format, |$grid-lines),
-                         $jsScatterPlotPart,
+                         $jsPlotMiddle,
                          GetPlotEndingCode($format)].join("\n");
 
     $margins = ProcessMargins($margins);
 
+    # Concrete parameters
     my $res = $jsScatterPlot
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')

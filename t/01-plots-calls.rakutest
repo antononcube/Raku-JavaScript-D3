@@ -8,7 +8,7 @@ use JavaScript::D3;
 
 use Test;
 
-plan 12;
+plan 13;
 
 #my @dsXY = random-tabular-dataset(12, <x y>,
 #        generators => { x => { random-variate(NormalDistribution.new(30, 12), $_) },
@@ -101,5 +101,8 @@ ok js-d3-list-plot($seq11);
 
 ## 12
 ok js-d3-list-line-plot($seq11);
+
+## 13
+ok js-d3-list-plot(@dsXYG);
 
 done-testing;
