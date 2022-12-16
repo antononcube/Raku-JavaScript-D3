@@ -16,7 +16,8 @@
   "provides": {
     "JavaScript::D3": "lib/JavaScript/D3.rakumod",
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
-    "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod"
+    "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
+    "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod"
   },
   "resources": [
     "Tests-for-JavaScript-D3.ipynb"
