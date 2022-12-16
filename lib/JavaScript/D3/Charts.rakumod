@@ -122,6 +122,10 @@ END
 #| Makes a bar chart for a list of numbers or a hash with numeric values.
 our proto BarChart($data, |) is export {*}
 
+our multi BarChart($data where $data ~~ Seq, *%args) {
+    return BarChart($data.List, |%args);
+}
+
 our multi BarChart($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
     my @dataPairs = |$data.map({ <Label Value> Z=> ($k++, $_) })>>.Hash;
@@ -227,6 +231,10 @@ END
 
 #| Makes a histogram for a list of numbers.
 our proto Histogram($data, |) is export {*}
+
+our multi Histogram($data where $data ~~ Seq, *%args) {
+    return Histogram($data.List, |%args);
+}
 
 our multi Histogram(@data where @data.all ~~ Numeric,
                     Str :$background= 'white',
@@ -394,6 +402,10 @@ END
 
 #| Makes a bubble chart for list of triplets..
 our proto BubbleChart($data, |) is export {*}
+
+our multi BubbleChart($data where $data ~~ Seq, *%args) {
+    return BubbleChart($data.List, |%args);
+}
 
 our multi BubbleChart(@data where @data.all ~~ List, *%args) {
     my @data2 = @data.map({ %( <x y z>.Array Z=> $_.Array) });
@@ -564,6 +576,10 @@ END
 
 #| Makes a bin 2D chart.
 our proto Bin2DChart($data, |) is export {*}
+
+our multi Bin2DChart($data where $data ~~ Seq, *%args) {
+    return Bin2DChart($data.List, |%args);
+}
 
 our multi Bin2DChart(@data where @data.all ~~ List, *%args) {
     my @data2 = @data.map({ %( <x y>.Array Z=> $_.Array) });
