@@ -62,6 +62,11 @@ sub is-map-of-maps($obj) is export {
 }
 
 #------------------------------------------------------------
+sub is-positional-of-lists($obj, UInt $l) is export {
+    $obj ~~ Positional && ( [and] $obj.map({ $_ ~~ List && $_.elems == $l }) )
+}
+
+#------------------------------------------------------------
 sub is-positional-of-pairs($obj) is export {
    $obj ~~ Positional && ( [and] $obj.map({ $_ ~~ Pair }) )
 }

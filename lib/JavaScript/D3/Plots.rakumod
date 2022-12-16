@@ -255,6 +255,11 @@ our multi ListPlot($data where $data ~~ Seq, *%args) {
     return ListPlot($data.List, |%args);
 }
 
+our multi ListPlot($data where is-positional-of-lists($data, 2), *%args) {
+    my @dataPairs = |$data.map({ <x y> Z=> $_.List })>>.Hash;
+    return ListPlot(@dataPairs, |%args);
+}
+
 our multi ListPlot($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
     my @dataPairs = |$data.map({ <x y> Z=> ($k++, $_) })>>.Hash;
