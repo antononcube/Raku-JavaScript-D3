@@ -4,12 +4,12 @@ This repository has the a Raku package for generation of JavaScript's D3 code fo
 
 This package is intended to be used in Jupyter notebooks with the
 [Raku kernel implemented by Brian Duggan](https://github.com/bduggan/raku-jupyter-kernel), [BD1].
-The commands of the package generate JavaScript code produce (nice) [D3.js](https://d3js.org/) plots or charts.
+The commands of the package generate JavaScript code that produces (nice) [D3.js](https://d3js.org/) plots or charts.
 
-For illustrative examples see the Jupyter notebook 
+For illustrative examples see the Jupyter notebook
 ["Tests-for-JavaScript-D3"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/Tests-for-JavaScript-D3.ipynb).
 
-The (original versions of the) JavaScript snippets used in this package are taken from 
+The (original versions of the) JavaScript snippets used in this package are taken from
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
 
 --------
