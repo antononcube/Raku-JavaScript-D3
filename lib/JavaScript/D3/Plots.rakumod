@@ -220,7 +220,7 @@ our sub ProcessGridLines($gridLines is copy) {
         when $_.isa(Whatever) { @defaultGridLines; }
         when $_ ~~ List && $_.elems == 1 { ($_[0], @defaultGridLines[1]) }
         when $_ ~~ List && $_.elems == 2 { $_ }
-        when $_ ~~ Int && $_ ≥ 0 { ($_, $_) }
+        when $_ ~~ Numeric && $_.round ≥ 0 { ($_.round, $_.round) }
     }
 
     $gridLines = $gridLines.map({ $_.isa(Whatever) ?? 0 !! $_ }).List;
