@@ -20,7 +20,8 @@
     "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod"
   },
   "resources": [
-    "Tests-for-JavaScript-D3.ipynb"
+    "Tests-for-JavaScript-D3.ipynb",
+    "The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb"
   ],
   "license": "Artistic-2.0",
   "tags": [
