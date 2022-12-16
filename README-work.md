@@ -12,6 +12,8 @@ For illustrative examples see the Jupyter notebook
 The (original versions of the) JavaScript snippets used in this package are taken from
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
 
+Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo).
+
 --------
 
 ## Mission statement
@@ -152,8 +154,8 @@ In the lists below the highest priority items are placed first.
 
 #### Multiple dataset
 
-1. [ ] TODO List plot
-2. [X] TODO List line plot
+1. [X] DONE List plot
+2. [X] DONE List line plot
 3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
 
