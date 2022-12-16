@@ -14,6 +14,9 @@ The (original versions of the) JavaScript snippets used in this package are take
 
 Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo).
 
+And here is the demo notebook:
+["The-Raku-ju-hijack-hack-for-D3.js-demo"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb).
+
 --------
 
 ## Mission statement

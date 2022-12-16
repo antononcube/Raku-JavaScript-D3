@@ -12,7 +12,10 @@ For illustrative examples see the Jupyter notebook
 The (original versions of the) JavaScript snippets used in this package are taken from
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
 
-Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo).
+Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo) (≈ 7 min.)
+
+And here is the demo notebook:
+["The-Raku-ju-hijack-hack-for-D3.js-demo"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb).
 
 --------
 
