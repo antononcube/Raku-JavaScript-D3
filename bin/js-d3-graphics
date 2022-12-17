@@ -67,8 +67,6 @@ multi sub MAIN(Str $cmd, #= Graphics command.
         @data = $words.split(/\D/)>>.Numeric;
     }
 
-    note @data.raku;
-
     MAIN($cmd,
             @data,
             :$width, :$height,
