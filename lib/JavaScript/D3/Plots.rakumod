@@ -274,6 +274,11 @@ our multi ListPlot($data where $data ~~ Seq, *%args) {
     return ListPlot($data.List, |%args);
 }
 
+our multi ListPlot($data where is-positional-of-lists($data, 3), *%args) {
+    my @dataPairs = |$data.map({ <x y group> Z=> $_.List })>>.Hash;
+    return ListPlot(@dataPairs, |%args);
+}
+
 our multi ListPlot($data where is-positional-of-lists($data, 2), *%args) {
     my @dataPairs = |$data.map({ <x y> Z=> $_.List })>>.Hash;
     return ListPlot(@dataPairs, |%args);
@@ -394,6 +399,11 @@ our proto ListLinePlot($data, |) is export {*}
 
 our multi ListLinePlot($data where $data ~~ Seq, *%args) {
     return ListLinePlot($data.List, |%args);
+}
+
+our multi ListLinePlot($data where is-positional-of-lists($data, 3), *%args) {
+    my @dataPairs = |$data.map({ <x y group> Z=> $_.List })>>.Hash;
+    return ListLinePlot(@dataPairs, |%args);
 }
 
 our multi ListLinePlot($data where is-positional-of-lists($data, 2), *%args) {

@@ -7,77 +7,6 @@ use JavaScript::D3::Predicates;
 unit module JavaScript::D3::Charts;
 
 #============================================================
-# JavaScript chart template parts
-#============================================================
-my $jsChartPreparation = q:to/END/;
-(function(element) { require(['d3'], function(d3) {
-
-// set the dimensions and margins of the graph
-var margin = $MARGINS,
-    width = $WIDTH - margin.left - margin.right,
-    height = $HEIGHT - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3
-   .select(element.get(0))
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background", $BACKGROUND_COLOR)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")")
-
-// Obtain title
-var title = $TITLE
-
-if ( title.length > 0 ) {
-    svg.append("text")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        //.style("text-decoration", "underline")
-        .text(title);
-}
-
-// Obtain x-axis label
-var xAxisLabel = $X_AXIS_LABEL
-var xAxisLabelFontSize = 12
-
-if ( xAxisLabel.length > 0 ) {
-    svg.append("text")
-        .attr("x", (width / 2))
-        .attr("y", height + margin.bottom - xAxisLabelFontSize/2)
-        .attr("text-anchor", "middle")
-        .style("font-size", xAxisLabelFontSize.toString() + "px")
-        .text(xAxisLabel);
-}
-
-// Obtain y-axis label
-var yAxisLabel = $Y_AXIS_LABEL
-var yAxisLabelFontSize = 12
-
-if ( yAxisLabel.length > 0 ) {
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", - (height / 2))
-        .attr("y", 0 - margin.left + yAxisLabelFontSize)
-        .attr("text-anchor", "middle")
-        .style("font-size", yAxisLabelFontSize.toString() + "px")
-        .text(yAxisLabel);
-}
-
-// Optain data
-var data = $DATA
-
-END
-
-my $jsChartEnding = q:to/END/;
-}) })(element);
-END
-
-#============================================================
 # BarChart
 #============================================================
 # See https://d3-graph-gallery.com/graph/barplot_basic.html
@@ -406,6 +335,11 @@ our proto BubbleChart($data, |) is export {*}
 
 our multi BubbleChart($data where $data ~~ Seq, *%args) {
     return BubbleChart($data.List, |%args);
+}
+
+our multi BubbleChart($data where is-positional-of-lists($data, 4), *%args) {
+    my @data2 = $data.map({ %( <x y z group>.Array Z=> $_.Array) });
+    return BubbleChart(@data2, |%args);
 }
 
 our multi BubbleChart($data where is-positional-of-lists($data, 3), *%args) {

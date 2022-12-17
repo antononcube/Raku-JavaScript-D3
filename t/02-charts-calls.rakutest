@@ -7,7 +7,7 @@ use JavaScript::D3;
 
 use Test;
 
-plan 6;
+plan 7;
 
 ## 1
 ok js-d3-bar-chart((rand xx 12).List, height => 500, background => 'rgb(60,60,60)');
@@ -74,5 +74,7 @@ ok js-d3-density2d-chart(
         y-axis-label => 'My Y',
         margins => %(top => 80, left => 60));
 
+## 7
+ok js-d3-bubble-chart( @arr5.map({ $_<x y z group> }) );
 
 done-testing;
