@@ -12,7 +12,7 @@ For illustrative examples see the Jupyter notebook
 The (original versions of the) JavaScript snippets used in this package are taken from
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
 
-Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo).
+Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo) (≈ 7 min.)
 
 And here is the demo notebook:
 ["The-Raku-ju-hijack-hack-for-D3.js-demo"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb).
@@ -129,35 +129,40 @@ js-d3-graphics --help
 ```
 ```
 # Usage:
-#   js-d3-graphics <cmd> [<points> ...] [-p|--point-char=<Str>] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes textual (terminal) plots.
-#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes textual (terminal) plots by splitting a string of data points.
-#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes textual (terminal) plots from pipeline input
+#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart.
+#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart by splitting a string of data points.
+#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart from pipeline input.
 #   
-#     <cmd>                    Graphics command.
-#     [<points> ...]           Data points.
-#     -p|--point-char=<Str>    Plot points character. [default: '*']
-#     -w|--width[=UInt]        Width of the plot. (-1 for Whatever.) [default: 800]
-#     -h|--height[=UInt]       Height of the plot. (-1 for Whatever.) [default: 600]
-#     -t|--title=<Str>         Title of the plot. [default: '']
-#     --x-label=<Str>          Label of the X-axis. If Whatever, then no label is placed. [default: '']
-#     --y-label=<Str>          Label of the Y-axis. If Whatever, then no label is placed. [default: '']
-#     --background=<Str>       Image background color [default: 'white']
-#     --color=<Str>            Color. [default: 'steelblue']
-#     --grid-lines             Should grid lines be drawn or not? [default: False]
-#     --format=<Str>           Output format, one of 'jupyter' or 'html'. [default: 'html']
-#     <words>                  String with data points.
+#     <cmd>                 Graphics command.
+#     [<points> ...]        Data points.
+#     -w|--width[=UInt]     Width of the plot. (-1 for Whatever.) [default: 800]
+#     -h|--height[=UInt]    Height of the plot. (-1 for Whatever.) [default: 600]
+#     -t|--title=<Str>      Title of the plot. [default: '']
+#     --x-label=<Str>       Label of the X-axis. If Whatever, then no label is placed. [default: '']
+#     --y-label=<Str>       Label of the Y-axis. If Whatever, then no label is placed. [default: '']
+#     --background=<Str>    Image background color [default: 'white']
+#     --color=<Str>         Color. [default: 'steelblue']
+#     --grid-lines          Should grid lines be drawn or not? [default: False]
+#     --format=<Str>        Output format, one of 'jupyter' or 'html'. [default: 'html']
+#     <words>               String with data points.
 ```
 
 Here is an usage example that produces a list line plot:
 
-```
+```shell
 js-d3-graphics list-line-plot 1 2 2 12 33 41 15 5 -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
+```
+```
+# 
 ```
 
 Here is an example that produces bubble chart:
 
+```shell
+js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
 ```
-js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.htm
+```
+# 
 ```
 
 --------

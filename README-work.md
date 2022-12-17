@@ -130,14 +130,14 @@ js-d3-graphics --help
 
 Here is an usage example that produces a list line plot:
 
-```
+```shell
 js-d3-graphics list-line-plot 1 2 2 12 33 41 15 5 -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
 ```
 
 Here is an example that produces bubble chart:
 
-```
-js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.htm
+```shell
+js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
 ```
 
 --------
