@@ -14,10 +14,9 @@ my %nameToFunc =
         'list-line-plot' => &js-d3-list-line-plot,
         'list-plot' => &js-d3-list-plot;
 
-#| Makes textual (terminal) plots.
+#| Generates HTML document code with D3.js plots or charts.
 multi sub MAIN(Str $cmd, #= Graphics command.
                *@points is copy, #= Data points.
-               Str :p(:$point-char) = '*', #= Plot points character.
                UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
                UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
                Str :t(:$title) = '', #= Title of the plot.
@@ -46,7 +45,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
     say $res;
 }
 
-#| Makes textual (terminal) plots by splitting a string of data points.
+#| Generates HTML document code with D3.js plots or charts by splitting a string of data points.
 multi sub MAIN(Str $cmd, #= Graphics command.
                Str $words, #= String with data points.
                UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
@@ -78,7 +77,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
             :$format);
 }
 
-#| Makes textual (terminal) plots from pipeline input
+#| Generates HTML document code with D3.js plots or charts from pipeline input.
 multi sub MAIN(
         Str $cmd, #= Graphics command.
         UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
