@@ -43,7 +43,7 @@ our multi BarChart(@data where @data.all ~~ Map,
                    ) {
     # Convert to JSON data
     my $jsData = to-json(@data, :!pretty);
-note $jsData;
+
     # Grid lines
     $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
 
