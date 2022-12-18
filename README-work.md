@@ -1,5 +1,7 @@
 # JavaScript::D3 Raku package
 
+[![SparrowCI](https://ci.sparrowhub.io/project/gh-antononcube-Raku-JavaScript-D3/badge)](https://ci.sparrowhub.io)
+
 This repository has the a Raku package for generation of JavaScript's D3 code for making plots and charts.
 
 This package is intended to be used in Jupyter notebooks with the
