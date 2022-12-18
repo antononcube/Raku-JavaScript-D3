@@ -386,13 +386,13 @@ my $jsBarChartPart = q:to/END/;
 // Obtain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o.Value; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o.Value; }))
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o.value; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o.value; }))
 
 // X axis
 var x = d3.scaleBand()
   .range([ 0, width ])
-  .domain(data.map(function(d) { return d.Label; }))
+  .domain(data.map(function(d) { return d.label; }))
   .padding(0.2);
 svg.append("g")
   .attr("transform", "translate(0," + height + ")")
@@ -413,10 +413,10 @@ svg.selectAll("mybar")
   .data(data)
   .enter()
   .append("rect")
-    .attr("x", function(d) { return x(d.Label); })
-    .attr("y", function(d) { return y(d.Value); })
+    .attr("x", function(d) { return x(d.label); })
+    .attr("y", function(d) { return y(d.value); })
     .attr("width", x.bandwidth())
-    .attr("height", function(d) { return height - y(d.Value); })
+    .attr("height", function(d) { return height - y(d.value); })
     .attr("fill", $FILL_COLOR)
 END
 
@@ -441,7 +441,7 @@ var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
 // X axis: scale and draw:
 var x = d3.scaleLinear()
-      .domain([valueMin, valueMax])     // can use this instead of 1000 to have the max of data: d3.max(data, function(d) { return +d.Value })
+      .domain([valueMin, valueMax])
       .range([0, width]);
 svg.append("g")
       .attr("transform", "translate(0," + height + ")")
@@ -449,7 +449,7 @@ svg.append("g")
 
 // set the parameters for the histogram
 var histogram = d3.histogram()
-      .value(function(d) { return d; })   // I need to give the vector of value
+      .value(function(d) { return d; })  // I need to give the vector of value
       .domain(x.domain())  // then the domain of the graphic
       .thresholds(x.ticks(70)); // then the numbers of bins
 

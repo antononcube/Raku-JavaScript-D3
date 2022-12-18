@@ -19,12 +19,12 @@ our multi BarChart($data where $data ~~ Seq, *%args) {
 
 our multi BarChart($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
-    my @dataPairs = |$data.map({ <Label Value> Z=> ($k++, $_) })>>.Hash;
+    my @dataPairs = |$data.map({ <label value> Z=> ($k++, $_) })>>.Hash;
     return BarChart(@dataPairs, |%args);
 }
 
 our multi BarChart(%data, *%args) {
-    my @dataPairs = %data.map({ %(Label => $_.key, Value => $_.value) }).Array;
+    my @dataPairs = %data.map({ %(label => $_.key, value => $_.value) }).Array;
     return BarChart(@dataPairs, |%args);
 }
 
@@ -38,20 +38,37 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :$y-axis-label = '',
                    :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
+                   :$legends = Whatever,
                    Str :$format = 'jupyter'
                    ) {
+    # Convert to JSON data
     my $jsData = to-json(@data, :!pretty);
-
+note $jsData;
     # Grid lines
     $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
 
     # Margins
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
+    # Groups
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    # Select code fragment to splice in
+    my $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+
+    # Chose to add legend code fragment or not
+    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    given $legends {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
+            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode();
+        }
+    }
+
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
                    JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+                   $jsPlotMiddle,
                    JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
     # Concrete values
@@ -64,7 +81,10 @@ our multi BarChart(@data where @data.all ~~ Map,
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
+            .subst(:g, '$LEGEND_Y_POS', '0')
+            .subst(:g, '$LEGEND_Y_GAP', '25');
 
     if $format.lc eq 'html' {
         $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;

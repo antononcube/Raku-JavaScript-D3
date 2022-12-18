@@ -125,6 +125,7 @@ multi js-d3-bar-chart($data,
                       Str :y-label(:$y-axis-label) = '',
                       :$grid-lines = False,
                       :$margins = Whatever,
+                      :$legends = Whatever,
                       Str :$format = 'jupyter' ) {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
@@ -134,6 +135,7 @@ multi js-d3-bar-chart($data,
             :$x-axis-label, :$y-axis-label,
             :$grid-lines,
             :$margins,
+            :$legends,
             :$format);
 }
 
