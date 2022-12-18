@@ -335,7 +335,7 @@ our sub GetMultiPathPlotPart() {
 
 # See https://d3-graph-gallery.com/graph/line_basic.html
 my $jsPlotDateDataAndScales = q:to/END/;
-// Optain data
+// Obtain data
 var data = $DATA
 
 data = data.map(function(d){
