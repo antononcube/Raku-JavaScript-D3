@@ -305,6 +305,9 @@ our multi ListPlot(@data where @data.all ~~ Map,
                    ) {
     my $jsData = to-json(@data, :!pretty);
 
+    # Process margins
+    $margins = ProcessMargins($margins);
+
     # Grid lines
     $grid-lines = ProcessGridLines($grid-lines);
 
@@ -327,9 +330,6 @@ our multi ListPlot(@data where @data.all ~~ Map,
     my $jsScatterPlot = [GetPlotPreparationCode($format, |$grid-lines),
                          $jsPlotMiddle,
                          GetPlotEndingCode($format)].join("\n");
-
-    # Process margins
-    $margins = ProcessMargins($margins);
 
     # Concrete parameters
     my $res = $jsScatterPlot
