@@ -215,9 +215,11 @@ User specified or automatic:
 
 3. [X] DONE CLI script
 
-4. [ ] TODO JavaScript code snippets management
+4. [X] TODO JavaScript code snippets management
 
-   - If they become too many.
+   - Initially the JavaScript snippets were kept with the Raku code,
+     but it seems it is better to have them in a separate file.
+     (With the corresponding accessors.)
 
 --------
 
@@ -239,6 +241,9 @@ properly
 [hacked to redirect Raku code to JavaScript backend](https://github.com/bduggan/p6-jupyter-kernel/issues/100)
 
 Brian Duggan fairly quickly implemented the suggested Jupyter kernel magics, so, now no hacking is needed.
+
+I finishing 0.1.3 version of this package I decided to write its Python version of it, see [AAp3].
+Writing the Python version was good brainstorming technique to produce reasonable refactoring (that is version 0.1.4).
 
 --------
 
@@ -267,6 +272,11 @@ Brian Duggan fairly quickly implemented the suggested Jupyter kernel magics, so,
 [Text::Plot Raku package](https://raku.land/zef:antononcube/Text::Plot),
 (2022),
 [GitHub/antononcube](https://github.com/antononcube/Raku-Text-Plot).
+
+[AAp3] Anton Antonov,
+[JavaScriptD3 Python package](https://github.com/antononcube/Python-packages/tree/main/JavaScriptD3),
+(2022),
+[Python-packages at GitHub/antononcube](https://github.com/antononcube/Python-packages).
 
 [BD1] Brian Duggan,
 [Jupyter::Kernel Raku package](https://raku.land/cpan:BDUGGAN/Jupyter::Kernel),

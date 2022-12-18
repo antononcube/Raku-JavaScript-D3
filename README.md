@@ -129,9 +129,9 @@ js-d3-graphics --help
 ```
 ```
 # Usage:
-#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart.
-#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart by splitting a string of data points.
-#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Makes an HTML page with a D3.js plot or chart from pipeline input.
+#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
+#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
+#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
 #   
 #     <cmd>                 Graphics command.
 #     [<points> ...]        Data points.
@@ -240,9 +240,11 @@ User specified or automatic:
 
 3. [X] DONE CLI script
 
-4. [ ] TODO JavaScript code snippets management
+4. [X] TODO JavaScript code snippets management
 
-   - If they become too many.
+   - Initially the JavaScript snippets were kept with the Raku code,
+     but it seems it is better to have them in a separate file.
+     (With the corresponding accessors.)
 
 --------
 
@@ -264,6 +266,9 @@ properly
 [hacked to redirect Raku code to JavaScript backend](https://github.com/bduggan/p6-jupyter-kernel/issues/100)
 
 Brian Duggan fairly quickly implemented the suggested Jupyter kernel magics, so, now no hacking is needed.
+
+I finishing 0.1.3 version of this package I decided to write its Python version of it, see [AAp3].
+Writing the Python version was good brainstorming technique to produce reasonable refactoring (that is version 0.1.4).
 
 --------
 
@@ -292,6 +297,11 @@ Brian Duggan fairly quickly implemented the suggested Jupyter kernel magics, so,
 [Text::Plot Raku package](https://raku.land/zef:antononcube/Text::Plot),
 (2022),
 [GitHub/antononcube](https://github.com/antononcube/Raku-Text-Plot).
+
+[AAp3] Anton Antonov,
+[JavaScriptD3 Python package](https://github.com/antononcube/Python-packages/tree/main/JavaScriptD3),
+(2022),
+[Python-packages at GitHub/antononcube](https://github.com/antononcube/Python-packages).
 
 [BD1] Brian Duggan,
 [Jupyter::Kernel Raku package](https://raku.land/cpan:BDUGGAN/Jupyter::Kernel),
