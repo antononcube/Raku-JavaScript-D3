@@ -19,12 +19,12 @@ our multi BarChart($data where $data ~~ Seq, *%args) {
 
 our multi BarChart($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
     my $k = 1;
-    my @dataPairs = |$data.map({ <label value> Z=> ($k++, $_) })>>.Hash;
+    my @dataPairs = |$data.map({ <variable value> Z=> ($k++, $_) })>>.Hash;
     return BarChart(@dataPairs, |%args);
 }
 
 our multi BarChart(%data, *%args) {
-    my @dataPairs = %data.map({ %(label => $_.key, value => $_.value) }).Array;
+    my @dataPairs = %data.map({ %(variable => $_.key, value => $_.value) }).Array;
     return BarChart(@dataPairs, |%args);
 }
 
@@ -51,17 +51,25 @@ our multi BarChart(@data where @data.all ~~ Map,
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
     # Groups
-    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+    my Bool $hasGroups = [&&] @data.map({ (<group variable value> (&) $_).elems == 3 });
+
+    note "Multi-dataset bar plots require all records to have the keys <group variable value>."
+    when !$hasGroups && ( [&&] @data.map({ so $_<group> }) );
 
     # Select code fragment to splice in
-    my $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+    my $jsPlotMiddle;
+    if $hasGroups {
+        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetMultiBarChartPart()),
+    } else {
+        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+    }
 
     # Chose to add legend code fragment or not
     my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
-            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode();
+            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode().subst('return o.group;', "return o.variable;");
         }
     }
 
