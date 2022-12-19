@@ -107,11 +107,11 @@ our sub Scribble(
 
     # Envelope functions
     if $envelope-functions.isa(Whatever) || $envelope-functions.isa(WhateverCode) {
-        @r = @r.map({ ($_[0], rescale($_[1], -1, 1, -rfunc($_[1]), rfunc($_[1])) )});
+        @r = @r.map({ ($_[0], rescale($_[1], -1, 1, -rfunc($_[0]), rfunc($_[0])) )});
     }
 
     # Ordered stroke points
-    if $ordered-stroke-points { @r = @r.sort; }
+    if $ordered-stroke-points { @r = @r.sort({ $_[0] }); }
 
     # Rotation angle
     if $rotation-angle ~~ Numeric {
