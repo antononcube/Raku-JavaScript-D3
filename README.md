@@ -131,7 +131,7 @@ js-d3-graphics --help
 ```
 ```
 # Usage:
-#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
+#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
 #   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
 #   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
 #   
@@ -145,6 +145,7 @@ js-d3-graphics --help
 #     --background=<Str>    Image background color [default: 'white']
 #     --color=<Str>         Color. [default: 'steelblue']
 #     --grid-lines          Should grid lines be drawn or not? [default: False]
+#     --margins[=UInt]      Size of the top, bottom, left, and right margins. [default: 40]
 #     --format=<Str>        Output format, one of 'jupyter' or 'html'. [default: 'html']
 #     <words>               String with data points.
 ```
@@ -162,6 +163,15 @@ Here is an example that produces bubble chart:
 
 ```shell
 js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
+```
+```
+# 
+```
+
+Here is an example that produces a random mandala:
+
+```shell
+js-d3-graphics random-mandala 7 --margins=100 -h=1000 -w=1000 --color='rgb(120,120,120)' --background='white' -t="Random mandala" > out.html && open out.html
 ```
 ```
 # 

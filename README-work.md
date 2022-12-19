@@ -142,6 +142,12 @@ Here is an example that produces bubble chart:
 js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-label="My X" --y-label="My Y" > out.html && open out.html
 ```
 
+Here is an example that produces a random mandala:
+
+```shell
+js-d3-graphics random-mandala 7 --margins=100 -h=1000 -w=1000 --color='rgb(120,120,120)' --background='white' -t="Random mandala" > out.html && open out.html
+```
+
 --------
 
 ## TODO
