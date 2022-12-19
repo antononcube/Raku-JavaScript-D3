@@ -3,6 +3,7 @@ use v6.d;
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
 use JavaScript::D3::RandomMandala;
+use Hash::Merge;
 
 unit module JavaScript::D3;
 
@@ -233,17 +234,31 @@ multi js-d3-density2d-chart($data,
 #| Makes a random mandala.
 proto js-d3-random-mandala(|) is export {*}
 
+multi js-d3-random-mandala($data, *%args) {
+    my $rso = do given $data {
+        when Positional { $data[0] }
+        when UInt { $data[0] }
+        default { 6 }
+    };
+
+    return js-d3-random-mandala(|merge-hash(%(rotational-symmetry-order => $rso), %args));
+}
+
 multi js-d3-random-mandala(
-        UInt :$rotational-symmetry-order = 6,
+        Int :$rotational-symmetry-order = 6,
         :$number-of-seed-elements is copy = Whatever,
         :$connecting-function is copy = 'curveBasisClosed',
         Bool :$symmetric-seed = True,
-        :$stroke is copy = Whatever,
+        :color(:$stroke) is copy = Whatever,
         :$stroke-width is copy = Whatever,
         :$fill is copy = Whatever,
         :$background is copy = Whatever,
         UInt :$width= 300,
         UInt :$height= 300,
+        Str :plot-label(:$title) = '',
+        Str :x-label(:$x-axis-label) = '',
+        Str :y-label(:$y-axis-label) = '',
+        :$grid-lines = False,
         :$margins = %(:top(0), :bottom(0), :left(0), :right(0)),
         Bool :$axes = False,
         Str :$format= "jupyter") {
@@ -312,8 +327,12 @@ multi js-d3-random-mandala(
     my $jsCode = js-d3-list-line-plot(
             @randomMandala,
             :$width, :$height,
+            :$title,
+            :$x-axis-label,
+            :$y-axis-label,
             :$background,
             :$margins,
+            :$grid-lines,
             :!legends,
             :$axes,
             :$format);

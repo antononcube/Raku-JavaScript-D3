@@ -12,7 +12,8 @@ my %nameToFunc =
         'density2d-chart' => &js-d3-density2d-chart,
         'histogram' => &js-d3-histogram,
         'list-line-plot' => &js-d3-list-line-plot,
-        'list-plot' => &js-d3-list-plot;
+        'list-plot' => &js-d3-list-plot,
+        'random-mandala' => &js-d3-random-mandala;
 
 #| Generates HTML document code with D3.js plots or charts.
 multi sub MAIN(Str $cmd, #= Graphics command.
