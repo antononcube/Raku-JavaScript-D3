@@ -100,7 +100,7 @@ my $seq11 =((2, <88706/9185>), (1, <78683/8047>), (7, <64493/6356>), (5, <41257/
 ok js-d3-list-plot($seq11);
 
 ## 12
-ok js-d3-list-line-plot($seq11);
+ok js-d3-list-line-plot($seq11, margins => 100);
 
 ## 13
 ok js-d3-list-plot(@dsXYG);

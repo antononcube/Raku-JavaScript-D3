@@ -10,8 +10,10 @@ unit module JavaScript::D3::CodeSnippets;
 
 our sub ProcessMargins($margins is copy) {
     my %defaultMargins = %( top => 40, bottom => 40, left => 40, right => 40);
-    if $margins.isa(Whatever) {
-        $margins = %defaultMargins;
+    $margins = do given $margins {
+        when $_.isa(Whatever) { %defaultMargins; }
+        when $_ ~~ Int { (<top bottom left right>.List X=> $_).Hash; }
+        default { $margins }
     }
     die "The argument margins is expected to be a Map or Whatever." unless $margins ~~ Map;
     $margins = merge-hash(%defaultMargins, $margins);

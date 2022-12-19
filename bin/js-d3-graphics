@@ -26,6 +26,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
                Str :$background = 'white', #= Image background color
                Str :$color = 'steelblue', #= Color.
                Bool :$grid-lines = False, #= Should grid lines be drawn or not?
+               UInt :$margins = 40, #= Size of the top, bottom, left, and right margins.
                Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
                ) {
 
@@ -42,6 +43,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
     :$background,
     :$color,
     :$grid-lines,
+    :$margins,
     :$format);
     say $res;
 }
