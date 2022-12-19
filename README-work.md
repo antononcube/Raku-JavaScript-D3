@@ -222,6 +222,14 @@ User specified or automatic:
    - Initially the JavaScript snippets were kept with the Raku code,
      but it seems it is better to have them in a separate file.
      (With the corresponding accessors.)
+   
+## Second wave
+
+1. [X] Random Mandala, single plot
+
+2. [ ] Random mandalas table/array
+
+3. [ ] Random Scribble, single plot 
 
 --------
 
