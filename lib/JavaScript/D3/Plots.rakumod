@@ -44,6 +44,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           :$grid-lines is copy = False,
                           :$margins is copy = Whatever,
                           :$legends = Whatever,
+                          Bool :$axes = True,
                           Str :$format = 'jupyter',
                           Str :$singleDatasetCode!,
                           Str :$multiDatasetCode!
@@ -72,7 +73,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines),
+    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
                          $jsPlotMiddle,
                          JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
@@ -160,6 +161,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                        :$grid-lines is copy = False,
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
+                       Bool :$axes = True,
                        Str :$format = 'jupyter'
                        ) {
 
@@ -192,7 +194,7 @@ our multi DateListPlot($data where is-str-time-series($data),
     # Stencil
     my $jsLinePlot = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
                       JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                      JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales),
+                      JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales),
                       $jsPlotMiddle,
                       JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)]
             .join("\n");

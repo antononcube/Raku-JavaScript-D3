@@ -118,6 +118,27 @@ if ( yAxisLabel.length > 0 ) {
 }
 END
 
+my $jsPlotData = q:to/END/;
+// Obtain data
+var data = $DATA
+
+var xMin = Math.min.apply(Math, data.map(function(o) { return o.x; }))
+var xMax = Math.max.apply(Math, data.map(function(o) { return o.x; }))
+
+var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
+
+// X scale and Axis
+var x = d3.scaleLinear()
+    .domain([xMin, xMax])         // This is the min and the max of the data: 0 to 100 if percentages
+    .range([0, width]);           // This is the corresponding value I want in Pixel
+
+// Y scale and Axis
+var y = d3.scaleLinear()
+    .domain([yMin, yMax])         // This is the min and the max of the data: 0 to 100 if percentages
+    .range([height, 0]);          // This is the corresponding value I want in Pixel
+END
+
 my $jsPlotDataAndScales = q:to/END/;
 // Obtain data
 var data = $DATA
@@ -138,7 +159,7 @@ svg
   .attr("transform", "translate(0," + height + ")")
   .call(d3.axisBottom(x))
 
-// X scale and Axis
+// Y scale and Axis
 var y = d3.scaleLinear()
     .domain([yMin, yMax])         // This is the min and the max of the data: 0 to 100 if percentages
     .range([height, 0]);          // This is the corresponding value I want in Pixel
@@ -207,7 +228,11 @@ our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
             $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
-our sub GetPlotDataAndScalesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataAndScales) {
+our sub GetPlotDataAndScalesCode() {
+    return $jsPlotData;
+}
+
+our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataAndScales) {
     my $res = $codeFragment;
     if $nXTicks > 0 {
         $res = $res.subst('.call(d3.axisBottom(x))', ".call(d3.axisBottom(x).ticks($nXTicks).tickSizeInner(-height))");
@@ -218,8 +243,10 @@ our sub GetPlotDataAndScalesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $code
     return $res;
 }
 
-our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0) {
-    return GetPlotStartingCode($format) ~ "\n" ~ GetPlotMarginsAndLabelsCode($format) ~ "\n" ~ GetPlotDataAndScalesCode($nXTicks, $nYTicks);
+our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0, Bool :$axes = True) {
+    return [GetPlotStartingCode($format),
+            GetPlotMarginsAndLabelsCode($format),
+            $axes ?? GetPlotDataScalesAndAxesCode($nXTicks, $nYTicks) !! GetPlotDataAndScalesCode()].join("\n");
 }
 
 our sub GetLegendCode() {

@@ -59,9 +59,9 @@ our multi BarChart(@data where @data.all ~~ Map,
     # Select code fragment to splice in
     my $jsPlotMiddle;
     if $hasGroups {
-        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetMultiBarChartPart()),
+        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetMultiBarChartPart()),
     } else {
-        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
     }
 
     # Chose to add legend code fragment or not
@@ -135,7 +135,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
                    JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart()),
+                   JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart()),
                    JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
     # Concrete values

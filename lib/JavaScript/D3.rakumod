@@ -43,6 +43,7 @@ multi js-d3-list-plot($data,
                       :$grid-lines = False,
                       :$margins = Whatever,
                       :$legends = Whatever,
+                      Bool :$axes = True,
                       Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
@@ -53,6 +54,7 @@ multi js-d3-list-plot($data,
             :$grid-lines,
             :$margins,
             :$legends,
+            :$axes,
             :$format);
 }
 
@@ -70,6 +72,7 @@ multi js-d3-list-line-plot($data,
                            :$grid-lines = False,
                            :$margins = Whatever,
                            :$legends = Whatever,
+                           Bool :$axes = True,
                            Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
@@ -80,6 +83,7 @@ multi js-d3-list-line-plot($data,
             :$grid-lines,
             :$margins,
             :$legends,
+            :$axes,
             :$format);
 }
 
@@ -98,6 +102,7 @@ multi js-d3-date-list-plot($data,
                            :$grid-lines = False,
                            :$margins = Whatever,
                            :$legends = Whatever,
+                           Bool :$axes = True,
                            Str :$format = 'jupyter' ) {
     return JavaScript::D3::Plots::DateListPlot($data,
             :$background,
@@ -109,6 +114,7 @@ multi js-d3-date-list-plot($data,
             :$grid-lines,
             :$margins,
             :$legends,
+            :$axes,
             :$format);
 }
 
