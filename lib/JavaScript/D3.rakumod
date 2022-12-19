@@ -247,7 +247,7 @@ multi js-d3-random-mandala($data, *%args) {
 multi js-d3-random-mandala(
         Int :$rotational-symmetry-order = 6,
         :$number-of-seed-elements is copy = Whatever,
-        :$connecting-function is copy = 'curveBasisClosed',
+        :$connecting-function is copy = 'curveBasis',
         Bool :$symmetric-seed = True,
         :color(:$stroke) is copy = Whatever,
         :$stroke-width is copy = Whatever,
@@ -270,8 +270,8 @@ multi js-d3-random-mandala(
     if $number-of-seed-elements.isa(Whatever) {
         $number-of-seed-elements = 10;
     }
-    die 'The parameter number-of-seed-elements is expected to be a non-negative integer or Whatever.'
-    unless $number-of-seed-elements ~~ UInt;
+    die 'The parameter number-of-seed-elements is expected to be a positive integer or Whatever.'
+    unless $number-of-seed-elements ~~ Int && $number-of-seed-elements > 0;
 
     # Connecting function
     my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
@@ -326,6 +326,124 @@ multi js-d3-random-mandala(
 
     my $jsCode = js-d3-list-line-plot(
             @randomMandala,
+            :$width, :$height,
+            :$title,
+            :$x-axis-label,
+            :$y-axis-label,
+            :$background,
+            :$margins,
+            :$grid-lines,
+            :!legends,
+            :$axes,
+            :$format);
+
+    return $jsCode
+            .subst('.attr("stroke-width", 1.5)',
+                    '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
+            .subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
+            .subst('.y(function(d) { return y(+d.y); })',
+                    '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
+}
+
+
+#============================================================
+#| Makes a random scribble.
+proto js-d3-random-scribble(|) is export {*}
+
+multi js-d3-random-scribble($data, *%args) {
+    my $ns = do given $data {
+        when Positional { $data[0] }
+        when UInt { $data[0] }
+        default { 120 }
+    };
+
+    return js-d3-random-scribble(|merge-hash(%(number-of-strokes => $ns), %args));
+}
+
+multi js-d3-random-scribble(
+        UInt :$number-of-strokes = 120,
+        Bool :$ordered-stroke-points = True,
+        :$rotation-angle = Whatever,
+        :$envelope-functions = Whatever,
+        :$connecting-function is copy = 'curveBasis',
+        :color(:$stroke) is copy = Whatever,
+        :$stroke-width is copy = Whatever,
+        :$fill is copy = Whatever,
+        :$background is copy = Whatever,
+        UInt :$width= 300,
+        UInt :$height= 300,
+        Str :plot-label(:$title) = '',
+        Str :x-label(:$x-axis-label) = '',
+        Str :y-label(:$y-axis-label) = '',
+        :$grid-lines = False,
+        :$margins = %(:top(0), :bottom(0), :left(0), :right(0)),
+        Bool :$axes = False,
+        Str :$format= "jupyter") {
+
+    #--------------------------------------------------------
+    # Process options
+    #--------------------------------------------------------
+    # Number of seed elements
+    if $number-of-strokes.isa(Whatever) {
+        $number-of-strokes = 120;
+    }
+    die 'The parameter number-of-strokes is expected to be a positive integer or Whatever.'
+    unless $number-of-strokes ~~ UInt && $number-of-strokes > 0;
+
+    # Connecting function
+    my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
+    if $connecting-function.isa(Whatever) {
+        $connecting-function = $d3Curves.pick;
+    }
+    die 'Them parameter connecting-function is expected to be a string or Whatever.'
+    unless $connecting-function ~~ Str;
+
+    # Stroke
+    if $stroke.isa(Whatever) {
+        $stroke = 'gray';
+    }
+    die 'Them parameter stroke is expected to be a string or Whatever.'
+    unless $stroke ~~ Str;
+
+    # Stroke width
+    if $stroke-width.isa(Whatever) {
+        $stroke-width = 1.5;
+    }
+    die 'Them parameter stroke-width is expected to be a positive number or Whatever.'
+    unless $stroke-width ~~ Numeric && $stroke-width > 0;
+
+    # Fill
+    if $fill.isa(Whatever) {
+        $fill = 'rgb(100,100,100)';
+    }
+    die 'Them parameter fill is expected to be a string or Whatever.'
+    unless $fill ~~ Str;
+
+    # Background
+    if $background.isa(Whatever) {
+        $background = 'none';
+    }
+    die 'Them parameter background is expected to be a string or Whatever.'
+    unless $background ~~ Str;
+
+    #--------------------------------------------------------
+    # Random mandala points
+    #--------------------------------------------------------
+
+    my @randomScribble =
+            JavaScript::D3::Random::Scribble(
+            :$number-of-strokes,
+            :$ordered-stroke-points,
+            :$rotation-angle,
+            :$envelope-functions
+            );
+
+    #--------------------------------------------------------
+    # Finishing
+    #--------------------------------------------------------
+
+    my $jsCode = js-d3-list-line-plot(
+            @randomScribble,
             :$width, :$height,
             :$title,
             :$x-axis-label,
