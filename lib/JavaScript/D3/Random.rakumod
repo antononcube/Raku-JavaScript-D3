@@ -1,8 +1,8 @@
 use v6.d;
 
-unit module JavaScript::D3::RandomMandala;
+unit module JavaScript::D3::Random;
 
-our sub RandomMandala(
+our sub Mandala(
         UInt :$rotational-symmetry-order = 6,
         UInt :$number-of-seed-elements = 10,
         Bool :$symmetric-seed = True) {

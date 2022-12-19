@@ -2,7 +2,7 @@ use v6.d;
 
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
-use JavaScript::D3::RandomMandala;
+use JavaScript::D3::Random;
 use Hash::Merge;
 
 unit module JavaScript::D3;
@@ -314,7 +314,7 @@ multi js-d3-random-mandala(
     #--------------------------------------------------------
 
     my @randomMandala =
-            JavaScript::D3::RandomMandala::RandomMandala(
+            JavaScript::D3::Random::Mandala(
             :$rotational-symmetry-order
             :$number-of-seed-elements,
             :$symmetric-seed
