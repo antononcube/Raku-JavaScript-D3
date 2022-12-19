@@ -7,7 +7,7 @@ use JavaScript::D3;
 
 use Test;
 
-plan 3;
+plan 4;
 
 ## 1
 ok js-d3-random-mandala();
@@ -17,5 +17,8 @@ ok js-d3-random-mandala(fill=>'silver', stroke=>'white', rotational-symmetry-ord
 
 ## 3
 ok js-d3-random-mandala(fill=>'silver', stroke=>'white', rotational-symmetry-order=>7, width=>600, height=>600 );
+
+##4
+ok js-d3-random-mandala(:title(''), :background('white'), :height(600), :format('html'), :rotational-symmetry-order(3), :!grid-lines, :y-label(''), :x-label(''), :color('steelblue'), :width(800));
 
 done-testing
