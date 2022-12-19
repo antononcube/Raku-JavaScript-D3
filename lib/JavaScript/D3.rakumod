@@ -2,6 +2,7 @@ use v6.d;
 
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
+use JavaScript::D3::RandomMandala;
 
 unit module JavaScript::D3;
 
@@ -44,7 +45,7 @@ multi js-d3-list-plot($data,
                       :$margins = Whatever,
                       :$legends = Whatever,
                       Bool :$axes = True,
-                      Str :$format = 'jupyter' ) {
+                      Str :$format = 'jupyter') {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
             :$color,
@@ -73,7 +74,7 @@ multi js-d3-list-line-plot($data,
                            :$margins = Whatever,
                            :$legends = Whatever,
                            Bool :$axes = True,
-                           Str :$format = 'jupyter' ) {
+                           Str :$format = 'jupyter') {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
@@ -103,7 +104,7 @@ multi js-d3-date-list-plot($data,
                            :$margins = Whatever,
                            :$legends = Whatever,
                            Bool :$axes = True,
-                           Str :$format = 'jupyter' ) {
+                           Str :$format = 'jupyter') {
     return JavaScript::D3::Plots::DateListPlot($data,
             :$background,
             :$color,
@@ -132,7 +133,7 @@ multi js-d3-bar-chart($data,
                       :$grid-lines = False,
                       :$margins = Whatever,
                       :$legends = Whatever,
-                      Str :$format = 'jupyter' ) {
+                      Str :$format = 'jupyter') {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
             :$color,
@@ -158,7 +159,7 @@ multi js-d3-histogram($data,
                       Str :y-label(:$y-axis-label) = '',
                       :$grid-lines = False,
                       :$margins = Whatever,
-                      Str :$format = 'jupyter' ) {
+                      Str :$format = 'jupyter') {
     return JavaScript::D3::Charts::Histogram($data,
             :$background,
             :$color,
@@ -186,7 +187,7 @@ multi js-d3-bubble-chart($data,
                          :$margins = Whatever,
                          :$tooltip = Whatever,
                          :$legends = Whatever,
-                         Str :$format = 'jupyter' ) {
+                         Str :$format = 'jupyter') {
     return JavaScript::D3::Charts::BubbleChart($data,
             :$background,
             :$color,
@@ -215,7 +216,7 @@ multi js-d3-density2d-chart($data,
                             :$grid-lines = False,
                             :$margins = Whatever,
                             :$method = Whatever,
-                            Str :$format = 'jupyter' ) {
+                            Str :$format = 'jupyter') {
     return JavaScript::D3::Charts::Bin2DChart($data,
             :$background,
             :$color,
@@ -226,4 +227,101 @@ multi js-d3-density2d-chart($data,
             :$margins,
             :$method,
             :$format);
+}
+
+#============================================================
+#| Makes a random mandala.
+proto js-d3-random-mandala(|) is export {*}
+
+multi js-d3-random-mandala(
+        UInt :$rotational-symmetry-order = 6,
+        :$number-of-seed-elements is copy = Whatever,
+        :$connecting-function is copy = 'curveBasisClosed',
+        Bool :$symmetric-seed = True,
+        :$stroke is copy = Whatever,
+        :$stroke-width is copy = Whatever,
+        :$fill is copy = Whatever,
+        :$background is copy = Whatever,
+        UInt :$width= 300,
+        UInt :$height= 300,
+        :$margins = %(:top(0), :bottom(0), :left(0), :right(0)),
+        Bool :$axes = False,
+        Str :$format= "jupyter") {
+
+    #--------------------------------------------------------
+    # Process options
+    #--------------------------------------------------------
+    # Number of seed elements
+    if $number-of-seed-elements.isa(Whatever) {
+        $number-of-seed-elements = 10;
+    }
+    die 'The parameter number-of-seed-elements is expected to be a non-negative integer or Whatever.'
+    unless $number-of-seed-elements ~~ UInt;
+
+    # Connecting function
+    my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
+    if $connecting-function.isa(Whatever) {
+        $connecting-function = $d3Curves.pick;
+    }
+    die 'Them parameter connecting-function is expected to be a string or Whatever.'
+    unless $connecting-function ~~ Str;
+
+    # Stroke
+    if $stroke.isa(Whatever) {
+        $stroke = 'gray';
+    }
+    die 'Them parameter stroke is expected to be a string or Whatever.'
+    unless $stroke ~~ Str;
+
+    # Stroke width
+    if $stroke-width.isa(Whatever) {
+        $stroke-width = 1.5;
+    }
+    die 'Them parameter stroke-width is expected to be a positive number or Whatever.'
+    unless $stroke-width ~~ Numeric && $stroke-width > 0;
+
+    # Fill
+    if $fill.isa(Whatever) {
+        $fill = 'rgb(100,100,100)';
+    }
+    die 'Them parameter fill is expected to be a string or Whatever.'
+    unless $fill ~~ Str;
+
+    # Background
+    if $background.isa(Whatever) {
+        $background = 'none';
+    }
+    die 'Them parameter background is expected to be a string or Whatever.'
+    unless $background ~~ Str;
+
+    #--------------------------------------------------------
+    # Random mandala points
+    #--------------------------------------------------------
+
+    my @randomMandala =
+            JavaScript::D3::RandomMandala::RandomMandala(
+            :$rotational-symmetry-order
+            :$number-of-seed-elements,
+            :$symmetric-seed
+            );
+
+    #--------------------------------------------------------
+    # Finishing
+    #--------------------------------------------------------
+
+    my $jsCode = js-d3-list-line-plot(
+            @randomMandala,
+            :$width, :$height,
+            :$background,
+            :$margins,
+            :!legends,
+            :$axes,
+            :$format);
+
+    return $jsCode
+            .subst('.attr("stroke-width", 1.5)',
+                    '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
+            .subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
+            .subst('.y(function(d) { return y(+d.y); })',
+                    '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
 }

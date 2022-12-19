@@ -18,7 +18,8 @@
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
-    "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod"
+    "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
+    "JavaScript::D3::RandomMandala": "lib/JavaScript/D3/RandomMandala.rakumod"
   },
   "resources": [
     "Tests-for-JavaScript-D3.ipynb",

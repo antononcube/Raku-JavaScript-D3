@@ -1,0 +1,21 @@
+use v6.d;
+
+use lib '.';
+use lib './lib';
+
+use JavaScript::D3;
+
+use Test;
+
+plan 3;
+
+## 1
+ok js-d3-random-mandala();
+
+## 2
+ok js-d3-random-mandala(fill=>'silver', stroke=>'white', rotational-symmetry-order=>7);
+
+## 3
+ok js-d3-random-mandala(fill=>'silver', stroke=>'white', rotational-symmetry-order=>7, width=>600, height=>600 );
+
+done-testing
