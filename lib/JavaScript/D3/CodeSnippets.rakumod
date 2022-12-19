@@ -316,6 +316,7 @@ var lineFunc = d3.line()
 // Add the path using this helper function
 svg.append('path')
   .attr('d', lineFunc(data))
+  .attr("stroke-width", 1.5)
   .attr('stroke', $LINE_COLOR)
   .attr('fill', 'none');
 END
