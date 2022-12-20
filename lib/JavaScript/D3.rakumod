@@ -276,7 +276,7 @@ multi js-d3-random-mandala(
 
     # Number of seed elements
     if $number-of-seed-elements.isa(Whatever) {
-        $number-of-seed-elements = (5..10).pick;
+        $number-of-seed-elements = (5 .. 10).pick;
     }
     die 'The parameter number-of-seed-elements is expected to be a positive integer or Whatever.'
     unless $number-of-seed-elements ~~ Int && $number-of-seed-elements > 0;
@@ -286,7 +286,8 @@ multi js-d3-random-mandala(
     if $connecting-function.isa(Whatever) {
         $connecting-function = $d3Curves.pick;
     }
-    die 'Them parameter connecting-function is expected to be Whatever or a string, one of ' ~ $d3Curves.join(', ') ~ '.'
+    die 'Them parameter connecting-function is expected to be Whatever or a string, one of ' ~ $d3Curves
+            .join(', ') ~ '.'
     unless $connecting-function ~~ Str && $connecting-function ∈ $d3Curves;
 
     # Stroke
@@ -378,6 +379,7 @@ multi js-d3-random-scribble(
         :$stroke-width is copy = Whatever,
         :$fill is copy = Whatever,
         :$background is copy = Whatever,
+        :$gradient-colors is copy = False,
         UInt :$width= 300,
         UInt :$height= 300,
         Str :plot-label(:$title) = '',
@@ -463,10 +465,35 @@ multi js-d3-random-scribble(
             :$axes,
             :$format);
 
-    return $jsCode
+    $jsCode = $jsCode
             .subst('.attr("stroke-width", 1.5)',
                     '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
             .subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
             .subst('.y(function(d) { return y(+d.y); })',
                     '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
+
+    $gradient-colors = do given $gradient-colors {
+        when Str { [$gradient-colors, 'gray'] }
+        when $_ ~~ List && $_.elems == 1 { [$gradient-colors[0], 'gray'] }
+        when $_ ~~ List && $_.elems == 2 { $gradient-colors }
+        when Whatever { <blue red> }
+        when $_ ~~ Bool && $_ { <blue red> }
+        when $_ ~~ Bool && !$_ { Empty }
+        default {
+            note 'Do not know how to process the given gradient-colors.';
+            <blue red>
+        }
+    }
+
+    if $gradient-colors ~~ List && $gradient-colors.elems == 2 {
+        $jsCode = $jsCode
+                .subst(
+                "// Add the path using this helper function",
+                        JavaScript::D3::CodeSnippets::GetLinearGradientCode(
+                        color0 => $gradient-colors[0],
+                                color100 => $gradient-colors[1]) ~ "\n" ~ '// Add the path using this helper function')
+                .subst(/ '.attr(\'stroke\'' .*?  \n /, '.attr("stroke", "url(#line-gradient)" )')
+    }
+
+    return $jsCode;
 }

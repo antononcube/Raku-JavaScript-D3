@@ -327,7 +327,6 @@ svg.selectAll(".line")
             .y(function(d) { return y(+d.y); })
             (d[1])
         })
-
 END
 
 #============================================================
@@ -395,6 +394,44 @@ our sub GetPlotDateDataScalesAndAxes() {
     return $jsPlotDateDataAndScales ~ "\n" ~ $jsPlotDateAxes;
 }
 
+#============================================================
+# Linear Gradient code snippets
+#============================================================
+
+my $jsLinearGradient = q:to/END/;
+// Set the gradient
+svg.append("linearGradient")
+  .attr("id", "line-gradient")
+  .attr("gradientUnits", "userSpaceOnUse")
+  .attr("x1", $LINEAR_GRADIENT_MIN_X)
+  .attr("y1", $LINEAR_GRADIENT_MIN_Y)
+  .attr("x2", $LINEAR_GRADIENT_MAX_X)
+  .attr("y2", $LINEAR_GRADIENT_MAX_Y)
+  .selectAll("stop")
+    .data([
+      {offset: "0%", color: "$LINEAR_GRADIENT_COLOR_0"},
+      {offset: "100%", color: "$LINEAR_GRADIENT_COLOR_100"}
+    ])
+  .enter().append("stop")
+    .attr("offset", function(d) { return d.offset; })
+    .attr("stop-color", function(d) { return d.color; });
+END
+
+#============================================================
+# Linear Gradient accessors
+#============================================================
+our sub GetLinearGradientCode(:$minX='x(xMin)', :$maxX='x(xMax)',
+                              :$minY='y(yMin)', :$maxY='y(yMax)',
+                              :$color0 = 'blue', :$color100 = 'red') {
+    return
+            $jsLinearGradient
+            .subst('$LINEAR_GRADIENT_MIN_X', $minX)
+            .subst('$LINEAR_GRADIENT_MAX_X', $maxX)
+            .subst('$LINEAR_GRADIENT_MIN_Y', $minY)
+            .subst('$LINEAR_GRADIENT_MAX_Y', $maxY)
+            .subst('$LINEAR_GRADIENT_COLOR_0', $color0)
+            .subst('$LINEAR_GRADIENT_COLOR_100', $color100);
+}
 
 #============================================================
 # BarChart code snippets
