@@ -132,44 +132,27 @@ var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
 
 // X scale and Axis
 var x = d3.scaleLinear()
-    .domain([xMin, xMax])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([0, width]);           // This is the corresponding value I want in Pixel
+    .domain([xMin, xMax])
+    .range([0, width]);
 
 // Y scale and Axis
 var y = d3.scaleLinear()
-    .domain([yMin, yMax])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([height, 0]);          // This is the corresponding value I want in Pixel
+    .domain([yMin, yMax])
+    .range([height, 0]);
 END
 
-my $jsPlotDataScalesAndAxes = q:to/END/;
-// Obtain data
-var data = $DATA
-
-var xMin = Math.min.apply(Math, data.map(function(o) { return o.x; }))
-var xMax = Math.max.apply(Math, data.map(function(o) { return o.x; }))
-
-var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
-var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
-
-// X scale and Axis
-var x = d3.scaleLinear()
-    .domain([xMin, xMax])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([0, width]);           // This is the corresponding value I want in Pixel
-
+my $jsPlotDataAxes = q:to/END/;
 svg
   .append('g')
   .attr("transform", "translate(0," + height + ")")
   .call(d3.axisBottom(x))
 
-// Y scale and Axis
-var y = d3.scaleLinear()
-    .domain([yMin, yMax])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([height, 0]);          // This is the corresponding value I want in Pixel
-
 svg
   .append('g')
   .call(d3.axisLeft(y));
 END
+
+my $jsPlotDataScalesAndAxes = $jsPlotDataAndScales ~ "\n" ~ $jsPlotDataAxes;
 
 # See https://d3-graph-gallery.com/graph/custom_legend.html
 my $jsGroupsLegend = q:to/END/;
@@ -217,16 +200,16 @@ END
 #============================================================
 
 our sub GetPlotStartingCode(Str $format = 'jupyter') {
-    return $format.lc eq 'jupyter' ?? $jsPlotStarting !! $jsPlotStartingHTML;
+    return $format.lc ∈ <jupyter script> ?? $jsPlotStarting !! $jsPlotStartingHTML;
 }
 
 our sub GetPlotEndingCode(Str $format = 'jupyter') {
-    return $format.lc eq 'jupyter' ?? $jsPlotEnding !! $jsPlotEndingHTML;
+    return $format.lc ∈ <jupyter script> ?? $jsPlotEnding !! $jsPlotEndingHTML;
 }
 
 our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
     return
-            $format.lc eq 'jupyter' ??
+            $format.lc ∈ <jupyter script> ??
             $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
@@ -383,15 +366,17 @@ var x = d3.scaleTime()
       .domain(d3.extent(data, function(d) { return d.x; }))
       .range([ 0, width ]);
 
-svg
-  .append('g')
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x))
-
 // Y scale and Axis
 var y = d3.scaleLinear()
     .domain([yMin, yMax])
     .range([height, 0]);
+END
+
+my $jsPlotDateAxes = q:to/END/;
+svg
+  .append('g')
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x))
 
 svg
   .append('g')
@@ -404,6 +389,10 @@ END
 
 our sub GetPlotDateDataAndScales() {
     return $jsPlotDateDataAndScales;
+}
+
+our sub GetPlotDateDataScalesAndAxes() {
+    return $jsPlotDateDataAndScales ~ "\n" ~ $jsPlotDateAxes;
 }
 
 

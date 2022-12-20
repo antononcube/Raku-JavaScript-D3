@@ -47,7 +47,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Bool :$axes = True,
                           Str :$format = 'jupyter',
                           Str :$singleDatasetCode!,
-                          Str :$multiDatasetCode!
+                          Str :$multiDatasetCode!,
+                          Str :$dataScalesAndAxesCode!,
+                          Str :$dataAndScalesCode!
                           ) {
     my $jsData = to-json(@data, :!pretty);
 
@@ -73,9 +75,17 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
-                         $jsPlotMiddle,
-                         JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+    #    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
+    #                         $jsPlotMiddle,
+    #                         JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+
+    # Stencil
+    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
+                      JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+                      $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
+                      $jsPlotMiddle,
+                      JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)]
+            .join("\n");
 
     # Concrete parameters
     my $res = $jsScatterPlot
@@ -111,7 +121,9 @@ our multi ListPlot($data, *%args) {
             $data,
             |%args,
             singleDatasetCode => JavaScript::D3::CodeSnippets::GetScatterPlotPart(),
-            multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiScatterPlotPart());
+            multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiScatterPlotPart(),
+            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(),
+            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode());
 }
 
 #============================================================
@@ -125,7 +137,9 @@ our multi ListLinePlot($data, *%args) {
             $data,
             |%args,
             singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
-            multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart());
+            multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
+            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(),
+            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode());
 }
 
 #============================================================
@@ -164,56 +178,26 @@ our multi DateListPlot($data where is-str-time-series($data),
                        Bool :$axes = True,
                        Str :$format = 'jupyter'
                        ) {
+    my $res =
+            ListPlotGeneric($data,
+                    :$background,
+                    :$color,
+                    :$width,
+                    :$height,
+                    :$title,
+                    :$x-axis-label,
+                    :$y-axis-label,
+                    :$grid-lines,
+                    :$margins,
+                    :$legends,
+                    :$axes,
+                    format => 'script',
+                    singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
+                    multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
+                    dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(),
+                    dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales());
 
-    # Grid lines
-    $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
-
-    # Margins
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
-
-    # Groups
-    my Bool $hasGroups = [&&] $data.map({ so $_<group> });
-
-    # Select code fragment to splice in
-    my $jsPlotMiddle =
-            $hasGroups ?? JavaScript::D3::CodeSnippets::GetMultiPathPlotPart() !!
-            JavaScript::D3::CodeSnippets::GetPathPlotPart();
-
-    # Chose to add legend code fragment or not
-    my $maxGroupChars = $hasGroups ?? $data.map(*<group>).unique>>.chars.max !! 'all'.chars;
-    given $legends {
-        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
-            $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
-            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode();
-        }
-    }
-
-    # Data dump
-    my $jsData = to-json($data, :!pretty);
-
-    # Stencil
-    my $jsLinePlot = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
-                      JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                      JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales),
-                      $jsPlotMiddle,
-                      JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)]
-            .join("\n");
-
-    # Concrete parameters
-    my $res = $jsLinePlot
-            .subst('$DATA', $jsData)
-            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$LINE_COLOR', '"' ~ $color ~ '"')
-            .subst(:g, '$WIDTH', $width.Str)
-            .subst(:g, '$HEIGHT', $height.Str)
-            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
-            .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
-            .subst(:g, '$LEGEND_Y_POS', '0')
-            .subst(:g, '$LEGEND_Y_GAP', '25');
+    $res = $res.subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"');
 
     if $format.lc eq 'html' {
         $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
