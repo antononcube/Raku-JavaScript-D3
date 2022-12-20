@@ -528,8 +528,8 @@ my $jsHistogramPart = q:to/END/;
 // Obtain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+var valueMin = Math.min.apply(Math, data)
+var valueMax = Math.max.apply(Math, data)
 
 // X axis: scale and draw:
 var x = d3.scaleLinear()
@@ -662,7 +662,7 @@ const showTooltip = function(event, d) {
       .duration(200)
     tooltip
       .style("opacity", 1)
-      .html("Group: " + d.group + '<br/>value: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString())
+      .html("Group: " + d.group + '<br/>z: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString())
       .style("left", (event.x)/2 + "px")
       .style("top", (event.y)/2+10 + "px")
   }
