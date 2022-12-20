@@ -245,7 +245,7 @@ multi js-d3-random-mandala($data, *%args) {
 }
 
 multi js-d3-random-mandala(
-        :$rotational-symmetry-order = 6,
+        :$rotational-symmetry-order is copy = 6,
         :$number-of-seed-elements is copy = Whatever,
         :$connecting-function is copy = 'curveBasis',
         Bool :$symmetric-seed = True,
