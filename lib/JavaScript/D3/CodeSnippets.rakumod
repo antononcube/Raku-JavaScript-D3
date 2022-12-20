@@ -120,7 +120,7 @@ if ( yAxisLabel.length > 0 ) {
 }
 END
 
-my $jsPlotData = q:to/END/;
+my $jsPlotDataAndScales = q:to/END/;
 // Obtain data
 var data = $DATA
 
@@ -141,7 +141,7 @@ var y = d3.scaleLinear()
     .range([height, 0]);          // This is the corresponding value I want in Pixel
 END
 
-my $jsPlotDataAndScales = q:to/END/;
+my $jsPlotDataScalesAndAxes = q:to/END/;
 // Obtain data
 var data = $DATA
 
@@ -231,10 +231,10 @@ our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
 }
 
 our sub GetPlotDataAndScalesCode() {
-    return $jsPlotData;
+    return $jsPlotDataAndScales;
 }
 
-our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataAndScales) {
+our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataScalesAndAxes) {
     my $res = $codeFragment;
     if $nXTicks > 0 {
         $res = $res.subst('.call(d3.axisBottom(x))', ".call(d3.axisBottom(x).ticks($nXTicks).tickSizeInner(-height))");
