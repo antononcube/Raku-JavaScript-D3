@@ -212,7 +212,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             JavaScript::D3::CodeSnippets::GetTooltipMultiBubbleChartPart()
         }
         when $_ ~~ Bool && !$_ && $hasGroups {
-            $JavaScript::D3::CodeSnippets::MultiBubbleChartPart()
+            JavaScript::D3::CodeSnippets::MultiBubbleChartPart()
         }
         when $_ ~~ Bool && $_ && !$hasGroups {
             @data = @data.map({ $_.push(group => 'All') });
