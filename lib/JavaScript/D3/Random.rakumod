@@ -7,7 +7,7 @@ unit module JavaScript::D3::Random;
 #============================================================
 
 our sub Mandala(
-        UInt :$rotational-symmetry-order = 6,
+        Numeric :$rotational-symmetry-order = 6,
         UInt :$number-of-seed-elements = 10,
         Bool :$symmetric-seed = True) {
 

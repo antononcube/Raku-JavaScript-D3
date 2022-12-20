@@ -245,7 +245,7 @@ multi js-d3-random-mandala($data, *%args) {
 }
 
 multi js-d3-random-mandala(
-        Int :$rotational-symmetry-order = 6,
+        :$rotational-symmetry-order = 6,
         :$number-of-seed-elements is copy = Whatever,
         :$connecting-function is copy = 'curveBasis',
         Bool :$symmetric-seed = True,
@@ -267,8 +267,16 @@ multi js-d3-random-mandala(
     # Process options
     #--------------------------------------------------------
     # Number of seed elements
+    if $rotational-symmetry-order.isa(Whatever) {
+        $rotational-symmetry-order = [4, 5, 6, 7, 9, 12].pick;
+    }
+    die 'The parameter rotational-symmetry-order is expected to be a positive number or Whatever.'
+    unless $rotational-symmetry-order ~~ Numeric && $rotational-symmetry-order > 0;
+
+
+    # Number of seed elements
     if $number-of-seed-elements.isa(Whatever) {
-        $number-of-seed-elements = 10;
+        $number-of-seed-elements = (5..10).pick;
     }
     die 'The parameter number-of-seed-elements is expected to be a positive integer or Whatever.'
     unless $number-of-seed-elements ~~ Int && $number-of-seed-elements > 0;
@@ -278,8 +286,8 @@ multi js-d3-random-mandala(
     if $connecting-function.isa(Whatever) {
         $connecting-function = $d3Curves.pick;
     }
-    die 'Them parameter connecting-function is expected to be a string or Whatever.'
-    unless $connecting-function ~~ Str;
+    die 'Them parameter connecting-function is expected to be Whatever or a string, one of ' ~ $d3Curves.join(', ') ~ '.'
+    unless $connecting-function ~~ Str && $connecting-function ∈ $d3Curves;
 
     # Stroke
     if $stroke.isa(Whatever) {
