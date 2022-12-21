@@ -46,7 +46,7 @@ multi sub MAIN(Str $cmd, #= Graphics command.
     :$grid-lines,
     :$margins,
     :$format);
-    say $res;
+    say $res.subst('<body>', "<body style=\"background-color:$background;\">");
 }
 
 #| Generates HTML document code with D3.js plots or charts by splitting a string of data points.
