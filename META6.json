@@ -23,7 +23,9 @@
   },
   "resources": [
     "Tests-for-JavaScript-D3.ipynb",
-    "The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb"
+    "The-Raku-ju-hijack-hack-for-D3.js-demo.ipynb",
+    "RandomScribbles.ipynb",
+    "RandomMandalas.ipynb"
   ],
   "license": "Artistic-2.0",
   "tags": [
