@@ -145,7 +145,13 @@ js-d3-graphics bubble-chart "1,1,10 2,2,12 33,41,15 5,3,30" -t="Nice plot" --x-l
 Here is an example that produces a random mandala:
 
 ```shell
-js-d3-graphics random-mandala 7 --margins=100 -h=1000 -w=1000 --color='rgb(120,120,120)' --background='white' -t="Random mandala" > out.html && open out.html
+js-d3-graphics random-mandala 1 --margins=100 -h=1000 -w=1000 --color='rgb(120,120,120)' --background='white' -t="Random mandala" > out.html && open out.html
+```
+
+Here is an example that produces three random scribbles:
+
+```shell
+js-d3-graphics random-scribble 3 --margins=10 -h=200 -w=200 --color='blue' --background='white' > out.html && open out.html
 ```
 
 --------
@@ -233,9 +239,15 @@ User specified or automatic:
 
 1. [X] Random Mandala, single plot
 
-2. [ ] Random mandalas table/array
+2. [X] Random mandalas row
 
-3. [ ] Random Scribble, single plot 
+3. [ ] Random mandalas table/array
+   
+   - (I am not sure I will do this.)
+   
+4. [X] Random Scribble, single plot 
+
+5. [X] Random Scribbles row 
 
 --------
 
