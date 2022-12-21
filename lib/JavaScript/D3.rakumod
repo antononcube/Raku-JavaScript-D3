@@ -231,17 +231,36 @@ multi js-d3-density2d-chart($data,
 }
 
 #============================================================
+#| Replicate parameter
+sub replicate-to-list(Str $param, $element-type, @whatever-to-roll, $count, $value) {
+
+    my $res = do given $value {
+        when Whatever { @whatever-to-roll.roll($count).Array }
+        when Numeric { ($_ xx $count).Array }
+        when List { ($_ xx $count).flat[^$count].Array }
+        when Range { ($_.List xx $count).flat[^$count].Array }
+        default { $_ }
+    }
+
+    if ! $res ~~ Positional && $res.all ~~ $element-type {
+        die "The parameter $param is expected to be {$element-type.raku}, a list of {$element-type.raku}, or Whatever."
+    }
+
+    return [|$res];
+}
+
+#============================================================
 #| Makes a random mandala.
 proto js-d3-random-mandala(|) is export {*}
 
 multi js-d3-random-mandala($data, *%args) {
-    my $rso = do given $data {
+    my $count = do given $data {
         when Positional { $data[0] }
         when UInt { $data[0] }
-        default { 6 }
+        default { 1 }
     };
 
-    return js-d3-random-mandala(|merge-hash(%(rotational-symmetry-order => $rso), %args));
+    return js-d3-random-mandala(|merge-hash(%(:$count), %args));
 }
 
 multi js-d3-random-mandala(
@@ -261,8 +280,8 @@ multi js-d3-random-mandala(
         Str :y-label(:$y-axis-label) = '',
         :$grid-lines = False,
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
-        UInt :$count = 1,
         Bool :$axes = False,
+        UInt :$count = 1,
         Str :$format= "jupyter") {
 
     #--------------------------------------------------------
@@ -273,23 +292,20 @@ multi js-d3-random-mandala(
     if $radius.isa(Whatever) {
         $radius = 1;
     }
-    die 'The parameter rotational-symmetry-order is expected to be a positive number or Whatever.'
+    die 'The parameter radius is expected to be a positive number or Whatever.'
     unless $radius ~~ Numeric && $radius > 0;
 
-    # Rotational symmetric order
-    if $rotational-symmetry-order.isa(Whatever) {
-        $rotational-symmetry-order = [4, 5, 6, 7, 9, 12].pick;
-    }
-    die 'The parameter rotational-symmetry-order is expected to be a positive number or Whatever.'
-    unless $rotational-symmetry-order ~~ Numeric && $rotational-symmetry-order > 0;
+    # Rotational symmetry order
+    $rotational-symmetry-order = replicate-to-list('rotational-symmetry-order', Numeric, [4, 5, 6, 7, 9, 12], $count, $rotational-symmetry-order);
 
+    die 'The parameter rotational-symmetry-order is expected to be a positive number, a list of positive numbers, or Whatever.'
+    unless $rotational-symmetry-order.all > 0;
 
     # Number of seed elements
-    if $number-of-seed-elements.isa(Whatever) {
-        $number-of-seed-elements = (5 .. 10).pick;
-    }
-    die 'The parameter number-of-seed-elements is expected to be a positive integer or Whatever.'
-    unless $number-of-seed-elements ~~ Int && $number-of-seed-elements > 0;
+    $number-of-seed-elements = replicate-to-list('number-of-seed-elements', Int, (5 ... 10), $count, $number-of-seed-elements);
+
+    die 'The parameter number-of-seed-elements is expected to be a positive integer, a list of positive integers, or Whatever.'
+    unless $rotational-symmetry-order.all > 0;
 
     # Connecting function
     my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
@@ -338,8 +354,8 @@ multi js-d3-random-mandala(
         my @randomMandala =
                 JavaScript::D3::Random::Mandala(
                 :$radius,
-                :$rotational-symmetry-order
-                :$number-of-seed-elements,
+                rotational-symmetry-order => $rotational-symmetry-order[$i],
+                number-of-seed-elements => $number-of-seed-elements[$i],
                 :$symmetric-seed
                 );
 
@@ -405,29 +421,17 @@ multi js-d3-random-scribble(
         :$grid-lines = False,
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
         Bool :$axes = False,
+        UInt :$count = 1,
         Str :$format= "jupyter") {
 
     #--------------------------------------------------------
     # Process options
     #--------------------------------------------------------
     # Number of seed elements
-    $number-of-strokes = do given $number-of-strokes {
-        when Whatever { [120,] }
-        when Numeric { [$_,] }
-        default { $_ }
-    }
-    die 'The parameter number-of-strokes is expected to be a positive integer, a list of positive integers, or Whatever.'
-    unless $number-of-strokes ~~ Positional && $number-of-strokes.all ~~ Int && $number-of-strokes.all > 0;
+    $number-of-strokes = replicate-to-list('number-of-strokes', UInt, [120, 80], $count, $number-of-strokes);
 
     # Rotation angle
-    $rotation-angle = do given $rotation-angle {
-        when Whatever { [0, π/3, π/4, π/6].roll($number-of-strokes.elems).List }
-        when Numeric { ($_ xx $number-of-strokes.elems).List }
-        when List { ($_ xx $number-of-strokes.elems)[^$number-of-strokes.elems].List }
-        default { $_ }
-    }
-    die 'The parameter rotation-angle is expected to be number, a list of numbers, or Whatever.'
-    unless $rotation-angle ~~ Positional && $rotation-angle.all ~~ Numeric;
+    $rotation-angle = replicate-to-list('rotation-angle', Numeric, [0, π/3, π/4, π/6],  $count, $rotation-angle);
 
     # Connecting function
     my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
