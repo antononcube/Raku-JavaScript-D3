@@ -75,16 +75,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    #    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
-    #                         $jsPlotMiddle,
-    #                         JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
-
-    # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
-                      JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
                       $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
-                      $jsPlotMiddle,
-                      JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)]
+                      $jsPlotMiddle]
             .join("\n");
 
     # Concrete parameters
@@ -103,11 +96,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }
 
 #============================================================
@@ -191,7 +180,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                     :$margins,
                     :$legends,
                     :$axes,
-                    format => 'script',
+                    format => 'asis',
                     singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
                     multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
                     dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(),
@@ -199,9 +188,5 @@ our multi DateListPlot($data where is-str-time-series($data),
 
     $res = $res.subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"');
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }

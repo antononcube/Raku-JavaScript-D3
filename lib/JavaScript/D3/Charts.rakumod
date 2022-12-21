@@ -74,10 +74,8 @@ our multi BarChart(@data where @data.all ~~ Map,
     }
 
     # Stencil code
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                   $jsPlotMiddle,
-                   JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+                   $jsPlotMiddle].join("\n");
 
     # Concrete values
     my $res = $jsChart
@@ -94,11 +92,7 @@ our multi BarChart(@data where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }
 
 #============================================================
@@ -133,10 +127,8 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
     # Stencil code
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart()),
-                   JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+                   JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart())].join("\n");
 
     # Concrete values
     my $res = $jsChart
@@ -150,11 +142,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }
 
 #============================================================
@@ -231,8 +219,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
     }
 
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines),
-                   $jsChartMiddle,
-                   JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+                   $jsChartMiddle].join("\n");
 
     my $jsData = to-json(@data, :!pretty);
 
@@ -251,11 +238,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }
 
 #============================================================
@@ -298,8 +281,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
     unless $method ~~ Str && $method ∈ <rect rectangle rectbin hex hexagon hexbin>;
 
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format),
-                   $method eq 'rectbin' ?? JavaScript::D3::CodeSnippets::GetRectbinChartPart() !! JavaScript::D3::CodeSnippets::GetHexbinChartPart(),
-                   JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+                   $method eq 'rectbin' ?? JavaScript::D3::CodeSnippets::GetRectbinChartPart() !! JavaScript::D3::CodeSnippets::GetHexbinChartPart()].join("\n");
 
     my $res = $jsChart
             .subst('$DATA', $jsData)
@@ -312,9 +294,5 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
-    }
-
-    return $res;
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
 }

@@ -44,6 +44,29 @@ our sub ProcessGridLines($gridLines is copy) {
 }
 
 #============================================================
+# Wrapping
+#============================================================
+# The core JavaScript code is wrapped with HTML or Jupyter cell pre- and post code.
+
+our sub WrapIt(Str $code, Str :$format='jupyter', Str :$div-id = 'my_dataviz') {
+
+    if $format eq 'asis' {
+        return $code
+    }
+
+    my $res =
+            [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
+             $code,
+             JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
+
+    if $format.lc eq 'html' {
+        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+    }
+
+    return $res;
+}
+
+#============================================================
 # JavaScript plot and chart template parts
 #============================================================
 my $jsPlotStartingHTML = q:to/END/;
@@ -200,16 +223,16 @@ END
 #============================================================
 
 our sub GetPlotStartingCode(Str $format = 'jupyter') {
-    return $format.lc ∈ <jupyter script> ?? $jsPlotStarting !! $jsPlotStartingHTML;
+    return $format.lc ∈ <jupyter asis> ?? $jsPlotStarting !! $jsPlotStartingHTML;
 }
 
 our sub GetPlotEndingCode(Str $format = 'jupyter') {
-    return $format.lc ∈ <jupyter script> ?? $jsPlotEnding !! $jsPlotEndingHTML;
+    return $format.lc ∈ <jupyter asis> ?? $jsPlotEnding !! $jsPlotEndingHTML;
 }
 
 our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
     return
-            $format.lc ∈ <jupyter script> ??
+            $format.lc ∈ <jupyter asis> ??
             $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
@@ -229,8 +252,7 @@ our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $
 }
 
 our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0, Bool :$axes = True) {
-    return [GetPlotStartingCode($format),
-            GetPlotMarginsAndLabelsCode($format),
+    return [GetPlotMarginsAndLabelsCode($format),
             $axes ?? GetPlotDataScalesAndAxesCode($nXTicks, $nYTicks) !! GetPlotDataAndScalesCode()].join("\n");
 }
 
