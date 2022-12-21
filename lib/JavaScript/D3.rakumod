@@ -245,6 +245,7 @@ multi js-d3-random-mandala($data, *%args) {
 }
 
 multi js-d3-random-mandala(
+        :$radius is copy = 1,
         :$rotational-symmetry-order is copy = 6,
         :$number-of-seed-elements is copy = Whatever,
         :$connecting-function is copy = 'curveBasis',
@@ -259,14 +260,22 @@ multi js-d3-random-mandala(
         Str :x-label(:$x-axis-label) = '',
         Str :y-label(:$y-axis-label) = '',
         :$grid-lines = False,
-        :$margins = %(:top(0), :bottom(0), :left(0), :right(0)),
+        :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
         Bool :$axes = False,
         Str :$format= "jupyter") {
 
     #--------------------------------------------------------
     # Process options
     #--------------------------------------------------------
-    # Number of seed elements
+
+    # Radius
+    if $radius.isa(Whatever) {
+        $radius = 1;
+    }
+    die 'The parameter rotational-symmetry-order is expected to be a positive number or Whatever.'
+    unless $radius ~~ Numeric && $radius > 0;
+
+    # Rotational symmetric order
     if $rotational-symmetry-order.isa(Whatever) {
         $rotational-symmetry-order = [4, 5, 6, 7, 9, 12].pick;
     }
@@ -324,6 +333,7 @@ multi js-d3-random-mandala(
 
     my @randomMandala =
             JavaScript::D3::Random::Mandala(
+            :$radius,
             :$rotational-symmetry-order
             :$number-of-seed-elements,
             :$symmetric-seed
