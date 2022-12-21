@@ -261,6 +261,7 @@ multi js-d3-random-mandala(
         Str :y-label(:$y-axis-label) = '',
         :$grid-lines = False,
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
+        UInt :$count = 1,
         Bool :$axes = False,
         Str :$format= "jupyter") {
 
@@ -328,40 +329,46 @@ multi js-d3-random-mandala(
     unless $background ~~ Str;
 
     #--------------------------------------------------------
-    # Random mandala points
+    # Random mandala
     #--------------------------------------------------------
+    my $jsCode = '';
+    for ^$count -> $i {
 
-    my @randomMandala =
-            JavaScript::D3::Random::Mandala(
-            :$radius,
-            :$rotational-symmetry-order
-            :$number-of-seed-elements,
-            :$symmetric-seed
-            );
+        # Random mandala points
+        my @randomMandala =
+                JavaScript::D3::Random::Mandala(
+                :$radius,
+                :$rotational-symmetry-order
+                :$number-of-seed-elements,
+                :$symmetric-seed
+                );
+
+        $jsCode ~= js-d3-list-line-plot(
+                @randomMandala,
+                :$width, :$height,
+                :$title,
+                :$x-axis-label,
+                :$y-axis-label,
+                :$background,
+                :$margins,
+                :$grid-lines,
+                :!legends,
+                :$axes,
+                format => 'asis');
+    }
 
     #--------------------------------------------------------
     # Finishing
     #--------------------------------------------------------
 
-    my $jsCode = js-d3-list-line-plot(
-            @randomMandala,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label,
-            :$y-axis-label,
-            :$background,
-            :$margins,
-            :$grid-lines,
-            :!legends,
-            :$axes,
-            :$format);
-
-    return $jsCode
-            .subst('.attr("stroke-width", 1.5)',
+    $jsCode = $jsCode
+            .subst(:g, '.attr("stroke-width", 1.5)',
                     '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
-            .subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
-            .subst('.y(function(d) { return y(+d.y); })',
+            .subst(:g, '.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
+            .subst(:g, '.y(function(d) { return y(+d.y); })',
                     '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
+
+    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format);
 }
 
 
@@ -380,9 +387,9 @@ multi js-d3-random-scribble($data, *%args) {
 }
 
 multi js-d3-random-scribble(
-        UInt :$number-of-strokes = 120,
+        :$number-of-strokes is copy = 120,
         Bool :$ordered-stroke-points = True,
-        :$rotation-angle = Whatever,
+        :$rotation-angle is copy = Whatever,
         :$envelope-functions = Whatever,
         :$connecting-function is copy = 'curveBasis',
         :color(:$stroke) is copy = Whatever,
@@ -396,7 +403,7 @@ multi js-d3-random-scribble(
         Str :x-label(:$x-axis-label) = '',
         Str :y-label(:$y-axis-label) = '',
         :$grid-lines = False,
-        :$margins = %(:top(0), :bottom(0), :left(0), :right(0)),
+        :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
         Bool :$axes = False,
         Str :$format= "jupyter") {
 
@@ -404,11 +411,23 @@ multi js-d3-random-scribble(
     # Process options
     #--------------------------------------------------------
     # Number of seed elements
-    if $number-of-strokes.isa(Whatever) {
-        $number-of-strokes = 120;
+    $number-of-strokes = do given $number-of-strokes {
+        when Whatever { [120,] }
+        when Numeric { [$_,] }
+        default { $_ }
     }
-    die 'The parameter number-of-strokes is expected to be a positive integer or Whatever.'
-    unless $number-of-strokes ~~ UInt && $number-of-strokes > 0;
+    die 'The parameter number-of-strokes is expected to be a positive integer, a list of positive integers, or Whatever.'
+    unless $number-of-strokes ~~ Positional && $number-of-strokes.all ~~ Int && $number-of-strokes.all > 0;
+
+    # Rotation angle
+    $rotation-angle = do given $rotation-angle {
+        when Whatever { [0, π/3, π/4, π/6].roll($number-of-strokes.elems).List }
+        when Numeric { ($_ xx $number-of-strokes.elems).List }
+        when List { ($_ xx $number-of-strokes.elems)[^$number-of-strokes.elems].List }
+        default { $_ }
+    }
+    die 'The parameter rotation-angle is expected to be number, a list of numbers, or Whatever.'
+    unless $rotation-angle ~~ Positional && $rotation-angle.all ~~ Numeric;
 
     # Connecting function
     my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
@@ -447,39 +466,43 @@ multi js-d3-random-scribble(
     unless $background ~~ Str;
 
     #--------------------------------------------------------
-    # Random mandala points
+    # Random Scribble
     #--------------------------------------------------------
 
-    my @randomScribble =
-            JavaScript::D3::Random::Scribble(
-            :$number-of-strokes,
-            :$ordered-stroke-points,
-            :$rotation-angle,
-            :$envelope-functions
-            );
+    my $jsCode = '';
+    for ^$number-of-strokes -> $i {
+
+        my @randomScribble =
+                JavaScript::D3::Random::Scribble(
+                number-of-strokes => $number-of-strokes[$i],
+                rotation-angle => $rotation-angle[$i],
+                :$ordered-stroke-points,
+                :$envelope-functions
+                );
+
+        $jsCode ~= js-d3-list-line-plot(
+                @randomScribble,
+                :$width, :$height,
+                :$title,
+                :$x-axis-label,
+                :$y-axis-label,
+                :$background,
+                :$margins,
+                :$grid-lines,
+                :!legends,
+                :$axes,
+                format => 'asis');
+    }
 
     #--------------------------------------------------------
     # Finishing
     #--------------------------------------------------------
 
-    my $jsCode = js-d3-list-line-plot(
-            @randomScribble,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label,
-            :$y-axis-label,
-            :$background,
-            :$margins,
-            :$grid-lines,
-            :!legends,
-            :$axes,
-            :$format);
-
     $jsCode = $jsCode
-            .subst('.attr("stroke-width", 1.5)',
+            .subst(:g, '.attr("stroke-width", 1.5)',
                     '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
-            .subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
-            .subst('.y(function(d) { return y(+d.y); })',
+            .subst(:g, '.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
+            .subst(:g, '.y(function(d) { return y(+d.y); })',
                     '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
 
     $gradient-colors = do given $gradient-colors {
@@ -497,13 +520,13 @@ multi js-d3-random-scribble(
 
     if $gradient-colors ~~ List && $gradient-colors.elems == 2 {
         $jsCode = $jsCode
-                .subst(
+                .subst(:g,
                 "// Add the path using this helper function",
                         JavaScript::D3::CodeSnippets::GetLinearGradientCode(
                         color0 => $gradient-colors[0],
                                 color100 => $gradient-colors[1]) ~ "\n" ~ '// Add the path using this helper function')
-                .subst(/ '.attr(\'stroke\'' .*?  \n /, '.attr("stroke", "url(#line-gradient)" )')
+                .subst(:g, / '.attr(\'stroke\'' .*?  \n /, '.attr("stroke", "url(#line-gradient)" )')
     }
 
-    return $jsCode;
+    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format);
 }
