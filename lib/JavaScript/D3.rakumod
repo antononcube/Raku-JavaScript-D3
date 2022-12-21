@@ -393,13 +393,13 @@ multi js-d3-random-mandala(
 proto js-d3-random-scribble(|) is export {*}
 
 multi js-d3-random-scribble($data, *%args) {
-    my $ns = do given $data {
+    my $count = do given $data {
         when Positional { $data[0] }
         when UInt { $data[0] }
-        default { 120 }
+        default { 1 }
     };
 
-    return js-d3-random-scribble(|merge-hash(%(number-of-strokes => $ns), %args));
+    return js-d3-random-scribble(|merge-hash(%(:$count), %args));
 }
 
 multi js-d3-random-scribble(
