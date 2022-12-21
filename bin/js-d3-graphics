@@ -13,7 +13,8 @@ my %nameToFunc =
         'histogram' => &js-d3-histogram,
         'list-line-plot' => &js-d3-list-line-plot,
         'list-plot' => &js-d3-list-plot,
-        'random-mandala' => &js-d3-random-mandala;
+        'random-mandala' => &js-d3-random-mandala,
+        'random-scribble' => &js-d3-random-scribble;
 
 #| Generates HTML document code with D3.js plots or charts.
 multi sub MAIN(Str $cmd, #= Graphics command.
