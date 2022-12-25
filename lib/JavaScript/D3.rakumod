@@ -438,11 +438,15 @@ multi js-d3-random-scribble(
 
     # Connecting function
     my $d3Curves = <curveLinear curveStep curveStepAfter curveStepBefore curveBasis curveBasisClosed curveCardinal curveCatmullRom curveMonotoneX curveMonotoneY curveBundle>;
+    my $d3ShortCurves = $d3Curves.map({ $_.substr(5) }).List;
     if $connecting-function.isa(Whatever) {
         $connecting-function = $d3Curves.pick;
     }
-    die 'Them parameter connecting-function is expected to be a string or Whatever.'
-    unless $connecting-function ~~ Str;
+    if $connecting-function ∈ $d3ShortCurves {
+        $connecting-function = 'curve' ~ $connecting-function;
+    }
+    die 'Them parameter connecting-function is expected to be Whatever or a string, one of ' ~ $d3Curves.join(', ') ~ '.'
+    unless $connecting-function ~~ Str && $connecting-function ∈ $d3Curves;
 
     # Stroke
     if $stroke.isa(Whatever) {
