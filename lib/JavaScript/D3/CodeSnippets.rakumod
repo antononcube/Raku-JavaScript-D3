@@ -60,7 +60,7 @@ our sub WrapIt(Str $code, Str :$format='jupyter', Str :$div-id = 'my_dataviz') {
              JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
     if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"#my_dataviz"'):g;
+        $res = $res.subst('element.get(0)', '"' ~ $div-id ~ '"'):g;
     }
 
     return $res;
