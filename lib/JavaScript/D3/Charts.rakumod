@@ -39,7 +39,8 @@ our multi BarChart(@data where @data.all ~~ Map,
                    :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
                    :$legends = Whatever,
-                   Str :$format = 'jupyter'
+                   Str :$format = 'jupyter',
+                   :$div-id = Whatever
                    ) {
     # Convert to JSON data
     my $jsData = to-json(@data, :!pretty);
@@ -92,7 +93,7 @@ our multi BarChart(@data where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id );
 }
 
 #============================================================
@@ -116,7 +117,8 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                     Str :$y-axis-label = '',
                     :$grid-lines is copy = False,
                     :$margins is copy = Whatever,
-                    Str :$format = 'jupyter'
+                    Str :$format = 'jupyter',
+                    :$div-id = Whatever
                     ) {
     my $jsData = to-json(@data, :!pretty);
 
@@ -142,7 +144,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
 #============================================================
@@ -183,7 +185,8 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
                       :$legends = Whatever,
-                      Str :$format = 'jupyter'
+                      Str :$format = 'jupyter',
+                      :$div-id = Whatever
                       ) {
     # Grid lines
     $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
@@ -238,7 +241,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
 #============================================================
@@ -268,7 +271,8 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      :$grid-lines is copy = False,
                      :$margins is copy = Whatever,
                      :$method is copy = Whatever,
-                     Str :$format = 'jupyter'
+                     Str :$format = 'jupyter',
+                     :$div-id = Whatever
                      ) {
     my $jsData = to-json(@data, :!pretty);
 
@@ -294,5 +298,5 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

@@ -48,7 +48,12 @@ our sub ProcessGridLines($gridLines is copy) {
 #============================================================
 # The core JavaScript code is wrapped with HTML or Jupyter cell pre- and post code.
 
-our sub WrapIt(Str $code, Str :$format='jupyter', Str :$div-id = 'my_dataviz') {
+our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
+
+    if $div-id !~~ Str {
+        warn 'The argument div-id is expected to be a string or Whatever' unless $div-id.isa(Whatever);
+        $div-id = 'my-dataviz'
+    }
 
     if $format eq 'asis' {
         return $code
@@ -59,8 +64,27 @@ our sub WrapIt(Str $code, Str :$format='jupyter', Str :$div-id = 'my_dataviz') {
              $code,
              JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
-    if $format.lc eq 'html' {
-        $res = $res.subst('element.get(0)', '"' ~ $div-id ~ '"'):g;
+
+    $res = do given $format.lc {
+
+        when $_ eq 'html' {
+            $res
+                    .subst(:g, '.select(element.get(0))', '.select("#' ~ $div-id ~ '")')
+                    .subst(:g, / 'element.get(0)' | '"my_dataviz"' /, '"' ~ $div-id ~ '"')
+                    .subst(:g, '"#my_dataviz"', '"#' ~ $div-id ~ '"');
+        }
+
+        when $_ ∈ <html-md html-markdown html-embedded html-fragment> {
+            $res
+                    .subst(:g, / 'element.get(0)' | '"my_dataviz"' /, '"' ~ $div-id ~ '"')
+                    .subst(:g, '"#my_dataviz"', '"#' ~ $div-id ~ '"')
+                    .subst(:g, '<body>', '')
+                    .subst(:g, '</body>', '')
+                    .subst(:g, '<!DOCTYPE html>', '')
+                    .subst(:g, '</html>', '');
+        }
+
+        default { $res }
     }
 
     return $res;

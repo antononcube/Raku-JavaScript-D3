@@ -46,6 +46,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           :$legends = Whatever,
                           Bool :$axes = True,
                           Str :$format = 'jupyter',
+                          :$div-id = Whatever,
                           Str :$singleDatasetCode!,
                           Str :$multiDatasetCode!,
                           Str :$dataScalesAndAxesCode!,
@@ -96,7 +97,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
 #============================================================
@@ -165,7 +166,8 @@ our multi DateListPlot($data where is-str-time-series($data),
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
                        Bool :$axes = True,
-                       Str :$format = 'jupyter'
+                       Str :$format = 'jupyter',
+                       :$div-id = Whatever
                        ) {
     my $res =
             ListPlotGeneric($data,
@@ -181,6 +183,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                     :$legends,
                     :$axes,
                     format => 'asis',
+                    :$div-id,
                     singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
                     multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
                     dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(),
@@ -188,5 +191,5 @@ our multi DateListPlot($data where is-str-time-series($data),
 
     $res = $res.subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"');
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

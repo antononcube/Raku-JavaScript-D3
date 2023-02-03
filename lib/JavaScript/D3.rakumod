@@ -46,7 +46,8 @@ multi js-d3-list-plot($data,
                       :$margins = Whatever,
                       :$legends = Whatever,
                       Bool :$axes = True,
-                      Str :$format = 'jupyter') {
+                      Str :$format = 'jupyter', 
+                      :$div-id = Whatever) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
             :$color,
@@ -57,7 +58,7 @@ multi js-d3-list-plot($data,
             :$margins,
             :$legends,
             :$axes,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -75,7 +76,8 @@ multi js-d3-list-line-plot($data,
                            :$margins = Whatever,
                            :$legends = Whatever,
                            Bool :$axes = True,
-                           Str :$format = 'jupyter') {
+                           Str :$format = 'jupyter',
+                           :$div-id = Whatever) {
     return JavaScript::D3::Plots::ListLinePlot($data,
             :$background,
             :$color,
@@ -86,7 +88,7 @@ multi js-d3-list-line-plot($data,
             :$margins,
             :$legends,
             :$axes,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -105,7 +107,8 @@ multi js-d3-date-list-plot($data,
                            :$margins = Whatever,
                            :$legends = Whatever,
                            Bool :$axes = True,
-                           Str :$format = 'jupyter') {
+                           Str :$format = 'jupyter',
+                           :$div-id = Whatever) {
     return JavaScript::D3::Plots::DateListPlot($data,
             :$background,
             :$color,
@@ -117,7 +120,7 @@ multi js-d3-date-list-plot($data,
             :$margins,
             :$legends,
             :$axes,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -134,7 +137,8 @@ multi js-d3-bar-chart($data,
                       :$grid-lines = False,
                       :$margins = Whatever,
                       :$legends = Whatever,
-                      Str :$format = 'jupyter') {
+                      Str :$format = 'jupyter', 
+                      :$div-id = Whatever) {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
             :$color,
@@ -144,7 +148,7 @@ multi js-d3-bar-chart($data,
             :$grid-lines,
             :$margins,
             :$legends,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -160,7 +164,8 @@ multi js-d3-histogram($data,
                       Str :y-label(:$y-axis-label) = '',
                       :$grid-lines = False,
                       :$margins = Whatever,
-                      Str :$format = 'jupyter') {
+                      Str :$format = 'jupyter', 
+                      :$div-id = Whatever) {
     return JavaScript::D3::Charts::Histogram($data,
             :$background,
             :$color,
@@ -169,7 +174,7 @@ multi js-d3-histogram($data,
             :$x-axis-label, :$y-axis-label,
             :$grid-lines,
             :$margins,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -188,7 +193,8 @@ multi js-d3-bubble-chart($data,
                          :$margins = Whatever,
                          :$tooltip = Whatever,
                          :$legends = Whatever,
-                         Str :$format = 'jupyter') {
+                         Str :$format = 'jupyter',
+                         :$div-id = Whatever) {
     return JavaScript::D3::Charts::BubbleChart($data,
             :$background,
             :$color,
@@ -200,7 +206,7 @@ multi js-d3-bubble-chart($data,
             :$margins,
             :$tooltip,
             :$legends,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -217,7 +223,8 @@ multi js-d3-density2d-chart($data,
                             :$grid-lines = False,
                             :$margins = Whatever,
                             :$method = Whatever,
-                            Str :$format = 'jupyter') {
+                            Str :$format = 'jupyter',
+                            :$div-id = Whatever) {
     return JavaScript::D3::Charts::Bin2DChart($data,
             :$background,
             :$color,
@@ -227,7 +234,7 @@ multi js-d3-density2d-chart($data,
             :$grid-lines,
             :$margins,
             :$method,
-            :$format);
+            :$format, :$div-id);
 }
 
 #============================================================
@@ -282,7 +289,8 @@ multi js-d3-random-mandala(
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
         Bool :$axes = False,
         UInt :$count = 1,
-        Str :$format= "jupyter") {
+        Str :$format= "jupyter",
+        :$div-id = Whatever) {
 
     #--------------------------------------------------------
     # Process options
@@ -387,7 +395,7 @@ multi js-d3-random-mandala(
             .subst(:g, '.y(function(d) { return y(+d.y); })',
                     '.y(function(d) { return y(+d.y); }).curve(d3.' ~ $connecting-function ~ ')');
 
-    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format, :$div-id);
 }
 
 
@@ -425,7 +433,8 @@ multi js-d3-random-scribble(
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
         Bool :$axes = False,
         UInt :$count = 1,
-        Str :$format= "jupyter") {
+        Str :$format= "jupyter",
+        :$div-id = Whatever) {
 
     #--------------------------------------------------------
     # Process options
@@ -539,5 +548,5 @@ multi js-d3-random-scribble(
                 .subst(:g, / '.attr(\'stroke\'' .*?  \n /, '.attr("stroke", "url(#line-gradient)" )')
     }
 
-    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format);
+    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format, :$div-id);
 }
