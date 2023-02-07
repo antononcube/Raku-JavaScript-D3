@@ -258,12 +258,33 @@ sub replicate-to-list(Str $param, $element-type, @whatever-to-roll, $count, $val
 
 #============================================================
 #| Makes a random mandala.
+#| C<$data> Positional argument to pass to C<:count>.
+#| C<:$radius> Radius of the mandala.
+#| C<:$rotational-symmetry-order> Rotational symmetry order.
+#| C<:$number-of-seed-element> Number of seed elements.
+#| C<:$connecting-function> Connecting function.
+#| C<:$symmetric-seed> Should the seed be symmetric or not?
+#| C<:color(:$stroke)> Color of the stroke.
+#| C<:$stroke-width> Width of the stroke.
+#| C<:$fill> Filling color.
+#| C<:$background> Background color.
+#| C<:$width> Width of a single mandala plot.
+#| C<:$height> Height of a single mandala plot.
+#| C<:plot-label(:$title)> Plot title.
+#| C<:x-label(:$x-axis-label)> X-axis label.
+#| C<:y-label(:$y-axis-label)> Y-axis label.
+#| C<:$grid-lines> Should grid lines be placed or not?
+#| C<:$margins> A hash with the keys top, bottom, left right, for the margins of a single plot.
+#| C<:$axes> Should axes be placed or not?
+#| C<:$count> Number of mandalas.
+#| C<:$format> Format of the generated code, one of "asis", "html", "html-md", or "jupyter".
+#| C<:$div-id> Div identifier tag.
 proto js-d3-random-mandala(|) is export {*}
 
 multi js-d3-random-mandala($data, *%args) {
     my $count = do given $data {
         when Positional { $data[0] }
-        when UInt { $data[0] }
+        when UInt { $data }
         default { 1 }
     };
 
