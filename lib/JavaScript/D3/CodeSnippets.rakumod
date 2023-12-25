@@ -2,6 +2,9 @@ unit module JavaScript::D3::CodeSnippets;
 
 use Hash::Merge;
 
+our sub reallyflat (+@list) {
+    gather @list.deepmap: *.take
+}
 
 #============================================================
 # Process margins
@@ -879,4 +882,45 @@ our sub GetHexbinChartPart() {
 
 our sub GetRectbinChartPart() {
     return $jsRectbinChartPart;
+}
+
+#============================================================
+# Image code snippets
+#============================================================
+
+my $jsImagePart = q:to/END/;
+const color = d3.scaleSequential([$LOW_VALUE, $HIGH_VALUE], d3.interpolate$COLOR_PALETTE)
+
+// Obtain data
+var data = $DATA
+
+var n = data.width,
+  m = data.height;
+
+var canvas = d3.select("canvas")
+  .attr("width", n)
+  .attr("height", m);
+
+var context = canvas.node().getContext("2d"),
+  image = context.createImageData(n, m);
+
+for (var j = 0, k = 0, l = 0; j < m; ++j) {
+    for (var i = 0; i < n; ++i, ++k, l += 4) {
+      var c = d3.rgb(color(data.values[k]));
+      image.data[l + 0] = c.r;
+      image.data[l + 1] = c.g;
+      image.data[l + 2] = c.b;
+      image.data[l + 3] = 255;
+    }
+}
+
+context.putImageData(image, 0, 0);
+END
+
+#============================================================
+# Image code snippets accessors
+#============================================================
+
+our sub GetImagePart() {
+    return $jsImagePart;
 }
