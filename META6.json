@@ -1,7 +1,7 @@
 {
   "name": "JavaScript::D3",
   "description": "Generation of JavaScript's D3 code for plots and charts.",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
@@ -9,7 +9,8 @@
   "auth": "zef:antononcube",
   "depends": [
     "JSON::Fast:ver<0.17+>",
-    "Hash::Merge:ver<2.0.0+>:api<2+>"
+    "Hash::Merge:ver<2.0.0+>:api<2+>",
+    "Data::TypeSystem:ver<0.1.4+>"
   ],
   "build-depends": [],
   "test-depends": [],
@@ -17,6 +18,7 @@
     "JavaScript::D3": "lib/JavaScript/D3.rakumod",
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
+    "JavaScript::D3::Image": "lib/JavaScript/D3/Image.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
     "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
     "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod"
@@ -34,6 +36,7 @@
     "code",
     "d3",
     "graphics",
+    "image",
     "javascript",
     "js",
     "plot"
