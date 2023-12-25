@@ -59,7 +59,7 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
 
     # Make data to hand over to D3.js
     my @values = |JavaScript::D3::CodeSnippets::reallyflat(@data);
-    my $jsData = to-json({ :$width, :$height, :@values }, :!pretty);
+    my $jsData = to-json({ width => $nCols, height => $nRows, :@values }, :!pretty);
 
     # Stencil
     my $jsImage = [
@@ -72,8 +72,8 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
             .subst('$COLOR_PALETTE', $color-palette)
             .subst(:g, '$LOW_VALUE', $low-value)
             .subst(:g, '$HIGH_VALUE', $high-value)
-            .subst(:g, '$WIDTH', $width.Str)
-            .subst(:g, '$HEIGHT', $height.Str);
+            .subst(:g, '$WIDTH', $width)
+            .subst(:g, '$HEIGHT', $height);
 
     $res = JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
     return $res.subst(/ '<head>' \h* \v+ /,
