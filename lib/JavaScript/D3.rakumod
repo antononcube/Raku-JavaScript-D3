@@ -1,11 +1,9 @@
-use v6.d;
+unit module JavaScript::D3;
 
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
 use Hash::Merge;
-
-unit module JavaScript::D3;
 
 
 #============================================================

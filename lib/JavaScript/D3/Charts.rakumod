@@ -1,10 +1,9 @@
-use v6.d;
+unit module JavaScript::D3::Charts;
 
 use JSON::Fast;
 use JavaScript::D3::CodeSnippets;
 use JavaScript::D3::Predicates;
 
-unit module JavaScript::D3::Charts;
 
 #============================================================
 # BarChart

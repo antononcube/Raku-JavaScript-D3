@@ -1,8 +1,7 @@
-use v6.d;
+unit module JavaScript::D3::CodeSnippets;
 
 use Hash::Merge;
 
-unit module JavaScript::D3::CodeSnippets;
 
 #============================================================
 # Process margins

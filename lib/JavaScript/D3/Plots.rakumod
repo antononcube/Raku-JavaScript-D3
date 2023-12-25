@@ -1,11 +1,10 @@
-use v6.d;
+unit module JavaScript::D3::Plots;
 
 use Hash::Merge;
 use JSON::Fast;
 use JavaScript::D3::Predicates;
 use JavaScript::D3::CodeSnippets;
 
-unit module JavaScript::D3::Plots;
 
 #============================================================
 # ListPlotGeneric
