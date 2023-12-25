@@ -3,6 +3,7 @@ unit module JavaScript::D3;
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
+use JavaScript::D3::Image;
 use Hash::Merge;
 
 
@@ -44,7 +45,7 @@ multi js-d3-list-plot($data,
                       :$margins = Whatever,
                       :$legends = Whatever,
                       Bool :$axes = True,
-                      Str :$format = 'jupyter', 
+                      Str :$format = 'jupyter',
                       :$div-id = Whatever) {
     return JavaScript::D3::Plots::ListPlot($data,
             :$background,
@@ -135,7 +136,7 @@ multi js-d3-bar-chart($data,
                       :$grid-lines = False,
                       :$margins = Whatever,
                       :$legends = Whatever,
-                      Str :$format = 'jupyter', 
+                      Str :$format = 'jupyter',
                       :$div-id = Whatever) {
     return JavaScript::D3::Charts::BarChart($data,
             :$background,
@@ -162,7 +163,7 @@ multi js-d3-histogram($data,
                       Str :y-label(:$y-axis-label) = '',
                       :$grid-lines = False,
                       :$margins = Whatever,
-                      Str :$format = 'jupyter', 
+                      Str :$format = 'jupyter',
                       :$div-id = Whatever) {
     return JavaScript::D3::Charts::Histogram($data,
             :$background,
@@ -568,4 +569,21 @@ multi js-d3-random-scribble(
     }
 
     return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format, :$div-id);
+}
+
+#============================================================
+#| Makes a random scribble.
+proto js-d3-image(|) is export {*}
+
+multi sub js-d3-image(
+        $data,
+        Str :$color-palette = "Greys",
+        :$width = Whatever,
+        :$height = Whatever,
+        :$low-value is copy = Whatever,
+        :$high-value is copy = Whatever,
+        Str :$format = 'jupyter',
+        :$div-id = Whatever) {
+
+    return JavaScript::D3::Image::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
 }
