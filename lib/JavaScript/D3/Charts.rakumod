@@ -74,7 +74,7 @@ our multi BarChart(@data where @data.all ~~ Map,
     }
 
     # Stencil code
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
                    $jsPlotMiddle].join("\n");
 
     # Concrete values
@@ -128,7 +128,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
     # Stencil code
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
                    JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart())].join("\n");
 
     # Concrete values

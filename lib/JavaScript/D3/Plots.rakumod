@@ -75,7 +75,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndLabelsCode($format),
+    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
                       $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
                       $jsPlotMiddle]
             .join("\n");
@@ -189,6 +189,93 @@ our multi DateListPlot($data where is-str-time-series($data),
                     dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales());
 
     $res = $res.subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"');
+
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
+
+#============================================================
+# HeatmapPlot
+#============================================================
+
+#| Makes a bubble chart for list of triplets..
+our proto HeatmapPlot($data, |) is export {*}
+
+our multi HeatmapPlot($data where $data ~~ Seq, *%args) {
+    return HeatmapPlot($data.List, |%args);
+}
+
+our multi HeatmapPlot($data where is-positional-of-lists($data, 3), *%args) {
+    my @data2 = $data.map({ %( <x y z>.Array Z=> $_.Array) });
+    return HeatmapPlot(@data2, |%args);
+}
+
+our multi HeatmapPlot($data where is-positional-of-lists($data, 2), *%args) {
+    return HeatmapPlot($data.map({ [|$_, 1] }), |%args);
+}
+
+our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
+                      Str :$background= 'white',
+                      Numeric :$opacity = 0.7,
+                      :$width = 600,
+                      :$height = 600,
+                      Str :plot-label(:$title) = '',
+                      Str :$subtitle = '',
+                      Str :$x-axis-label = '',
+                      Str :$y-axis-label = '',
+                      :$low-value is copy = Whatever,
+                      :$high-value is copy = Whatever,
+                      :$margins is copy = Whatever,
+                      :$tooltip = Whatever,
+                      Str :$format = 'jupyter',
+                      :$div-id = Whatever
+                      ) {
+
+    my @values = @data.map(*<z>).Array;
+
+
+    #-------------------------------------------------------
+    # Process $low-value
+    #-------------------------------------------------------
+    if $low-value.isa(Whatever) {
+        $low-value = min(JavaScript::D3::CodeSnippets::reallyflat(@values))
+    }
+    die "The argument \$low-value is expected Whatever or Numeric:D."
+    unless $low-value ~~ Numeric:D;
+
+    #-------------------------------------------------------
+    # Process $high-value
+    #-------------------------------------------------------
+    if $high-value.isa(Whatever) {
+        $high-value = max(JavaScript::D3::CodeSnippets::reallyflat(@values))
+    }
+    die "The argument \$max-value is expected Whatever or Numeric:D."
+    unless $low-value ~~ Numeric:D;
+
+    # Margins
+    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+
+    # Select code fragment to splice in
+    my $jsChartMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
+
+
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
+                   $jsChartMiddle].join("\n");
+
+    my $jsData = to-json(@data, :!pretty);
+
+    my $res = $jsChart
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$SUBTITLE', '"' ~ $subtitle ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$LOW_VALUE', $low-value)
+            .subst(:g, '$HIGH_VALUE', $high-value);
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

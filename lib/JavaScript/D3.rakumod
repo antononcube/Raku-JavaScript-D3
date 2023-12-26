@@ -600,3 +600,11 @@ multi sub js-d3-image(
 
     return JavaScript::D3::Images::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
 }
+
+#============================================================
+#| Makes an image from a numerical matrix.
+proto js-d3-heatmap-plot(|) is export {*}
+
+multi sub js-d3-heatmap-plot($data, *%args) {
+    return JavaScript::D3::Plots::HeatmapPlot($data, |%args);
+}

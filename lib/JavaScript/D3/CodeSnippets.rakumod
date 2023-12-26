@@ -111,7 +111,7 @@ my $jsPlotStarting = q:to/END/;
 (function(element) { require(['d3'], function(d3) {
 END
 
-my $jsPlotMarginsAndLabels = q:to/END/;
+my $jsPlotMarginsAndTitle = q:to/END/;
 // set the dimensions and margins of the graph
 var margin = $MARGINS,
     width = $WIDTH - margin.left - margin.right,
@@ -140,7 +140,9 @@ if ( title.length > 0 ) {
         //.style("text-decoration", "underline")
         .text(title);
 }
+END
 
+my $jsPlotAxesLabels = q:to/END/;
 // Obtain x-axis label
 var xAxisLabel = $X_AXIS_LABEL
 var xAxisLabelFontSize = 12
@@ -168,6 +170,8 @@ if ( yAxisLabel.length > 0 ) {
         .text(yAxisLabel);
 }
 END
+
+my $jsPlotMarginsTitleAndLabels = $jsPlotMarginsAndTitle ~ "\n" ~ $jsPlotAxesLabels;
 
 my $jsPlotDataAndScales = q:to/END/;
 // Obtain data
@@ -256,10 +260,16 @@ our sub GetPlotEndingCode(Str $format = 'jupyter') {
     return $format.lc ∈ <jupyter asis> ?? $jsPlotEnding !! $jsPlotEndingHTML;
 }
 
-our sub GetPlotMarginsAndLabelsCode(Str $format = 'jupyter') {
+our sub GetPlotMarginsAndTitle(Str $format = 'jupyter') {
     return
             $format.lc ∈ <jupyter asis> ??
-            $jsPlotMarginsAndLabels !! $jsPlotMarginsAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
+            $jsPlotMarginsAndTitle !! $jsPlotMarginsAndTitle.subst(:g, 'element.get(0)', '"#my_dataviz"');
+}
+
+our sub GetPlotMarginsTitleAndLabelsCode(Str $format = 'jupyter') {
+    return
+            $format.lc ∈ <jupyter asis> ??
+            $jsPlotMarginsTitleAndLabels !! $jsPlotMarginsTitleAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
 our sub GetPlotDataAndScalesCode() {
@@ -278,7 +288,7 @@ our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $
 }
 
 our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0, Bool :$axes = True) {
-    return [GetPlotMarginsAndLabelsCode($format),
+    return [GetPlotMarginsTitleAndLabelsCode($format),
             $axes ?? GetPlotDataScalesAndAxesCode($nXTicks, $nYTicks) !! GetPlotDataAndScalesCode()].join("\n");
 }
 
@@ -940,4 +950,104 @@ END
 
 our sub GetImagePart() {
     return $jsImagePart;
+}
+
+#============================================================
+# Heatmap code snippets
+#============================================================
+
+my $jsTooltipHeatmapPart = q:to/HEATMAP-PART-END/;
+// Obtain data
+var data = $DATA
+
+// Labels of row and columns -> unique identifier of the column called 'x' and 'y
+const myGroups = Array.from(new Set(data.map(d => d.x)))
+const myVars = Array.from(new Set(data.map(d => d.y)))
+
+// Build X scales and axis:
+const x = d3.scaleBand()
+.range([ 0, width ])
+.domain(myGroups)
+.padding(0.05);
+
+svg.append("g")
+.style("font-size", 15)
+.attr("transform", `translate(0, ${height})`)
+.call(d3.axisBottom(x).tickSize(0))
+.select(".domain").remove()
+
+// Build Y scales and axis:
+const y = d3.scaleBand()
+.range([ height, 0 ])
+.domain(myVars)
+.padding(0.05);
+
+svg.append("g")
+.style("font-size", 15)
+.call(d3.axisLeft(y).tickSize(0))
+.select(".domain").remove()
+
+// Build color scale
+const myColor = d3.scaleSequential()
+.interpolator(d3.interpolateInferno)
+.domain([$LOW_VALUE,$HIGH_VALUE])
+
+// create a tooltip
+const tooltip = d3.select("#my_dataviz")
+.append("div")
+.style("opacity", 0)
+.attr("class", "tooltip")
+.style("background-color", "white")
+.style("border", "solid")
+.style("border-width", "2px")
+.style("border-radius", "5px")
+.style("padding", "5px")
+
+// Three function that change the tooltip when user hover / move / leave a cell
+const mouseover = function(event,d) {
+tooltip
+  .style("opacity", 1)
+d3.select(this)
+  .style("stroke", "black")
+  .style("opacity", 1)
+}
+const mousemove = function(event,d) {
+tooltip
+  .html("The exact value of<br>this cell is: " + d.z)
+  .style("left", (event.x)/2 + "px")
+  .style("top", (event.y)/2 + "px")
+}
+const mouseleave = function(event,d) {
+tooltip
+  .style("opacity", 0)
+d3.select(this)
+  .style("stroke", "none")
+  .style("opacity", 0.8)
+}
+
+// add the squares
+svg.selectAll()
+.data(data, function(d) {return d.x+':'+d.y;})
+.join("rect")
+  .attr("x", function(d) { return x(d.x) })
+  .attr("y", function(d) { return y(d.y) })
+  .attr("rx", 4)
+  .attr("ry", 4)
+  .attr("width", x.bandwidth() )
+  .attr("height", y.bandwidth() )
+  .style("fill", function(d) { return myColor(d.z)} )
+  .style("stroke-width", 4)
+  .style("stroke", "none")
+  .style("opacity", 0.8)
+.on("mouseover", mouseover)
+.on("mousemove", mousemove)
+.on("mouseleave", mouseleave)
+HEATMAP-PART-END
+
+#============================================================
+# Heatmap code snippets accessors
+#============================================================
+
+our sub GetTooltipHeatmapPart() {
+    return $jsTooltipHeatmapPart;
 }
