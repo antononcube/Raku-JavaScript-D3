@@ -611,9 +611,12 @@ multi sub js-d3-heatmap-plot($data, *%args) {
 }
 
 #============================================================
-#| Makes an image from a numerical matrix.
+#| Makes a chessboard position plot.
 proto js-d3-chessboard(|) is export {*}
 
+multi sub js-d3-chessboard(*%args) {
+    return JavaScript::D3::Chess::Chessboard(|%args);
+}
 multi sub js-d3-chessboard($data, *%args) {
     return JavaScript::D3::Chess::Chessboard($data, |%args);
 }
