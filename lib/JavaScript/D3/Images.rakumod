@@ -54,6 +54,7 @@ our multi ImageDisplay($spec,
 # Image
 #============================================================
 
+# See : https://d3js.org/d3-scale-chromatic/sequential
 my @knownSequentialSchemes =
         <Blues BuGn BuPu Cividis Cool CubehelixDefault GnBu Greens Greys Inferno Magma
 Oranges OrRd Plasma PuBu PuBuGn PuRd Purples RdPu Reds Turbo Viridis Warm
