@@ -66,10 +66,11 @@ our multi Chessboard($data where is-positional-of-lists($data, 3), *%args) {
 }
 
 our multi Chessboard(@data is copy where @data.all ~~ Map,
-                     Str :$background= 'white',
+                     Str :$background = 'white',
+                     Str :$color-palette = 'Greys',
                      Numeric :$opacity = 1.0,
-                     :$width = 600,
-                     :$height = 650,
+                     :$width = 400,
+                     :$height = 450,
                      Str :plot-label(:$title) = '',
                      :$margins is copy = Whatever,
                      Str :$format = 'jupyter',
@@ -89,11 +90,18 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                                                high-value => 1,
                                                x-axis-label => 'x coordinates',
                                                y-axis-label => 'y coordinates',
-                                               plot-label => 'Chessboard',
+                                               :$title,
                                                :$background,
+                                               :$color-palette,
                                                :$opacity,
                                                :$margins,
                                                format => 'asis');
+
+    $res =
+            $res
+            .subst('.on("mouseover", mouseover)')
+            .subst('.on("mousemove", mousemove)')
+            .subst('.on("mouseleave", mouseleave)');
 
     #-------------------------------------------------------
     # Fill in chess arguments
