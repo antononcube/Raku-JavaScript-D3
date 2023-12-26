@@ -80,10 +80,10 @@ our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
             $res
                     .subst(:g, / 'element.get(0)' | '"my_dataviz"' /, '"' ~ $div-id ~ '"')
                     .subst(:g, '"#my_dataviz"', '"#' ~ $div-id ~ '"')
-                    .subst(:g, '<body>', '')
-                    .subst(:g, '</body>', '')
-                    .subst(:g, '<!DOCTYPE html>', '')
-                    .subst(:g, '</html>', '');
+                    .subst(:g, '<body>')
+                    .subst(:g, '</body>')
+                    .subst(:g, '<!DOCTYPE html>')
+                    .subst(:g, '</html>');
         }
 
         default { $res }
