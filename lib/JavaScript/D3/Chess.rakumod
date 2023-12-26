@@ -22,8 +22,10 @@ my %chess-to-html =
         '♞' => '&#9822;',
         '♟' => '&#9823;';
 
-my %chess-pieces = :p('♟'), :P('♙'), :r('♜'), :R('♖'), :n('♞'), :N('♘'), :b('♝'), :B('♗'), :q('♛'), :Q('♕'), :k('♚'), :K('♔');
-
+my %chess-pieces =
+        :p('♟'), :P('♙'), :r('♜'), :R('♖'),
+        :n('♞'), :N('♘'), :b('♝'), :B('♗'),
+        :q('♛'), :Q('♕'), :k('♚'), :K('♔');
 
 #===========================================================
 
@@ -32,19 +34,30 @@ sub chess-color(Str $x, Str $y) {
     return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 0 !! 0.5;
 }
 
+#===========================================================
+
+sub starting-chess-position() {
+    [
+        { :x("a"), :y("8"), :z("r") }, { :x("b"), :y("8"), :z("n") }, { :x("c"), :y("8"), :z("b") }, { :x("d"), :y("8"), :z("q") }, { :x("e"), :y("8"), :z("k") }, { :x("f"), :y("8"), :z("b") }, { :x("g"), :y("8"), :z("n") }, { :x("h"), :y("8"), :z("r") },
+        { :x("a"), :y("7"), :z("p") }, { :x("b"), :y("7"), :z("p") }, { :x("c"), :y("7"), :z("p") }, { :x("d"), :y("7"), :z("p") }, { :x("e"), :y("7"), :z("p") }, { :x("f"), :y("7"), :z("p") }, { :x("g"), :y("7"), :z("p") }, { :x("h"), :y("7"), :z("p") },
+        { :x("a"), :y("2"), :z("P") }, { :x("b"), :y("2"), :z("P") }, { :x("c"), :y("2"), :z("P") }, { :x("d"), :y("2"), :z("P") }, { :x("e"), :y("2"), :z("P") }, { :x("f"), :y("2"), :z("P") }, { :x("g"), :y("2"), :z("P") }, { :x("h"), :y("2"), :z("P") },
+        { :x("a"), :y("1"), :z("R") }, { :x("b"), :y("1"), :z("N") }, { :x("c"), :y("1"), :z("B") }, { :x("d"), :y("1"), :z("Q") }, { :x("e"), :y("1"), :z("K") }, { :x("f"), :y("1"), :z("B") }, { :x("g"), :y("1"), :z("N") }, { :x("h"), :y("1"), :z("R") }
+    ]
+}
+
 #============================================================
 # Chessboard
 #============================================================
 
 #| Makes a bubble chart for list of triplets..
-our proto Chessboard($data, |) is export {*}
+our proto Chessboard(|) is export {*}
 
 our multi Chessboard($data where $data ~~ Seq, *%args) {
     return Chessboard($data.List, |%args);
 }
 
 our multi Chessboard(*%args) {
-    return Chessboard([], |%args);
+    return Chessboard(starting-chess-position, |%args);
 }
 
 our multi Chessboard($data where is-positional-of-lists($data, 3), *%args) {
@@ -54,7 +67,7 @@ our multi Chessboard($data where is-positional-of-lists($data, 3), *%args) {
 
 our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Str :$background= 'white',
-                     Numeric :$opacity = 0.7,
+                     Numeric :$opacity = 1.0,
                      :$width = 600,
                      :$height = 650,
                      Str :plot-label(:$title) = '',
@@ -66,8 +79,6 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
     my @dsField = 'a' .. 'h' X (1 .. 8)>>.Str;
     @dsField .= sort;
     @dsField = @dsField.map({ <x y z> Z=> [|$_, chess-color(|$_)] })>>.Hash;
-
-    note @dsField.raku;
 
     my $res =
             JavaScript::D3::Plots::HeatmapPlot(@dsField,
@@ -88,7 +99,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
     # Fill in chess arguments
     #-------------------------------------------------------
     if @data {
-        my @chessData = @data.clone.map({ merge-hash( $_, %( z => %chess-to-html{ %chess-pieces{$_<z>} // $_<z> } )) });
+        my @chessData = @data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
 
         my $jsData = to-json(@chessData, :!pretty);
 
