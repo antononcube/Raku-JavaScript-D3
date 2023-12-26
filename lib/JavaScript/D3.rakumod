@@ -3,7 +3,7 @@ unit module JavaScript::D3;
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
-use JavaScript::D3::Image;
+use JavaScript::D3::Images;
 use Hash::Merge;
 
 
@@ -585,5 +585,5 @@ multi sub js-d3-image(
         Str :$format = 'jupyter',
         :$div-id = Whatever) {
 
-    return JavaScript::D3::Image::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
+    return JavaScript::D3::Images::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
 }

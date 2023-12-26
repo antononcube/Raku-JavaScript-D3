@@ -1,4 +1,4 @@
-unit module JavaScript::D3::Image;
+unit module JavaScript::D3::Images;
 
 use Data::TypeSystem::Predicates;
 use JavaScript::D3::CodeSnippets;
@@ -29,44 +29,64 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
                 :$div-id = Whatever
                 ) {
 
+    #-------------------------------------------------------
+    # Dimensions of from data
+    #-------------------------------------------------------
     my $nRows = @data.elems;
     my $nCols = @data.head.elems;
 
+    #-------------------------------------------------------
+    # Process $color-palette
+    #-------------------------------------------------------
+    die "The argument \$color-palette is expected to be one of '{@knownSequentialSchemes.join("', '")}'."
+    unless $color-palette ∈ @knownSequentialSchemes;
+
+    #-------------------------------------------------------
     # Process $low-value
+    #-------------------------------------------------------
     if $low-value.isa(Whatever) {
         $low-value = min(JavaScript::D3::CodeSnippets::reallyflat(@data))
     }
     die "The argument \$low-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
 
+    #-------------------------------------------------------
     # Process $high-value
+    #-------------------------------------------------------
     if $high-value.isa(Whatever) {
         $high-value = max(JavaScript::D3::CodeSnippets::reallyflat(@data))
     }
     die "The argument \$max-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
 
+    #-------------------------------------------------------
     # Process width
+    #-------------------------------------------------------
     if $width.isa(Whatever) { $width = $nCols; }
     die "The argument \$width is expected Whatever or a positive integer."
     unless $width ~~ Int:D && $width > 0;
 
-    # Process width
+    #-------------------------------------------------------
+    # Process height
+    #-------------------------------------------------------
     if $height.isa(Whatever) { $height = $nRows; }
     die "The argument \$height is expected Whatever or a positive integer."
     unless $height ~~ Int:D && $height > 0;
 
-
+    #-------------------------------------------------------
     # Make data to hand over to D3.js
+    #-------------------------------------------------------
     my @values = |JavaScript::D3::CodeSnippets::reallyflat(@data);
     my $jsData = to-json({ width => $nCols, height => $nRows, :@values }, :!pretty);
 
+    #-------------------------------------------------------
     # Stencil
-    my $jsImage = [
-        JavaScript::D3::CodeSnippets::GetImagePart()
-    ].join("\n");
+    #-------------------------------------------------------
+    my $jsImage = JavaScript::D3::CodeSnippets::GetImagePart();
 
+    #-------------------------------------------------------
     # Concrete parameters
+    #-------------------------------------------------------
     my $res = $jsImage
             .subst('$DATA', $jsData)
             .subst('$COLOR_PALETTE', $color-palette)
@@ -75,7 +95,11 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
             .subst(:g, '$WIDTH', $width)
             .subst(:g, '$HEIGHT', $height);
 
+    #-------------------------------------------------------
+    # Wrap-up and return
+    #-------------------------------------------------------
     $res = JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+
     return $res.subst(/ '<head>' \h* \v+ /,
             "<head>\n\t<canvas style=\"width:{ $width }px; height:{ $height }px;\"></canvas>\n");
 }

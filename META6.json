@@ -18,7 +18,7 @@
     "JavaScript::D3": "lib/JavaScript/D3.rakumod",
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
-    "JavaScript::D3::Image": "lib/JavaScript/D3/Image.rakumod",
+    "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
     "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
     "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod"
