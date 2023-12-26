@@ -4,6 +4,7 @@ use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
 use JavaScript::D3::Images;
+use JavaScript::D3::Chess;
 use Hash::Merge;
 
 
@@ -607,4 +608,12 @@ proto js-d3-heatmap-plot(|) is export {*}
 
 multi sub js-d3-heatmap-plot($data, *%args) {
     return JavaScript::D3::Plots::HeatmapPlot($data, |%args);
+}
+
+#============================================================
+#| Makes an image from a numerical matrix.
+proto js-d3-chessboard(|) is export {*}
+
+multi sub js-d3-chessboard($data, *%args) {
+    return JavaScript::D3::Chess::Chessboard($data, |%args);
 }

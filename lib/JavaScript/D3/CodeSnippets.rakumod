@@ -1063,3 +1063,34 @@ HEATMAP-PART-END
 our sub GetTooltipHeatmapPart() {
     return $jsTooltipHeatmapPart;
 }
+
+#============================================================
+# Chessboard code snippets
+#============================================================
+
+my $jsChessboardPart = q:to/CHESSBOARD-END/;
+var chessData = $CHESS_DATA
+
+var hx = x('b') - x('a')
+var hy = y('2') - y('1')
+
+svg.selectAll()
+.data(chessData, function(d) {return d.x+':'+d.y;})
+.join("text")
+  .attr("x", function(d) { return x(d.x) + hx/2 })
+  .attr("y", function(d) { return y(d.y) - hy * 4/5 })
+  .attr("rx", 4)
+  .attr("ry", 4)
+  .attr("text-anchor", "middle")
+  .style("stroke", "black")
+  .style("font-size", function(d) { return (height / 9) + "px" })
+  .html(function(d){ return d.z });
+CHESSBOARD-END
+
+#============================================================
+# Chessboard code snippets accessors
+#============================================================
+
+our sub GetChessboardPart() {
+    return $jsChessboardPart;
+}

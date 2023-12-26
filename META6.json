@@ -17,6 +17,7 @@
   "provides": {
     "JavaScript::D3": "lib/JavaScript/D3.rakumod",
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
+    "JavaScript::D3::Chess": "lib/JavaScript/D3/Chess.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
     "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
