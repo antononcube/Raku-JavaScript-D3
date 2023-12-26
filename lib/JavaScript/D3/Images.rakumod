@@ -5,6 +5,52 @@ use JavaScript::D3::CodeSnippets;
 use JSON::Fast;
 
 #============================================================
+# ImageDisplay
+#============================================================
+
+our proto ImageDisplay($data, |) is export {*}
+
+our multi ImageDisplay($spec,
+                       :$width is copy = Whatever,
+                       :$height is copy = Whatever,
+                       Str :$format = 'jupyter',
+                       :$div-id = Whatever ) {
+
+    #-------------------------------------------------------
+    # Verify $spec
+    #-------------------------------------------------------
+    # TBD...
+
+    #-------------------------------------------------------
+    # Stencil
+    #-------------------------------------------------------
+    my $jsImage = JavaScript::D3::CodeSnippets::GetImageDisplayPart();
+
+    #-------------------------------------------------------
+    # Concrete parameters
+    #-------------------------------------------------------
+    my $res = $jsImage.subst(:g, '$IMAGE_PATH', $spec);
+
+    if $width ~~ Int:D {
+        $res .= subst(:g, '$WIDTH', $width)
+    } else {
+        $res .= subst('.attr("width", "$WIDTH")')
+    }
+
+    if $height ~~ Int:D {
+        $res .= subst(:g, '$HEIGHT', $height)
+    } else {
+        $res .= subst('.attr("height", "$HEIGHT")')
+    }
+
+    #-------------------------------------------------------
+    # Wrap-up and return
+    #-------------------------------------------------------
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
+
+#============================================================
 # Image
 #============================================================
 

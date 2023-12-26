@@ -885,6 +885,23 @@ our sub GetRectbinChartPart() {
 }
 
 #============================================================
+# Image display code snippets
+#============================================================
+
+my $jsImageDisplayPart = q:to/END/;
+const imagePath = '$IMAGE_PATH'
+d3.select(element.get(0)).append('img').attr("src", imagePath).attr("width", "$WIDTH").attr("height", "$HEIGHT")
+END
+
+#============================================================
+# Image display code snippets accessors
+#============================================================
+
+our sub GetImageDisplayPart() {
+    return $jsImageDisplayPart;
+}
+
+#============================================================
 # Image code snippets
 #============================================================
 

@@ -561,10 +561,9 @@ multi js-d3-random-scribble(
     if $gradient-colors ~~ List && $gradient-colors.elems == 2 {
         $jsCode = $jsCode
                 .subst(:g,
-                "// Add the path using this helper function",
-                        JavaScript::D3::CodeSnippets::GetLinearGradientCode(
-                        color0 => $gradient-colors[0],
-                                color100 => $gradient-colors[1]) ~ "\n" ~ '// Add the path using this helper function')
+                        "// Add the path using this helper function",
+                        JavaScript::D3::CodeSnippets::GetLinearGradientCode(color0 => $gradient-colors[0], color100 => $gradient-colors[1])
+                                ~ "\n" ~ '// Add the path using this helper function')
                 .subst(:g, / '.attr(\'stroke\'' .*?  \n /, '.attr("stroke", "url(#line-gradient)" )')
     }
 
@@ -572,7 +571,21 @@ multi js-d3-random-scribble(
 }
 
 #============================================================
-#| Makes a random scribble.
+#| Displays the image using a given URL or file name.
+proto js-d3-image-display(|) is export {*}
+
+multi sub js-d3-image-display(
+        Str $spec,
+        :$width = Whatever,
+        :$height = Whatever,
+        :$format = 'jupyter',
+        :$div-id = Whatever) {
+
+    return JavaScript::D3::Images::ImageDisplay($spec, :$width, :$height, :$format, :$div-id);
+}
+
+#============================================================
+#| Makes an image from a numerical matrix.
 proto js-d3-image(|) is export {*}
 
 multi sub js-d3-image(
