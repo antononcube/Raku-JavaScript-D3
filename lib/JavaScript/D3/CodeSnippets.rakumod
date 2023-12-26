@@ -93,6 +93,18 @@ our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
 }
 
 #============================================================
+# D3.js color palettes
+#============================================================
+
+# See : https://d3js.org/d3-scale-chromatic/sequential
+my @knownSequentialSchemes =
+        <Blues BuGn BuPu Cividis Cool CubehelixDefault GnBu Greens Greys Inferno Magma
+Oranges OrRd Plasma PuBu PuBuGn PuRd Purples RdPu Reds Turbo Viridis Warm
+lGn YlGnBu YlOrBr YlOrRd>;
+
+our sub known-sequential-schemes() { return @knownSequentialSchemes; }
+
+#============================================================
 # JavaScript plot and chart template parts
 #============================================================
 my $jsPlotStartingHTML = q:to/END/;
@@ -989,7 +1001,7 @@ svg.append("g")
 
 // Build color scale
 const myColor = d3.scaleSequential()
-.interpolator(d3.interpolateInferno)
+.interpolator(d3.interpolate$COLOR_PALETTE)
 .domain([$LOW_VALUE,$HIGH_VALUE])
 
 // create a tooltip

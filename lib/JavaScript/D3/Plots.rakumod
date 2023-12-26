@@ -215,6 +215,7 @@ our multi HeatmapPlot($data where is-positional-of-lists($data, 2), *%args) {
 }
 
 our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
+                      Str :$color-palette = 'Inferno',
                       Str :$background= 'white',
                       Numeric :$opacity = 0.7,
                       :$width = 600,
@@ -230,8 +231,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$div-id = Whatever
                       ) {
 
+    # Get values
     my @values = @data.map(*<z>).Array;
-
 
     #-------------------------------------------------------
     # Process $low-value
@@ -251,21 +252,35 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     die "The argument \$max-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
 
+    #-------------------------------------------------------
+    # Process $color-palette
+    #-------------------------------------------------------
+    die "The argument \$color-palette is expected to be one of '{JavaScript::D3::CodeSnippets::known-sequential-schemes.join("', '")}'."
+    unless $color-palette ∈ JavaScript::D3::CodeSnippets::known-sequential-schemes;
+
+    #-------------------------------------------------------
     # Margins
+    #-------------------------------------------------------
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
+    #-------------------------------------------------------
     # Select code fragment to splice in
+    #-------------------------------------------------------
     my $jsChartMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
 
 
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
                    $jsChartMiddle].join("\n");
 
+    #-------------------------------------------------------
+    # Fill in arguments
+    #-------------------------------------------------------
     my $jsData = to-json(@data, :!pretty);
 
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$COLOR_PALETTE', $color-palette)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
