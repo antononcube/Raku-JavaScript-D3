@@ -79,8 +79,8 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
     #-------------------------------------------------------
     # Process $color-palette
     #-------------------------------------------------------
-    die "The argument \$color-palette is expected to be one of '{known-sequential-schemes.join("', '")}'."
-    unless $color-palette ∈ known-sequential-schemes;
+    die "The argument \$color-palette is expected to be one of '{JavaScript::D3::CodeSnippets::known-sequential-schemes.join("', '")}'."
+    unless $color-palette ∈ JavaScript::D3::CodeSnippets::known-sequential-schemes;
 
     #-------------------------------------------------------
     # Process $low-value
