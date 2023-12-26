@@ -220,7 +220,6 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$width = 600,
                       :$height = 600,
                       Str :plot-label(:$title) = '',
-                      Str :$subtitle = '',
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
                       :$low-value is copy = Whatever,
@@ -270,7 +269,6 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-            .subst(:g, '$SUBTITLE', '"' ~ $subtitle ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
