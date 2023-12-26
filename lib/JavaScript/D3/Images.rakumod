@@ -54,12 +54,6 @@ our multi ImageDisplay($spec,
 # Image
 #============================================================
 
-# See : https://d3js.org/d3-scale-chromatic/sequential
-my @knownSequentialSchemes =
-        <Blues BuGn BuPu Cividis Cool CubehelixDefault GnBu Greens Greys Inferno Magma
-Oranges OrRd Plasma PuBu PuBuGn PuRd Purples RdPu Reds Turbo Viridis Warm
-lGn YlGnBu YlOrBr YlOrRd>;
-
 our proto Image($data, |) is export {*}
 
 our multi Image($data where $data ~~ Seq, *%args) {
@@ -85,8 +79,8 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
     #-------------------------------------------------------
     # Process $color-palette
     #-------------------------------------------------------
-    die "The argument \$color-palette is expected to be one of '{@knownSequentialSchemes.join("', '")}'."
-    unless $color-palette ∈ @knownSequentialSchemes;
+    die "The argument \$color-palette is expected to be one of '{known-sequential-schemes.join("', '")}'."
+    unless $color-palette ∈ known-sequential-schemes;
 
     #-------------------------------------------------------
     # Process $low-value
