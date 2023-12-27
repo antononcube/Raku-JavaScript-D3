@@ -242,6 +242,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
         when (Whatever, Int:D) {
             $width = $height;
         }
+        when (Int:D, Int:D) { }
         default {
             die 'The arguments $width and $height are expected to positive integers or Whatever.';
         }
