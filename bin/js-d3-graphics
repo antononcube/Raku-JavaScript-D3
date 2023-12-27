@@ -17,13 +17,13 @@ my %nameToFunc =
         'random-scribble' => &js-d3-random-scribble,
         'heatmap' => &js-d3-heatmap-plot,
         'heatmap-plot' => &js-d3-heatmap-plot,
-        'chesboard' => &js-d3-chessboard;
+        'chessboard' => &js-d3-chessboard;
 
 #| Generates HTML document code with D3.js plots or charts.
 multi sub MAIN(Str $cmd, #= Graphics command.
                *@points is copy, #= Data points.
-               UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
-               UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+               UInt :w(:$width) = 800, #= Width of the plot. (0 for Whatever.)
+               UInt :h(:$height) = 600, #= Height of the plot. (0 for Whatever.)
                Str :t(:$title) = '', #= Title of the plot.
                Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
                Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
@@ -55,8 +55,8 @@ multi sub MAIN(Str $cmd, #= Graphics command.
 #| Generates HTML document code with D3.js plots or charts by splitting a string of data points.
 multi sub MAIN(Str $cmd, #= Graphics command.
                Str $words, #= String with data points.
-               UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
-               UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+               UInt :w(:$width) is copy = 800, #= Width of the plot. (0 for Whatever.)
+               UInt :h(:$height) is copy = 600, #= Height of the plot. (0 for Whatever.)
                Str :t(:$title) = '', #= Title of the plot.
                Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
                Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
@@ -65,6 +65,19 @@ multi sub MAIN(Str $cmd, #= Graphics command.
                Bool :$grid-lines = False, #= Should grid lines be drawn or not?
                Str :$format = 'html', #= Output format, one of 'jupyter' or 'html'.
                ) {
+
+    # It is better to extend the signature of js-d3-chessboard to handle lists of strings.
+    # (Not just single string argument.)
+    if $cmd ∈ <chessboard> {
+        say
+                js-d3-chessboard($words,
+                        width => ($width ?? $width !! Whatever),
+                        height => ($height ?? $height !! Whatever),
+                        :$title,
+                        :$background,
+                        :$format);
+        return;
+    }
 
     my @data;
     if $words.contains(',') {
@@ -87,8 +100,8 @@ multi sub MAIN(Str $cmd, #= Graphics command.
 #| Generates HTML document code with D3.js plots or charts from pipeline input.
 multi sub MAIN(
         Str $cmd, #= Graphics command.
-        UInt :w(:$width) = 800, #= Width of the plot. (-1 for Whatever.)
-        UInt :h(:$height) = 600, #= Height of the plot. (-1 for Whatever.)
+        UInt :w(:$width) = 800, #= Width of the plot. (0 for Whatever.)
+        UInt :h(:$height) = 600, #= Height of the plot. (0 for Whatever.)
         Str :t(:$title) = '', #= Title of the plot.
         Str :$x-label = '', #= Label of the X-axis. If Whatever, then no label is placed.
         Str :$y-label = '', #= Label of the Y-axis. If Whatever, then no label is placed.
