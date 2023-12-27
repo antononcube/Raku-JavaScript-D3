@@ -6,6 +6,9 @@ use JavaScript::D3::Plots;
 use Hash::Merge;
 use JSON::Fast;
 
+use FEN::Grammar;
+use FEN::Actions;
+
 #===========================================================
 
 my %chess-to-html =
@@ -58,6 +61,22 @@ our multi Chessboard($data where $data ~~ Seq, *%args) {
 
 our multi Chessboard(*%args) {
     return Chessboard(starting-chess-position, |%args);
+}
+
+our multi Chessboard(Str $data, *%args) {
+
+    # Interpret into rows
+    my $match = FEN::Grammar.parse($data, actions => FEN::Actions.new);
+    my $resObj = $match.made;
+    my @ranks = $resObj.ranks;
+
+    # Make Hashmap of chess-coordinates to ches pieces
+    my %to-letters = (^8) Z=> 'a'..'h';
+    my @ranks2 = @ranks.kv.map( -> $k, $v { $v.map( { (8 - $k, %to-letters{$_.head}) => $_.tail }) }).flat;
+    my @fenData = @ranks2.map({ (<y x z> Z=> $_.kv.flat).Hash.deepmap(*.Str) });
+
+    # Delegate
+    return Chessboard(@fenData, |%args);
 }
 
 our multi Chessboard($data where is-positional-of-lists($data, 3), *%args) {
