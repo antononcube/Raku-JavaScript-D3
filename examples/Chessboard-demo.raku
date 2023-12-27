@@ -6,10 +6,10 @@ use JavaScript::D3;
 #===========================================================
 # Initial position
 
-spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(width => 600, height => 650, format => 'html');
+#spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(width => 600, height => 650, format => 'html');
 
 #===========================================================
-# Given position
+# Given position in long form
 
 my @chessPos = [
     {:x("a"), :y("8"), :z("r")}, {:x("c"), :y("8"), :z("b")}, {:x("d"), :y("8"), :z("k")}, {:x("h"), :y("8"), :z("r")},
@@ -21,4 +21,13 @@ my @chessPos = [
     {:x("a"), :y("1"), :z("q")}, {:x("g"), :y("1"), :z("b")}
 ];
 
-spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(@chessPos, width => 600, height => 650, format => 'html');
+#spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(@chessPos, width => 600, height => 650, format => 'html');
+
+
+#===========================================================
+# Given position as a FEN string
+
+my $fen = 'r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1';
+
+spurt $*CWD ~ '/chessboard.html', js-d3-chessboard($fen,color-palette=>'Greens', tick-label-color=>'red', width=>450, format => 'html');
+
