@@ -215,11 +215,12 @@ our multi HeatmapPlot($data where is-positional-of-lists($data, 2), *%args) {
 }
 
 our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
+                      :$width is copy = 600,
+                      :$height is copy = 600,
                       Str :$color-palette = 'Inferno',
-                      Str :$background= 'white',
+                      Str :$background = 'white',
+                      Str :$tick-label-color = 'black',
                       Numeric :$opacity = 0.7,
-                      :$width = 600,
-                      :$height = 600,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
@@ -230,6 +231,21 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
+
+    given ($width, $height) {
+        when (Whatever, Whatever) {
+            $width = 600; $height = 600;
+        }
+        when (Int:D, Whatever) {
+            $height = $width;
+        }
+        when (Whatever, Int:D) {
+            $width = $height;
+        }
+        default {
+            die 'The arguments $width and $height are expected to positive integers or Whatever.';
+        }
+    }
 
     # Get values
     my @values = @data.map(*<z>).Array;
@@ -281,6 +297,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$COLOR_PALETTE', $color-palette)
+            .subst(:g, '$TICK_LABEL_COLOR', "\"$tick-label-color\"")
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')

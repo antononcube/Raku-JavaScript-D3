@@ -984,6 +984,7 @@ const x = d3.scaleBand()
 
 svg.append("g")
 .style("font-size", 15)
+.style("stroke", $TICK_LABEL_COLOR)
 .attr("transform", `translate(0, ${height})`)
 .call(d3.axisBottom(x).tickSize(0))
 .select(".domain").remove()
@@ -996,6 +997,7 @@ const y = d3.scaleBand()
 
 svg.append("g")
 .style("font-size", 15)
+.style("stroke", $TICK_LABEL_COLOR)
 .call(d3.axisLeft(y).tickSize(0))
 .select(".domain").remove()
 
