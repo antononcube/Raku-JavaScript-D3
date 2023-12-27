@@ -11,7 +11,7 @@ The commands of the package generate JavaScript code that produces (nice) [D3.js
 For illustrative examples see the Jupyter notebook
 ["Tests-for-JavaScript-D3"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/Tests-for-JavaScript-D3.ipynb).
 
-The (original versions of the) JavaScript snippets used in this package are taken from
+The (original versions of the) JavaScript snippets used in this package are (mostly) taken from
 ["The D3.js Graph Gallery"](https://d3-graph-gallery.com/index.html).
 
 Here is a corresponding video demo (≈7 min): ["The Raku-ju hijack hack of D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo) (≈ 7 min.)
@@ -41,7 +41,7 @@ Here is a list of guiding design principles:
     [`BubbleChart`](https://reference.wolfram.com/language/ref/BubbleChart.html).
   
 - The primary target data structure to visualize is an array of hashes, 
-   with all array elements having the one of these sets of keys 
+   with all array elements having one of these sets of keys 
    - `<x y>` 
    - `<x y group>`
    - `<x y z>`
@@ -197,9 +197,9 @@ In the lists below the highest priority items are placed first.
 #### Single dataset
 
 1. [X] DONE List plot
-3. [X] DONE List line plot
-5. [X] DONE Date list plot
-7. [ ] TODO Box plot
+2. [X] DONE List line plot
+3. [X] DONE Date list plot
+4. [ ] TODO Box plot
 
 #### Multiple dataset
 
@@ -219,6 +219,8 @@ In the lists below the highest priority items are placed first.
 5. [ ] TODO Radar chart 
 6. [ ] TODO Density 2D chart -- hexagonal bins
 7. [ ] TODO Pie chart
+8. [X] DONE Heatmap plot
+9. [X] DONE Chessboard position
 
 #### Multiple dataset
 
@@ -227,7 +229,7 @@ In the lists below the highest priority items are placed first.
 3. [X] DONE Bubble chart
 4. [X] DONE Bubble chart with tooltips
 5. [ ] TODO Pie chart 
-7. [ ] TODO Radar chart
+6. [ ] TODO Radar chart
 
 ### Decorations
 
@@ -302,8 +304,8 @@ properly
 
 Brian Duggan fairly quickly implemented the suggested Jupyter kernel magics, so, now no hacking is needed.
 
-I finishing 0.1.3 version of this package I decided to write its Python version of it, see [AAp3].
-Writing the Python version was good brainstorming technique to produce reasonable refactoring (that is version 0.1.4).
+After I finished version 0.1.3 of this package I decided to write a Python version of it, see [AAp3].
+Writing the Python version was a good brainstorming technique to produce reasonable refactoring (that is version 0.1.4).
 
 --------
 
@@ -347,3 +349,15 @@ Writing the Python version was good brainstorming technique to produce reasonabl
 [SVG::Plot Raku package](https://github.com/moritz/svg-plot)
 (2009-2018),
 [GitHub/moritz](https://github.com/moritz/svg-plot).
+
+### Videos
+
+[AAv1] Anton Antonov,
+["The Raku-ju hijack hack for D3.js"](https://www.youtube.com/watch?v=YIhx3FBWayo),
+(2022),
+[YouTube/@AAA4Prediction](https://www.youtube.com/@AAA4prediction).
+
+[AAv2] Anton Antonov,
+["Random mandalas generation (with D3.js via Raku)"](https://www.youtube.com/watch?v=THNnofZEAn4),
+(2022),
+[YouTube/@AAA4Prediction](https://www.youtube.com/@AAA4prediction).
