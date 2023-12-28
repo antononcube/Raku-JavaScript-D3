@@ -100,7 +100,7 @@ our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
 my @knownSequentialSchemes =
         <Blues BuGn BuPu Cividis Cool CubehelixDefault GnBu Greens Greys Inferno Magma
 Oranges OrRd Plasma PuBu PuBuGn PuRd Purples RdPu Reds Turbo Viridis Warm
-lGn YlGnBu YlOrBr YlOrRd>;
+YlGn YlGnBu YlOrBr YlOrRd>;
 
 our sub known-sequential-schemes() { return @knownSequentialSchemes; }
 
