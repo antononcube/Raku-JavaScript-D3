@@ -283,18 +283,18 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     #-------------------------------------------------------
     # Select code fragment to splice in
     #-------------------------------------------------------
-    my $jsChartMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
+    my $jsHeatmapMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
 
 
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-                   $jsChartMiddle].join("\n");
+    my $jsHeatmap = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
+                     $jsHeatmapMiddle].join("\n");
 
     #-------------------------------------------------------
     # Fill in arguments
     #-------------------------------------------------------
     my $jsData = to-json(@data, :!pretty);
 
-    my $res = $jsChart
+    my $res = $jsHeatmap
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$COLOR_PALETTE', $color-palette)
