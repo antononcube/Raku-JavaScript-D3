@@ -973,41 +973,41 @@ my $jsTooltipHeatmapPart = q:to/HEATMAP-PART-END/;
 var data = $DATA
 
 // Labels of row and columns -> unique identifier of the column called 'x' and 'y
-const myGroups = Array.from(new Set(data.map(d => d.x)))
-const myVars = Array.from(new Set(data.map(d => d.y)))
+var myGroups = Array.from(new Set(data.map(d => d.x)))
+var myVars = Array.from(new Set(data.map(d => d.y)))
 
 // Build X scales and axis:
-const x = d3.scaleBand()
+var x = d3.scaleBand()
 .range([ 0, width ])
 .domain(myGroups)
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", 12)
+.style("font-size", Math.round(width/60*1.8))
 .style("stroke", $TICK_LABEL_COLOR)
 .attr("transform", `translate(0, ${height})`)
 .call(d3.axisBottom(x).tickSize(0))
 .select(".domain").remove()
 
 // Build Y scales and axis:
-const y = d3.scaleBand()
+var y = d3.scaleBand()
 .range([ height, 0 ])
 .domain(myVars)
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", 12)
+.style("font-size", Math.round(width/60*1.8))
 .style("stroke", $TICK_LABEL_COLOR)
 .call(d3.axisLeft(y).tickSize(0))
 .select(".domain").remove()
 
 // Build color scale
-const myColor = d3.scaleSequential()
+var myColor = d3.scaleSequential()
 .interpolator(d3.interpolate$COLOR_PALETTE)
 .domain([$LOW_VALUE,$HIGH_VALUE])
 
 // create a tooltip
-const tooltip = d3.select("#my_dataviz")
+var tooltip = d3.select("#my_dataviz")
 .append("div")
 .style("opacity", 0)
 .attr("class", "tooltip")
@@ -1018,20 +1018,20 @@ const tooltip = d3.select("#my_dataviz")
 .style("padding", "5px")
 
 // Three function that change the tooltip when user hover / move / leave a cell
-const mouseover = function(event,d) {
+var mouseover = function(event,d) {
 tooltip
   .style("opacity", 1)
 d3.select(this)
   .style("stroke", "black")
   .style("opacity", 1)
 }
-const mousemove = function(event,d) {
+var mousemove = function(event,d) {
 tooltip
   .html("The exact value of<br>this cell is: " + d.z)
   .style("left", (event.x)/2 + "px")
   .style("top", (event.y)/2 + "px")
 }
-const mouseleave = function(event,d) {
+var mouseleave = function(event,d) {
 tooltip
   .style("opacity", 0)
 d3.select(this)
