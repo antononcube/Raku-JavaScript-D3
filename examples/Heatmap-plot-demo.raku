@@ -13,9 +13,9 @@ sink records-summary(@ds3D);
 
 spurt $*CWD ~ '/heatmaps.html',
         js-d3-heatmap-plot(@ds3D,
-                width => 300,
+                width => 600,
                 height => 500,
                 color-palette => 'Blues',
-                tick-label-color => 'blue',
+                tick-label-color => 'steelblue',
                 format => 'html');
 
