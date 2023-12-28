@@ -64,13 +64,21 @@ our multi Chessboard(*%args) {
 }
 
 our multi Chessboard(Str $data, *%args) {
+    return Chessboard([$data,], |%args);
+}
+
+our multi Chessboard(@data where @data.all ~~ Str, *%args) {
 
     # Interpret into rows
-    my $match = FEN::Grammar.parse($data, actions => FEN::Actions.new);
-    my $resObj = $match.made;
+    my @fenData;
+    for @data.kv -> $k, $d {
+        my $match = FEN::Grammar.parse($d, actions => FEN::Actions.new);
+        my $resObj = $match.made;
 
-    my @ranks = |$resObj.position-set().grep({so $_.value}).map({ [|$_.key.split(/\h/), $_.value] })>>.Array.Array;
-    my @fenData = @ranks.map({ (<x y z> Z=> $_.Array).Hash.deepmap(*.Str) });
+        my @ranks = |$resObj.position-set().grep({ so $_.value }).map({ [|$_.key.split(/\h/), $_.value] })>>.Array.Array;
+
+        @fenData.append( @ranks.map({ (<x y z group> Z=> [|$_.Array, $k].Array).Hash.deepmap(*.Str) }) );
+    }
 
     # Delegate
     return Chessboard(@fenData, |%args);
@@ -93,6 +101,23 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Str :$format = 'jupyter',
                      :$div-id = Whatever
                      ) {
+
+    #-------------------------------------------------------
+    # Groups
+    #-------------------------------------------------------
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    if $hasGroups {
+
+        my $resTotal;
+        for @data.classify(*<group>).pairs.sort(*.key) -> $p {
+            $resTotal ~= "\n\n" ~
+                    Chessboard($p.value.map({ $_.grep({ $_.key ne 'group' }).Hash }).Array,
+                            :$width, :$height, :$background, :$color-palette, :$tick-label-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
+        }
+
+        return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
+    }
 
     my @dsField = 'a' .. 'h' X (1 .. 8)>>.Str;
     @dsField .= sort;
