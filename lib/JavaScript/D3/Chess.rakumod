@@ -34,7 +34,7 @@ my %chess-pieces =
 
 sub chess-color(Str $x, Str $y) {
     my %char-to-num = 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8;
-    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 0 !! 0.5;
+    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 0.5 !! 0;
 }
 
 #===========================================================
