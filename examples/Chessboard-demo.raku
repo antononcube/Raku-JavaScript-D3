@@ -1,6 +1,7 @@
 #!/usr/bin/env raku
 use v6.d;
 
+
 use JavaScript::D3;
 
 #===========================================================
@@ -27,7 +28,12 @@ my @chessPos = [
 #===========================================================
 # Given position as a FEN string
 
-my $fen = 'r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1';
+my @fens = [
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR',
+    'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR',
+    'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R'
+];
 
-spurt $*CWD ~ '/chessboard.html', js-d3-chessboard($fen,color-palette=>'Greens', tick-label-color=>'red', width=>450, format => 'html');
+spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(@fens.head, color-palette=>'Greens', tick-label-color=>'red', width=>450, format => 'html');
 
