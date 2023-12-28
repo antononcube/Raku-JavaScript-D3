@@ -68,12 +68,9 @@ our multi Chessboard(Str $data, *%args) {
     # Interpret into rows
     my $match = FEN::Grammar.parse($data, actions => FEN::Actions.new);
     my $resObj = $match.made;
-    my @ranks = $resObj.ranks;
 
-    # Make Hashmap of chess-coordinates to ches pieces
-    my %to-letters = (^8) Z=> 'a'..'h';
-    my @ranks2 = @ranks.kv.map( -> $k, $v { $v.map( { (8 - $k, %to-letters{$_.head}) => $_.tail }) }).flat;
-    my @fenData = @ranks2.map({ (<y x z> Z=> $_.kv.flat).Hash.deepmap(*.Str) });
+    my @ranks = |$resObj.position-set().grep({so $_.value}).map({ [|$_.key.split(/\h/), $_.value] })>>.Array.Array;
+    my @fenData = @ranks.map({ (<x y z> Z=> $_.Array).Hash.deepmap(*.Str) });
 
     # Delegate
     return Chessboard(@fenData, |%args);
