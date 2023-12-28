@@ -224,6 +224,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
+                      Bool :$sort-tick-labels = True,
+                      Bool :$show-groups = True,
                       :$low-value is copy = Whatever,
                       :$high-value is copy = Whatever,
                       :$margins is copy = Whatever,
@@ -281,32 +283,54 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
 
     #-------------------------------------------------------
-    # Select code fragment to splice in
+    # Groups
     #-------------------------------------------------------
-    my $jsHeatmapMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
+    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
 
+    my %groups;
+    if $hasGroups {
+        %groups = @data.classify(*<group>);
+    } else {
+        %groups = %($title => @data);
+    }
 
-    my $jsHeatmap = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-                     $jsHeatmapMiddle].join("\n");
+    my $resTotal = '';
+    for %groups.kv -> $g, @d {
 
-    #-------------------------------------------------------
-    # Fill in arguments
-    #-------------------------------------------------------
-    my $jsData = to-json(@data, :!pretty);
+        # Sort data in order to get sorted tick labels
+        if $sort-tick-labels {
+            @d = @d.sort(*<x y>);
+        }
 
-    my $res = $jsHeatmap
-            .subst('$DATA', $jsData)
-            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$COLOR_PALETTE', $color-palette)
-            .subst(:g, '$TICK_LABEL_COLOR', "\"$tick-label-color\"")
-            .subst(:g, '$WIDTH', $width.Str)
-            .subst(:g, '$HEIGHT', $height.Str)
-            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
-            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty)
-            .subst(:g, '$LOW_VALUE', $low-value)
-            .subst(:g, '$HIGH_VALUE', $high-value);
+        #-------------------------------------------------------
+        # Select code fragment to splice in
+        #-------------------------------------------------------
+        my $jsHeatmapMiddle = JavaScript::D3::CodeSnippets::GetTooltipHeatmapPart();
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+        my $jsHeatmap = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
+                         $jsHeatmapMiddle].join("\n");
+
+        #-------------------------------------------------------
+        # Fill in arguments
+        #-------------------------------------------------------
+        my $jsData = to-json(@d, :!pretty);
+
+        my $res = $jsHeatmap
+                .subst('$DATA', $jsData)
+                .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+                .subst('$COLOR_PALETTE', $color-palette)
+                .subst(:g, '$TICK_LABEL_COLOR', "\"$tick-label-color\"")
+                .subst(:g, '$WIDTH', $width.Str)
+                .subst(:g, '$HEIGHT', $height.Str)
+                .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
+                .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+                .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+                .subst(:g, '$MARGINS', to-json($margins):!pretty)
+                .subst(:g, '$LOW_VALUE', $low-value)
+                .subst(:g, '$HIGH_VALUE', $high-value);
+
+        $resTotal ~= $res;
+    }
+
+    return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
 }
