@@ -1,7 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-
 use JavaScript::D3;
 
 #===========================================================
@@ -35,5 +34,5 @@ my @fens = [
     'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R'
 ];
 
-spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(@fens.head, color-palette=>'Greens', tick-label-color=>'red', width=>450, format => 'html');
+spurt $*CWD ~ '/chessboard.html', js-d3-chessboard(@fens, color-palette=>'Greens', tick-label-color=>'red', width=>450, format => 'html');
 
