@@ -1082,11 +1082,9 @@ svg.selectAll()
 .data(plotLabelData, function(d) {return d.x+':'+d.y;})
 .join("text")
   .attr("x", function(d) { return x(d.x) + hx/2 })
-  .attr("y", function(d) { return y(d.y) + hy/2 + hy*3/10 })
-  .attr("rx", 4)
-  .attr("ry", 4)
+  .attr("y", function(d) { return y(d.y) + hy/2 + $PLOT_LABEL_Y_OFFSET })
   .attr("text-anchor", "middle")
-  .style("stroke", "black")
+  .style("stroke", $PLOT_LABEL_COLOR)
   .style("font-size", $PLOT_LABEL_FONT_SIZE)
   .html(function(d){ return d.z });
 HEATMAP-PLOT-LABELS

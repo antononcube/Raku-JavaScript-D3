@@ -155,7 +155,9 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
 
         $res = $res
                 .subst('$PLOT_LABELS_DATA', $jsData)
-                .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }');
+                .subst('$PLOT_LABEL_COLOR', '"black"')
+                .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }')
+                .subst('$PLOT_LABEL_Y_OFFSET', 'hy*3/10');
     }
 
     # Result

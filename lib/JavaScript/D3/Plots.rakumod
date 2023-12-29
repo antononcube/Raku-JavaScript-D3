@@ -221,6 +221,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$background = 'white',
                       Str :$tick-label-color = 'black',
                       Numeric :$opacity = 0.7,
+                      Str :$plot-label-color = 'black',
                       :$plot-label-font-size is copy = Whatever,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '',
@@ -354,7 +355,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
 
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
-                    .subst(:g, '$PLOT_LABEL_FONT_SIZE', $plot-label-font-size);
+                    .subst('$PLOT_LABEL_COLOR', '"' ~ $plot-label-color ~ '"')
+                    .subst('$PLOT_LABEL_FONT_SIZE', $plot-label-font-size)
+                    .subst('$PLOT_LABEL_Y_OFFSET', '0');
         }
 
         $resTotal ~= $res;
