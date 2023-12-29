@@ -221,6 +221,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$background = 'white',
                       Str :$tick-label-color = 'black',
                       Numeric :$opacity = 0.7,
+                      :$plot-label-font-size is copy = Whatever,
                       Str :plot-label(:$title) = '',
                       Str :$x-axis-label = '',
                       Str :$y-axis-label = '',
@@ -278,6 +279,18 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     unless $color-palette ∈ JavaScript::D3::CodeSnippets::known-sequential-schemes;
 
     #-------------------------------------------------------
+    # Process $plot-label-font-size
+    #-------------------------------------------------------
+    $plot-label-font-size = do given $plot-label-font-size {
+        when Whatever { 'function(d) { return (width / 30) + "px" }' }
+        when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
+        when Str:D {}
+        default {
+            die 'The argument $plot-label-font-size is expected to be a string, a non-negative integer, or Whatever.';
+        }
+    }
+
+    #-------------------------------------------------------
     # Margins
     #-------------------------------------------------------
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
@@ -328,6 +341,21 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$MARGINS', to-json($margins):!pretty)
                 .subst(:g, '$LOW_VALUE', $low-value)
                 .subst(:g, '$HIGH_VALUE', $high-value);
+
+        #-------------------------------------------------------
+        # Fill in plot label data
+        #-------------------------------------------------------
+        if [||] @d.map({ $_<label> // False }) {
+            my @plotLabelData = @d.clone.map({ merge-hash($_, %( z => $_<label>)) });
+
+            my $jsData = to-json(@plotLabelData, :!pretty);
+
+            $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
+
+            $res = $res
+                    .subst('$PLOT_LABELS_DATA', $jsData)
+                    .subst(:g, '$PLOT_LABEL_FONT_SIZE', $plot-label-font-size);
+        }
 
         $resTotal ~= $res;
     }
