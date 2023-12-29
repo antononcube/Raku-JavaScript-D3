@@ -151,10 +151,13 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
 
         my $jsData = to-json(@chessData, :!pretty);
 
-        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetChessboardPart();
+        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
 
         $res = $res
-                .subst('$CHESS_DATA', $jsData);
+                .subst('$PLOT_LABELS_DATA', $jsData)
+                .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }');
     }
+
+    # Result
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

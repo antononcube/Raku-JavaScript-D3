@@ -1072,29 +1072,29 @@ our sub GetTooltipHeatmapPart() {
 # Chessboard code snippets
 #============================================================
 
-my $jsChessboardPart = q:to/CHESSBOARD-END/;
-var chessData = $CHESS_DATA
+my $jsTooltipHeatmapPlotLabelsPart = q:to/HEATMAP-PLOT-LABELS/;
+var plotLabelData = $PLOT_LABELS_DATA
 
-var hx = x('b') - x('a')
-var hy = y('2') - y('1')
+var hx = x.bandwidth()
+var hy = y.bandwidth()
 
 svg.selectAll()
-.data(chessData, function(d) {return d.x+':'+d.y;})
+.data(plotLabelData, function(d) {return d.x+':'+d.y;})
 .join("text")
   .attr("x", function(d) { return x(d.x) + hx/2 })
-  .attr("y", function(d) { return y(d.y) - hy * 4/5 })
+  .attr("y", function(d) { return y(d.y) + hy/2 + hy*3/10 })
   .attr("rx", 4)
   .attr("ry", 4)
   .attr("text-anchor", "middle")
   .style("stroke", "black")
-  .style("font-size", function(d) { return (height / 9) + "px" })
+  .style("font-size", $PLOT_LABEL_FONT_SIZE)
   .html(function(d){ return d.z });
-CHESSBOARD-END
+HEATMAP-PLOT-LABELS
 
 #============================================================
 # Chessboard code snippets accessors
 #============================================================
 
-our sub GetChessboardPart() {
-    return $jsChessboardPart;
+our sub GetTooltipHeatmapPlotLabelsPart() {
+    return $jsTooltipHeatmapPlotLabelsPart;
 }
