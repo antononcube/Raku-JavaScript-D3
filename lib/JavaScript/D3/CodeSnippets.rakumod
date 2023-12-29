@@ -1084,8 +1084,10 @@ svg.selectAll()
   .attr("x", function(d) { return x(d.x) + hx/2 })
   .attr("y", function(d) { return y(d.y) + hy/2 + $PLOT_LABEL_Y_OFFSET })
   .attr("text-anchor", "middle")
-  .style("stroke", $PLOT_LABEL_COLOR)
+  .style("alignment-baseline", "middle")
+  .style("fill", $PLOT_LABEL_COLOR)
   .style("font-size", $PLOT_LABEL_FONT_SIZE)
+  .attr("font-family", "Courier")
   .html(function(d){ return d.z });
 HEATMAP-PLOT-LABELS
 

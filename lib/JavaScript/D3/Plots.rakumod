@@ -356,7 +356,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst('$PLOT_LABEL_COLOR', '"' ~ $plot-label-color ~ '"')
-                    .subst('$PLOT_LABEL_FONT_SIZE', $plot-label-font-size)
+                    .subst(:g, '$PLOT_LABEL_FONT_SIZE', $plot-label-font-size)
                     .subst('$PLOT_LABEL_Y_OFFSET', '0');
         }
 
