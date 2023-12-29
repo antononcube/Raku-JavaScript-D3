@@ -30,6 +30,9 @@ my %chess-pieces =
         :n('♞'), :N('♘'), :b('♝'), :B('♗'),
         :q('♛'), :Q('♕'), :k('♚'), :K('♔');
 
+my %white-to-black = :P('p'), :R('r'), :N('n'), :B('b'), :Q('q'), :K('k');
+%white-to-black = %white-to-black , ('♙♖♘♗♕♔'.comb Z=> '♟♜♞♝♛♚'.comb).Hash;
+
 #===========================================================
 
 sub chess-color(Str $x, Str $y) {
@@ -149,6 +152,24 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
     # Fill in chess arguments
     #-------------------------------------------------------
     if @data {
+        my @white-data = @data.grep({ $_<z> ∈ %white-to-black });
+
+        # Print white piece only
+        if @white-data {
+            my @chessData = @white-data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{%white-to-black{$_<z>}} // $_<z>})) });
+
+            my $jsData = to-json(@chessData, :!pretty);
+
+            $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
+
+            $res = $res
+                    .subst('$PLOT_LABELS_DATA', $jsData)
+                    .subst(:g, '$PLOT_LABEL_COLOR', '"white"')
+                    .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }')
+                    .subst('$PLOT_LABEL_Y_OFFSET', 'hy*0.1');
+        }
+
+        # Print all pieces
         my @chessData = @data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
 
         my $jsData = to-json(@chessData, :!pretty);
