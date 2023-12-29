@@ -141,7 +141,9 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
             $res
             .subst('.on("mouseover", mouseover)')
             .subst('.on("mousemove", mousemove)')
-            .subst('.on("mouseleave", mouseleave)');
+            .subst('.on("mouseleave", mouseleave)')
+            .subst('.attr("rx", 4)')
+            .subst('.attr("ry", 4)');
 
     #-------------------------------------------------------
     # Fill in chess arguments
