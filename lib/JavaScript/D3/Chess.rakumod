@@ -37,7 +37,7 @@ my %white-to-black = :P('p'), :R('r'), :N('n'), :B('b'), :Q('q'), :K('k');
 
 sub chess-color(Str $x, Str $y) {
     my %char-to-num = 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8;
-    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 'white' !! 'black';
+    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 'black' !! 'white';
 }
 
 #===========================================================
@@ -97,8 +97,8 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      :$height = Whatever,
                      Str :$background = 'white',
                      Str :$color-palette = 'Greys',
-                     Numeric :$black-square-value = 0.2,
-                     Numeric :$white-square-value = 0.75,
+                     Numeric :$black-square-value = 0.8,
+                     Numeric :$white-square-value = 0.1,
                      Str :$tick-label-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
