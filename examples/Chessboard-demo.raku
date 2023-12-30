@@ -38,6 +38,8 @@ spurt $*CWD ~ '/chessboard.html',
         js-d3-chessboard(@fens,
                 background => '#EEEEEE',
                 color-palette=>'Greens',
+                black-square-value => 0.1,
+                white-square-value => 0.75,
                 tick-label-color=>'red',
                 width=>450,
                 format => 'html');
