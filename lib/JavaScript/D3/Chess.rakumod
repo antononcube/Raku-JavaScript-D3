@@ -37,7 +37,7 @@ my %white-to-black = :P('p'), :R('r'), :N('n'), :B('b'), :Q('q'), :K('k');
 
 sub chess-color(Str $x, Str $y) {
     my %char-to-num = 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6, 'g' => 7, 'h' => 8;
-    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 0.5 !! 0;
+    return ($y.Int + %char-to-num{$x}) % 2 == 0 ?? 'white' !! 'black';
 }
 
 #===========================================================
@@ -97,6 +97,8 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      :$height = Whatever,
                      Str :$background = 'white',
                      Str :$color-palette = 'Greys',
+                     Numeric :$black-square-value = 0.1,
+                     Numeric :$white-square-value = 0.75,
                      Str :$tick-label-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
@@ -116,15 +118,19 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
         for @data.classify(*<group>).pairs.sort(*.key) -> $p {
             $resTotal ~= "\n\n" ~
                     Chessboard($p.value.map({ $_.grep({ $_.key ne 'group' }).Hash }).Array,
-                            :$width, :$height, :$background, :$color-palette, :$tick-label-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
+                            :$width, :$height,
+                            :$background,
+                            :$color-palette, :$black-square-value, :$white-square-value,
+                            :$tick-label-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
         }
 
         return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
     }
 
+    my %chess-values = white => $white-square-value, black => $black-square-value;
     my @dsField = 'a' .. 'h' X (1 .. 8)>>.Str;
     @dsField .= sort;
-    @dsField = @dsField.map({ <x y z> Z=> [|$_, chess-color(|$_)] })>>.Hash;
+    @dsField = @dsField.map({ <x y z> Z=> [|$_, %chess-values{chess-color(|$_)}] })>>.Hash;
 
     my $res =
             JavaScript::D3::Plots::HeatmapPlot(@dsField,
