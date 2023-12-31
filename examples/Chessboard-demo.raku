@@ -35,7 +35,7 @@ my @fens = [
 ];
 
 # Close to the style of lichess.com
-spurt $*CWD ~ '/chessboard.html',
+spurt $*CWD ~ '/chessboards.html',
         js-d3-chessboard(@fens,
                 color-palette => 'YlOrBr',
                 black-square-value => 0.75,
@@ -46,7 +46,7 @@ spurt $*CWD ~ '/chessboard.html',
 
 # Close to the style of chess.com
 #`[
-spurt $*CWD ~ '/chessboard.html',
+spurt $*CWD ~ '/chessboards.html',
         js-d3-chessboard(@fens,
                 #background => '#282828',
                 color-palette => 'YlGn',
