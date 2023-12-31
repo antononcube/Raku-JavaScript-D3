@@ -1,8 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib '.';
-
 use JavaScript::D3;
 use Data::Generators;
 use Data::Summarizers;
@@ -32,7 +30,7 @@ spurt $*CWD ~ '/heatmaps.html',
                 height => 500,
                 color-palette => 'Reds',
                 plot-label-color => 'White',
-                plot-label-font-size => 12,
+                plot-label-font-size => 18,
                 tick-label-color => 'steelblue',
                 low-value => 0,
                 high-value => 14,
