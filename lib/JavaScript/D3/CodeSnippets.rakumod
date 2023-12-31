@@ -972,10 +972,15 @@ my $jsTooltipHeatmapPart = q:to/HEATMAP-PART-END/;
 // Obtain data
 var data = $DATA
 
-// Labels of row and columns -> unique identifier of the column called 'x' and 'y
-var myGroups = Array.from(new Set(data.map(d => d.x)))
-var myVars = Array.from(new Set(data.map(d => d.y)))
+var myGroups = $X_TICK_LABELS
+var myVars = $Y_TICK_LABELS
 
+if (myGroups.length == 0) {
+    myGroups = Array.from(new Set(data.map(d => d.x)))
+}
+if (myVars.length == 0) {
+    myVars = Array.from(new Set(data.map(d => d.y)))
+}
 
 if ( $SORT_TICK_LABELS ) {
     myGroups = myGroups.sort(d3.ascending)

@@ -225,8 +225,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$plot-label-color = 'black',
                       :$plot-label-font-size is copy = Whatever,
                       Str :plot-label(:$title) = '',
-                      Str :$x-axis-label = '',
-                      Str :$y-axis-label = '',
+                      :$x-tick-labels is copy = Whatever,
+                      :$y-tick-labels is copy = Whatever,
                       Bool :$sort-tick-labels = True,
                       Bool :$show-groups = True,
                       :$low-value is copy = Whatever,
@@ -305,6 +305,32 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     }
 
     #-------------------------------------------------------
+    # Process $x-tick-labels
+    #-------------------------------------------------------
+    if $x-tick-labels.isa(Whatever) {
+        $x-tick-labels = []
+    }
+    die "The argument \$x-tick-labels is expected Whatever or a Iterable."
+    unless $x-tick-labels ~~ Iterable;
+
+    if $x-tick-labels && ! ($x-tick-labels (&) @data.map(*<x>)) {
+        note "None of the given x tick labels are found in the data.";
+    }
+
+    #-------------------------------------------------------
+    # Process $y-tick-labels
+    #-------------------------------------------------------
+    if $y-tick-labels.isa(Whatever) {
+        $y-tick-labels = []
+    }
+    die "The argument \$y-tick-labels is expected Whatever or a Iterable."
+    unless $y-tick-labels ~~ Iterable;
+
+    if $y-tick-labels && ! ($y-tick-labels (&) @data.map(*<y>)) {
+        note "None of the given y tick labels are found in the data.";
+    }
+
+    #-------------------------------------------------------
     # Margins
     #-------------------------------------------------------
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
@@ -347,8 +373,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
                 .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
-                .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
-                .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+                .subst(:g, '$X_TICK_LABELS', $x-tick-labels ?? to-json($x-tick-labels.Array, :!pretty) !! '[]')
+                .subst(:g, '$Y_TICK_LABELS', $y-tick-labels ?? to-json($y-tick-labels.Array, :!pretty) !! '[]')
                 .subst(:g, '$MARGINS', to-json($margins):!pretty)
                 .subst(:g, '$LOW_VALUE', $low-value)
                 .subst(:g, '$HIGH_VALUE', $high-value);
