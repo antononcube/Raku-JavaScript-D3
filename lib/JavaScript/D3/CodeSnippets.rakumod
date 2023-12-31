@@ -976,6 +976,12 @@ var data = $DATA
 var myGroups = Array.from(new Set(data.map(d => d.x)))
 var myVars = Array.from(new Set(data.map(d => d.y)))
 
+
+if ( $SORT_TICK_LABELS ) {
+    myGroups = myGroups.sort(d3.ascending)
+    myVars = myVars.sort(d3.ascending)
+}
+
 // Build X scales and axis:
 var x = d3.scaleBand()
 .range([ 0, width ])
@@ -983,7 +989,7 @@ var x = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 2)) )
+.style("font-size", $TICK_LABEL_FONT_SIZE)
 .style("stroke", $TICK_LABEL_COLOR)
 .style("stroke-width", "1px")
 .attr("font-family", "Courier")
@@ -998,7 +1004,7 @@ var y = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 2)) )
+.style("font-size", $TICK_LABEL_FONT_SIZE)
 .style("stroke", $TICK_LABEL_COLOR)
 .style("stroke-width", "1px")
 .attr("font-family", "Courier")

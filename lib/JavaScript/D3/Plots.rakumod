@@ -220,6 +220,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$color-palette = 'Inferno',
                       Str :$background = 'white',
                       Str :$tick-label-color = 'black',
+                      :$tick-label-font-size is copy = Whatever,
                       Numeric :$opacity = 0.7,
                       Str :$plot-label-color = 'black',
                       :$plot-label-font-size is copy = Whatever,
@@ -292,6 +293,18 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     }
 
     #-------------------------------------------------------
+    # Process $tick-label-font-size
+    #-------------------------------------------------------
+    $tick-label-font-size = do given $tick-label-font-size {
+        when Whatever { max(10, round(max($width, $height) / 60 * 2 )) }
+        when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
+        when Str:D {}
+        default {
+            die 'The argument $plot-label-font-size is expected to be a string, a non-negative integer, or Whatever.';
+        }
+    }
+
+    #-------------------------------------------------------
     # Margins
     #-------------------------------------------------------
     $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
@@ -311,11 +324,6 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     my $resTotal = '';
     for %groups.kv -> $g, @d {
 
-        # Sort data in order to get sorted tick labels
-        if $sort-tick-labels {
-            @d = @d.sort(*<x y>);
-        }
-
         #-------------------------------------------------------
         # Select code fragment to splice in
         #-------------------------------------------------------
@@ -333,7 +341,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst('$DATA', $jsData)
                 .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
                 .subst('$COLOR_PALETTE', $color-palette)
+                .subst(:g, '$SORT_TICK_LABELS', $sort-tick-labels ?? 'true' !! 'false')
                 .subst(:g, '$TICK_LABEL_COLOR', "\"$tick-label-color\"")
+                .subst(:g, '$TICK_LABEL_FONT_SIZE', $tick-label-font-size)
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
                 .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
