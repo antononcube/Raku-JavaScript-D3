@@ -34,13 +34,26 @@ my @fens = [
     'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R'
 ];
 
+# Close to the style of lichess.com
 spurt $*CWD ~ '/chessboard.html',
         js-d3-chessboard(@fens,
-                background => '#EEEEEE',
-                color-palette => 'Greens',
-                black-square-value => 0.7,
-                white-square-value => 0.1,
-                tick-label-color => 'red',
+                color-palette => 'YlOrBr',
+                black-square-value => 0.75,
+                white-square-value => 0.25,
+                tick-label-color => 'grey',
                 width => 450,
                 format => 'html');
+
+# Close to the style of chess.com
+#`[
+spurt $*CWD ~ '/chessboard.html',
+        js-d3-chessboard(@fens,
+                #background => '#282828',
+                color-palette => 'YlGn',
+                black-square-value => 0.45,
+                white-square-value => 0.05,
+                tick-label-color => 'grey',
+                width => 450,
+                format => 'html');
+]
 
