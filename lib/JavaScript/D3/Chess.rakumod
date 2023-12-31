@@ -97,8 +97,8 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      :$height = Whatever,
                      Str :$background = 'white',
                      Str :$color-palette = 'Greys',
-                     Numeric :$black-square-value = 0.8,
-                     Numeric :$white-square-value = 0.1,
+                     Numeric :$black-square-value = 0.5,
+                     Numeric :$white-square-value = 0.15,
                      Str :$tick-label-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
@@ -171,7 +171,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABEL_COLOR', '"white"')
-                    .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }')
+                    .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
                     .subst('$PLOT_LABEL_Y_OFFSET', 'hy*0.1');
         }
 
@@ -185,7 +185,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
         $res = $res
                 .subst('$PLOT_LABELS_DATA', $jsData)
                 .subst(:g, '$PLOT_LABEL_COLOR', '"black"')
-                .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 9) + "px" }')
+                .subst('$PLOT_LABEL_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
                 .subst('$PLOT_LABEL_Y_OFFSET', 'hy*0.1');
     }
 

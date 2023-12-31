@@ -983,9 +983,10 @@ var x = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 1.8)) )
+.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 2)) )
 .style("stroke", $TICK_LABEL_COLOR)
 .style("stroke-width", "1px")
+.attr("font-family", "Courier")
 .attr("transform", `translate(0, ${height})`)
 .call(d3.axisBottom(x).tickSize(0))
 .select(".domain").remove()
@@ -997,9 +998,10 @@ var y = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 1.8)) )
+.style("font-size", Math.max(10, Math.round(Math.max(width, height) / 60 * 2)) )
 .style("stroke", $TICK_LABEL_COLOR)
 .style("stroke-width", "1px")
+.attr("font-family", "Courier")
 .call(d3.axisLeft(y).tickSize(0))
 .select(".domain").remove()
 
@@ -1086,6 +1088,7 @@ svg.selectAll()
   .attr("text-anchor", "middle")
   .style("alignment-baseline", "middle")
   .style("fill", $PLOT_LABEL_COLOR)
+  .style("stroke-width", "1px")
   .style("font-size", $PLOT_LABEL_FONT_SIZE)
   .attr("font-family", "Courier")
   .html(function(d){ return d.z });
