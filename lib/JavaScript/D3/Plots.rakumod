@@ -256,6 +256,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     # Get values
     my @values = @data.map(*<z>).Array;
 
+    die 'All z-values of the dataset are expected to be Numeric:D.'
+    unless @values.all ~~ Numeric:D;
+
     #-------------------------------------------------------
     # Process $low-value
     #-------------------------------------------------------
