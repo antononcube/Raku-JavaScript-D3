@@ -233,7 +233,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$high-value is copy = Whatever,
                       :$margins is copy = Whatever,
                       Bool :$tooltip = True,
-                      Bool :$mesh = True,
+                      :$mesh = True,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
@@ -403,10 +403,23 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
         $resTotal ~= $res;
     }
 
-    if !$mesh {
-        # Here we assume that the heatmap plot code snipped using '.padding(0.05)'
-        # and that is only for the "squares" of the heatmap.
-        $resTotal = $resTotal.subst(:g, '.padding(0.05)');
+    # Here we assume that the heatmap plot code snipped is using '.padding(0.05)'
+    # and that is only for the "squares" of the heatmap.
+    given $mesh {
+        when $_ ~~ Bool:D {
+            # As explained by Nemokosch:
+            #  when uses smart-matching under the hood but somebody thought it should also try to mimic the behavior of if as much as possible
+            #  so smartmatching was deliberately ruined to support this use case
+            if !$_ {
+                $resTotal = $resTotal.subst(:g, '.padding(0.05)');
+            }
+        }
+        when $_ ~~ Numeric:D && $_ ≥ 0 {
+            $resTotal = $resTotal.subst(:g, '.padding(0.05)', ".padding($mesh)");
+        }
+        when !$_.isa(Whatever) {
+            note 'The argument $mesh is expected to be a Boolean or non-negative number.';
+        }
     }
 
     if !$tooltip {
