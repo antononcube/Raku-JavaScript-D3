@@ -99,7 +99,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Str :$color-palette = 'Greys',
                      Numeric :$black-square-value = 0.5,
                      Numeric :$white-square-value = 0.15,
-                     Str :$tick-label-color = 'black',
+                     Str :$tick-labels-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
                      :$margins is copy = Whatever,
@@ -121,7 +121,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                             :$width, :$height,
                             :$background,
                             :$color-palette, :$black-square-value, :$white-square-value,
-                            :$tick-label-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
+                            :$tick-labels-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
         }
 
         return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
@@ -141,7 +141,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                                                :$title,
                                                :$color-palette,
                                                :$background,
-                                               :$tick-label-color,
+                                               :$tick-labels-color,
                                                :$opacity,
                                                :$margins,
                                                format => 'asis');

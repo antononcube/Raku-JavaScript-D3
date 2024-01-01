@@ -994,8 +994,8 @@ var x = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", $TICK_LABEL_FONT_SIZE)
-.style("stroke", $TICK_LABEL_COLOR)
+.style("font-size", $TICK_LABELS_FONT_SIZE)
+.style("stroke", $TICK_LABELS_COLOR)
 .style("stroke-width", "1px")
 .attr("font-family", "Courier")
 .attr("transform", `translate(0, ${height})`)
@@ -1009,8 +1009,8 @@ var y = d3.scaleBand()
 .padding(0.05);
 
 svg.append("g")
-.style("font-size", $TICK_LABEL_FONT_SIZE)
-.style("stroke", $TICK_LABEL_COLOR)
+.style("font-size", $TICK_LABELS_FONT_SIZE)
+.style("stroke", $TICK_LABELS_COLOR)
 .style("stroke-width", "1px")
 .attr("font-family", "Courier")
 .call(d3.axisLeft(y).tickSize(0))

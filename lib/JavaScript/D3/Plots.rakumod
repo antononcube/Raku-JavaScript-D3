@@ -219,8 +219,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$height is copy = 600,
                       Str :$color-palette = 'Inferno',
                       Str :$background = 'white',
-                      Str :$tick-label-color = 'black',
-                      :$tick-label-font-size is copy = Whatever,
+                      Str :$tick-labels-color = 'black',
+                      :$tick-labels-font-size is copy = Whatever,
                       Numeric :$opacity = 0.7,
                       Str :$plot-labels-color = 'black',
                       :$plot-labels-font-size is copy = Whatever,
@@ -296,9 +296,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     }
 
     #-------------------------------------------------------
-    # Process $tick-label-font-size
+    # Process $tick-labels-font-size
     #-------------------------------------------------------
-    $tick-label-font-size = do given $tick-label-font-size {
+    $tick-labels-font-size = do given $tick-labels-font-size {
         when Whatever { max(10, round(max($width, $height) / 60 * 2 )) }
         when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
         when Str:D {}
@@ -371,8 +371,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
                 .subst('$COLOR_PALETTE', $color-palette)
                 .subst(:g, '$SORT_TICK_LABELS', $sort-tick-labels ?? 'true' !! 'false')
-                .subst(:g, '$TICK_LABEL_COLOR', "\"$tick-label-color\"")
-                .subst(:g, '$TICK_LABEL_FONT_SIZE', $tick-label-font-size)
+                .subst(:g, '$TICK_LABELS_COLOR', "\"$tick-labels-color\"")
+                .subst(:g, '$TICK_LABELS_FONT_SIZE', $tick-labels-font-size)
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
                 .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
