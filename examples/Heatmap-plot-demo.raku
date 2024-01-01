@@ -41,5 +41,6 @@ spurt $*CWD ~ '/heatmaps.html',
                 low-value => 0,
                 high-value => 14,
                 margins => {left => 100, right => 0},
+                mesh => 0.01,
                 format => 'html');
 
