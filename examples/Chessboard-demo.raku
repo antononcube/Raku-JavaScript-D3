@@ -40,6 +40,7 @@ spurt $*CWD ~ '/chessboards.html',
                 color-palette => 'YlOrBr',
                 black-square-value => 0.75,
                 white-square-value => 0.25,
+                whites-stroke-color => 'darkslategrey',
                 tick-labels-color => 'grey',
                 width => 450,
                 format => 'html');
