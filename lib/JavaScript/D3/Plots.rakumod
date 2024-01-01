@@ -222,8 +222,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$tick-label-color = 'black',
                       :$tick-label-font-size is copy = Whatever,
                       Numeric :$opacity = 0.7,
-                      Str :$plot-label-color = 'black',
-                      :$plot-label-font-size is copy = Whatever,
+                      Str :$plot-labels-color = 'black',
+                      :$plot-labels-font-size is copy = Whatever,
                       Str :plot-label(:$title) = '',
                       :$x-tick-labels is copy = Whatever,
                       :$y-tick-labels is copy = Whatever,
@@ -281,14 +281,14 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     unless $color-palette ∈ JavaScript::D3::CodeSnippets::known-sequential-schemes;
 
     #-------------------------------------------------------
-    # Process $plot-label-font-size
+    # Process $plot-labels-font-size
     #-------------------------------------------------------
-    $plot-label-font-size = do given $plot-label-font-size {
+    $plot-labels-font-size = do given $plot-labels-font-size {
         when Whatever { 'function(d) { return (width / 30) + "px" }' }
         when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
         when Str:D {}
         default {
-            die 'The argument $plot-label-font-size is expected to be a string, a non-negative integer, or Whatever.';
+            die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
         }
     }
 
@@ -300,7 +300,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
         when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
         when Str:D {}
         default {
-            die 'The argument $plot-label-font-size is expected to be a string, a non-negative integer, or Whatever.';
+            die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
         }
     }
 
@@ -391,9 +391,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
 
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
-                    .subst('$PLOT_LABEL_COLOR', '"' ~ $plot-label-color ~ '"')
-                    .subst(:g, '$PLOT_LABEL_FONT_SIZE', $plot-label-font-size)
-                    .subst('$PLOT_LABEL_Y_OFFSET', '0');
+                    .subst('$PLOT_LABELS_COLOR', '"' ~ $plot-labels-color ~ '"')
+                    .subst(:g, '$PLOT_LABELS_FONT_SIZE', $plot-labels-font-size)
+                    .subst('$PLOT_LABELS_Y_OFFSET', '0');
         }
 
         $resTotal ~= $res;
