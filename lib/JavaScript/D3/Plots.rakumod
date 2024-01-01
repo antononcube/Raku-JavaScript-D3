@@ -232,7 +232,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$low-value is copy = Whatever,
                       :$high-value is copy = Whatever,
                       :$margins is copy = Whatever,
-                      :$tooltip = Whatever,
+                      Bool :$tooltip = True,
+                      Bool :$mesh = True,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
@@ -400,6 +401,19 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
         }
 
         $resTotal ~= $res;
+    }
+
+    if !$mesh {
+        # Here we assume that the heatmap plot code snipped using '.padding(0.05)'
+        # and that is only for the "squares" of the heatmap.
+        $resTotal = $resTotal.subst(:g, '.padding(0.05)');
+    }
+
+    if !$tooltip {
+        $resTotal = $resTotal
+                .subst('.on("mouseover", mouseover)')
+                .subst('.on("mousemove", mousemove)')
+                .subst('.on("mouseleave", mouseleave)');
     }
 
     return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);

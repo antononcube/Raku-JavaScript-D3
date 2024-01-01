@@ -991,7 +991,7 @@ if ( $SORT_TICK_LABELS ) {
 var x = d3.scaleBand()
 .range([ 0, width ])
 .domain(myGroups)
-.padding(0.05);
+.padding(0.05)
 
 svg.append("g")
 .style("font-size", $TICK_LABELS_FONT_SIZE)
@@ -1006,7 +1006,7 @@ svg.append("g")
 var y = d3.scaleBand()
 .range([ height, 0 ])
 .domain(myVars)
-.padding(0.05);
+.padding(0.05)
 
 svg.append("g")
 .style("font-size", $TICK_LABELS_FONT_SIZE)

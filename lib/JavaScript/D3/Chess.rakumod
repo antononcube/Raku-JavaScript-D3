@@ -99,6 +99,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Str :$color-palette = 'Greys',
                      Numeric :$black-square-value = 0.5,
                      Numeric :$white-square-value = 0.15,
+                     Str :$whites-stroke-color = 'darkslategray',
                      Str :$tick-labels-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
@@ -120,7 +121,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     Chessboard($p.value.map({ $_.grep({ $_.key ne 'group' }).Hash }).Array,
                             :$width, :$height,
                             :$background,
-                            :$color-palette, :$black-square-value, :$white-square-value,
+                            :$color-palette, :$black-square-value, :$white-square-value, :$whites-stroke-color,
                             :$tick-labels-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
         }
 
@@ -144,13 +145,13 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                                                :$tick-labels-color,
                                                :$opacity,
                                                :$margins,
+                                               :!tooltip,
+                                               :!mesh,
                                                format => 'asis');
 
+    # No round corners for the squares
     $res =
             $res
-            .subst('.on("mouseover", mouseover)')
-            .subst('.on("mousemove", mousemove)')
-            .subst('.on("mouseleave", mouseleave)')
             .subst('.attr("rx", 4)')
             .subst('.attr("ry", 4)');
 
@@ -173,20 +174,36 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst(:g, '$PLOT_LABELS_COLOR', '"white"')
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
+
+            @chessData = @white-data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
+
+            $jsData = to-json(@chessData, :!pretty);
+
+            $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
+
+            $res = $res
+                    .subst('$PLOT_LABELS_DATA', $jsData)
+                    .subst(:g, '$PLOT_LABELS_COLOR', "\"$whites-stroke-color\"")
+                    .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
+                    .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
         }
 
-        # Print all pieces
-        my @chessData = @data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
+        my @black-data = @data.grep({ $_<z> ∉ %white-to-black });
 
-        my $jsData = to-json(@chessData, :!pretty);
+        # Print black pieces
+        if @black-data {
+            my @chessData = @black-data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
 
-        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
+            my $jsData = to-json(@chessData, :!pretty);
 
-        $res = $res
-                .subst('$PLOT_LABELS_DATA', $jsData)
-                .subst(:g, '$PLOT_LABELS_COLOR', '"black"')
-                .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
-                .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
+            $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipHeatmapPlotLabelsPart();
+
+            $res = $res
+                    .subst('$PLOT_LABELS_DATA', $jsData)
+                    .subst(:g, '$PLOT_LABELS_COLOR', '"black"')
+                    .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 8) + "px" }')
+                    .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
+        }
     }
 
     # Result
