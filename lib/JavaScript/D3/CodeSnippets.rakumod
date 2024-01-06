@@ -1,49 +1,6 @@
 unit module JavaScript::D3::CodeSnippets;
 
-use Hash::Merge;
-
-our sub reallyflat (+@list) {
-    gather @list.deepmap: *.take
-}
-
-#============================================================
-# Process margins
-#============================================================
-
-our sub ProcessMargins($margins is copy) {
-    my %defaultMargins = %( top => 40, bottom => 40, left => 40, right => 40);
-    $margins = do given $margins {
-        when $_.isa(Whatever) { %defaultMargins; }
-        when $_ ~~ Int { (<top bottom left right>.List X=> $_).Hash; }
-        default { $margins }
-    }
-    die "The argument margins is expected to be a Map or Whatever." unless $margins ~~ Map;
-    $margins = merge-hash(%defaultMargins, $margins);
-    return $margins;
-}
-
-#============================================================
-# Process grid lines
-#============================================================
-
-our sub ProcessGridLines($gridLines is copy) {
-    my @defaultGridLines = (5, 5);
-    $gridLines = do given $gridLines {
-        when $_ ~~ Bool && !$_ { (0, 0) }
-        when $_ ~~ Bool && $_ { @defaultGridLines }
-        when $_.isa(Whatever) { @defaultGridLines; }
-        when $_ ~~ List && $_.elems == 1 { ($_[0], @defaultGridLines[1]) }
-        when $_ ~~ List && $_.elems == 2 { $_ }
-        when $_ ~~ Numeric && $_.round ≥ 0 { ($_.round, $_.round) }
-    }
-
-    $gridLines = $gridLines.map({ $_.isa(Whatever) ?? 0 !! $_ }).List;
-
-    die "The argument grid-lines is expected to be a non-negative integer, Whatever, or a two element list of those type of values."
-    unless $gridLines ~~ List && $gridLines.elems == 2 && $gridLines.all ~~ UInt;
-
-    return $gridLines;
-}
+use JavaScript::D3::Utilities;
 
 #============================================================
 # Wrapping

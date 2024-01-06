@@ -2,6 +2,7 @@ unit module JavaScript::D3::Images;
 
 use Data::TypeSystem::Predicates;
 use JavaScript::D3::CodeSnippets;
+use JavaScript::D3::Utilities;
 use JSON::Fast;
 
 #============================================================

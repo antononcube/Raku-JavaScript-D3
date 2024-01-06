@@ -3,6 +3,7 @@ unit module JavaScript::D3::Charts;
 use JSON::Fast;
 use JavaScript::D3::CodeSnippets;
 use JavaScript::D3::Predicates;
+use JavaScript::D3::Utilities;
 
 
 #============================================================
@@ -45,10 +46,17 @@ our multi BarChart(@data where @data.all ~~ Map,
     my $jsData = to-json(@data, :!pretty);
 
     # Grid lines
-    $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
 
     # Margins
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    # Normalize data
+    if [&&] @data.map({ so $_<group> }) {
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <variable value group>);
+    } else {
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <variable value>);
+    }
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ (<group variable value> (&) $_).elems == 3 });
@@ -122,10 +130,10 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     my $jsData = to-json(@data, :!pretty);
 
     # Grid lines
-    $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
 
     # Margins
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
@@ -188,10 +196,10 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       :$div-id = Whatever
                       ) {
     # Grid lines
-    $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
 
     # Margins
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
@@ -275,7 +283,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      ) {
     my $jsData = to-json(@data, :!pretty);
 
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     if $method.isa(Whatever) {
         $method = 'rectbin';

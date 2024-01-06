@@ -3,6 +3,7 @@ unit module JavaScript::D3::Chess;
 use JavaScript::D3::CodeSnippets;
 use JavaScript::D3::Predicates;
 use JavaScript::D3::Plots;
+use JavaScript::D3::Utilities;
 use Hash::Merge;
 use JSON::Fast;
 

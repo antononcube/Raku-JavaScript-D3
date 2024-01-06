@@ -4,7 +4,7 @@ use Hash::Merge;
 use JSON::Fast;
 use JavaScript::D3::Predicates;
 use JavaScript::D3::CodeSnippets;
-
+use JavaScript::D3::Utilities;
 
 #============================================================
 # ListPlotGeneric
@@ -54,10 +54,10 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     my $jsData = to-json(@data, :!pretty);
 
     # Process margins
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     # Grid lines
-    $grid-lines = JavaScript::D3::CodeSnippets::ProcessGridLines($grid-lines);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
@@ -337,7 +337,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     #-------------------------------------------------------
     # Margins
     #-------------------------------------------------------
-    $margins = JavaScript::D3::CodeSnippets::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     #-------------------------------------------------------
     # Groups
