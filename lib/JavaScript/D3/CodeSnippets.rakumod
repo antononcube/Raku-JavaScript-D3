@@ -469,13 +469,13 @@ my $jsBarChartPart = q:to/END/;
 // Obtain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o.value; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o.value; }))
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
 
 // X axis
 var x = d3.scaleBand()
   .range([ 0, width ])
-  .domain(data.map(function(d) { return d.variable; }))
+  .domain(data.map(function(d) { return d.x; }))
   .padding(0.2);
 svg.append("g")
   .attr("transform", "translate(0," + height + ")")
@@ -496,10 +496,10 @@ svg.selectAll("mybar")
   .data(data)
   .enter()
   .append("rect")
-    .attr("x", function(d) { return x(d.variable); })
-    .attr("y", function(d) { return y(d.value); })
+    .attr("x", function(d) { return x(d.x); })
+    .attr("y", function(d) { return y(d.y); })
     .attr("width", x.bandwidth())
-    .attr("height", function(d) { return height - y(d.value); })
+    .attr("height", function(d) { return height - y(d.y); })
     .attr("fill", $FILL_COLOR)
 END
 
@@ -507,11 +507,11 @@ my $jsMultiBarChartPart = q:to/END/;
 // Obtain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o.value; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o.value; }))
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
 
 // List of subgroups
-var subgroups = d3.map(data, function(d){return(d.variable)}).values()
+var subgroups = d3.map(data, function(d){return(d.x)}).values()
 subgroups = [...new Set(subgroups)];
 
 // List of groups
@@ -554,11 +554,11 @@ svg.append("g")
     .selectAll("rect")
     .data(function(d) { return data.filter(function(x){ return x.group == d.group }) })
     .join("rect")
-      .attr("x", d => xSubgroup(d.variable))
-      .attr("y", d => y(d.value))
+      .attr("x", d => xSubgroup(d.x))
+      .attr("y", d => y(d.y))
       .attr("width", xSubgroup.bandwidth())
-      .attr("height", d => height - y(d.value))
-      .attr("fill", d => myColor(d.variable));
+      .attr("height", d => height - y(d.y))
+      .attr("fill", d => myColor(d.x));
 END
 
 #============================================================

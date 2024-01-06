@@ -53,15 +53,15 @@ our multi BarChart(@data where @data.all ~~ Map,
 
     # Normalize data
     if [&&] @data.map({ so $_<group> }) {
-        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <variable value group>);
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <x y group>);
     } else {
-        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <variable value>);
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <x y>);
     }
 
     # Groups
-    my Bool $hasGroups = [&&] @data.map({ (<group variable value> (&) $_).elems == 3 });
+    my Bool $hasGroups = [&&] @data.map({ (<group x y> (&) $_).elems == 3 });
 
-    note "Multi-dataset bar plots require all records to have the keys <group variable value>."
+    note "Multi-dataset bar plots require all records to have the keys <group x y>."
     when !$hasGroups && ( [&&] @data.map({ so $_<group> }) );
 
     # Select code fragment to splice in
@@ -77,7 +77,7 @@ our multi BarChart(@data where @data.all ~~ Map,
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
-            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode().subst('return o.group;', "return o.variable;");
+            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode().subst('return o.group;', "return o.x;");
         }
     }
 
