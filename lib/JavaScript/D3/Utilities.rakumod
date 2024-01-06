@@ -85,9 +85,8 @@ multi sub NormalizeData(%data,
     if %data.values.all ~~ Numeric:D {
        return %data.map({ %(x => $_.key, y => $_.value ) }).Array;
     }
-    my @dataRes = NormalizeData(%data.values, :$columns-to, :$columns-from);
 
-    return @dataRes;
+    return NormalizeData(%data.values, :$columns-to, :$columns-from);
 }
 
 multi sub NormalizeData(@data where @data.all ~~ Positional,
@@ -118,13 +117,25 @@ multi sub NormalizeData(@data where @data.all ~~ Map,
     }
 
     if $columns-to.isa(Whatever) {
-        $columns-to = do given $columns-from {
-            when $_.elems == 2 { <x y> }
+        given $columns-from {
+            when $_.elems == 2 && $_.sort({.lc})>>.lc eq <value variable> {
+                $columns-from = $_.sort({.lc}).cache;
+                $columns-to = <y x>;
+            }
+            when $_.elems == 2 {
+                $columns-to = <x y>
+            }
+            when $_.elems == 3 && $_.sort({.lc})>>.lc eqv <group value variable> {
+                $columns-from = $_.sort({.lc}).cache;
+                $columns-to = <group y x>;
+            }
             when $_.elems == 3 && 'group' ∈ $_>>.lc {
                 my $k = 0;
-                $_.map({ $_.lc eq 'group' ?? 'group' !! <x y>[$k++] }).List
+                $columns-to = $_.map({ $_.lc eq 'group' ?? 'group' !! <x y>[$k++] }).List;
             }
-            when $_.elems == 3 { <x y z> }
+            when $_.elems == 3 {
+                $columns-to = <x y z>;
+            }
         }
     }
 
