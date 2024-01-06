@@ -28,7 +28,7 @@ our multi BarChart(%data, *%args) {
     return BarChart(@dataPairs, |%args);
 }
 
-our multi BarChart(@data where @data.all ~~ Map,
+our multi BarChart(@data is copy where @data.all ~~ Map,
                    Str :$background= 'white',
                    Str :$color= 'steelblue',
                    :$width = 600,
