@@ -23,7 +23,8 @@
     "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
     "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
-    "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod"
+    "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod",
+    "JavaScript::D3::Utilities": "lib/JavaScript/D3/Utilities.rakumod"
   },
   "resources": [
     "Tests-for-JavaScript-D3.ipynb",
