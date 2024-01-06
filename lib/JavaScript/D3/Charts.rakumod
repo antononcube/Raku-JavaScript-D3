@@ -42,6 +42,13 @@ our multi BarChart(@data where @data.all ~~ Map,
                    Str :$format = 'jupyter',
                    :$div-id = Whatever
                    ) {
+    # Normalize data
+    if [&&] @data.map({ so $_<group> }) {
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => Whatever);
+    } else {
+        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => Whatever);
+    }
+
     # Convert to JSON data
     my $jsData = to-json(@data, :!pretty);
 
@@ -50,13 +57,6 @@ our multi BarChart(@data where @data.all ~~ Map,
 
     # Margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
-
-    # Normalize data
-    if [&&] @data.map({ so $_<group> }) {
-        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <x y group>);
-    } else {
-        @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => <x y>);
-    }
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ (<group x y> (&) $_).elems == 3 });
