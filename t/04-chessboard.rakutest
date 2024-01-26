@@ -1,0 +1,28 @@
+use v6.d;
+
+use lib '.';
+use lib './lib';
+
+use JavaScript::D3;
+
+use Test;
+
+plan 3;
+
+## 1
+ok js-d3-chessboard();
+
+## 2
+ok js-d3-chessboard('rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R', color-palette=>'Greens', tick-labels-color=>'red', width=>400, format=>'jupyter');
+
+## 3
+my @fens3 = [
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR',
+    'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR',
+    'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R'
+];
+
+ok js-d3-chessboard(@fens3, color-palette=>'Greens', tick-labels-color=>'silver', background => '#282828', width=>340);
+
+done-testing
