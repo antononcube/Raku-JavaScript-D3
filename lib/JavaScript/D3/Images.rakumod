@@ -87,7 +87,7 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
     # Process $low-value
     #-------------------------------------------------------
     if $low-value.isa(Whatever) {
-        $low-value = min(JavaScript::D3::CodeSnippets::reallyflat(@data))
+        $low-value = min(JavaScript::D3::Utilities::reallyflat(@data))
     }
     die "The argument \$low-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
@@ -96,7 +96,7 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
     # Process $high-value
     #-------------------------------------------------------
     if $high-value.isa(Whatever) {
-        $high-value = max(JavaScript::D3::CodeSnippets::reallyflat(@data))
+        $high-value = max(JavaScript::D3::Utilities::reallyflat(@data))
     }
     die "The argument \$max-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
@@ -118,7 +118,7 @@ our multi Image(@data where is-matrix(@data, Numeric:D),
     #-------------------------------------------------------
     # Make data to hand over to D3.js
     #-------------------------------------------------------
-    my @values = |JavaScript::D3::CodeSnippets::reallyflat(@data);
+    my @values = |JavaScript::D3::Utilities::reallyflat(@data);
     my $jsData = to-json({ width => $nCols, height => $nRows, :@values }, :!pretty);
 
     #-------------------------------------------------------

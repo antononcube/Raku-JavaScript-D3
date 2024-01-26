@@ -264,7 +264,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     # Process $low-value
     #-------------------------------------------------------
     if $low-value.isa(Whatever) {
-        $low-value = min(JavaScript::D3::CodeSnippets::reallyflat(@values))
+        $low-value = min(JavaScript::D3::Utilities::reallyflat(@values))
     }
     die "The argument \$low-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
@@ -273,7 +273,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     # Process $high-value
     #-------------------------------------------------------
     if $high-value.isa(Whatever) {
-        $high-value = max(JavaScript::D3::CodeSnippets::reallyflat(@values))
+        $high-value = max(JavaScript::D3::Utilities::reallyflat(@values))
     }
     die "The argument \$max-value is expected Whatever or Numeric:D."
     unless $low-value ~~ Numeric:D;
