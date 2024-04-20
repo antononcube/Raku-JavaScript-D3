@@ -133,6 +133,10 @@ multi sub NormalizeData(@data where @data.all ~~ Map,
                 my $k = 0;
                 $columns-to = $_.map({ $_.lc eq 'group' ?? 'group' !! <x y>[$k++] }).List;
             }
+            when (<group x y> (&) $_>>.lc).elems == 3 {
+                $columns-from = <group x y>;
+                $columns-to = <group x y>;
+            }
             when $_.elems == 3 {
                 $columns-to = <x y z>;
             }
