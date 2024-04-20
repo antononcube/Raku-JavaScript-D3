@@ -509,6 +509,10 @@ var data = $DATA
 
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
+var absMax = Math.max.apply(Math, data.map(function(o) { return Math.abs(o.y); }))
+
+var zeroLocation = height
+zeroLocation = height * Math.abs(valueMax / (valueMax - valueMin))
 
 // List of subgroups
 var subgroups = d3.map(data, function(d){return(d.x)}).values()
@@ -523,13 +527,14 @@ var x = d3.scaleBand()
   .range([0, width])
   .padding([0.2])
 svg.append("g")
-.attr("transform", "translate(0," + height + ")")
+.attr("transform", "translate(0," + zeroLocation + ")")
 .call(d3.axisBottom(x).tickSize(0));
 
 // Add Y axis
+//    .domain([-absMax, absMax]).nice()
 var y = d3.scaleLinear()
-    .domain([0, valueMax])
-    .range([ height, 0 ]);
+    .domain([valueMin, valueMax])
+    .range([ height, 0 ])
 svg.append("g")
     .call(d3.axisLeft(y));
 
@@ -544,11 +549,11 @@ var myColor = d3.scaleOrdinal()
     .domain(subgroups)
     .range(d3.schemeSet2);
 
-// Show the bars
+// Show the bars positive values
 svg.append("g")
     .selectAll("g")
     // Enter in data = loop group per group
-    .data(data)
+    .data(data.map(d => d.y > 0 ? d : {y: 0}))
     .join("g")
       .attr("transform", d => `translate(${x(d.group)}, 0)`)
     .selectAll("rect")
@@ -557,7 +562,23 @@ svg.append("g")
       .attr("x", d => xSubgroup(d.x))
       .attr("y", d => y(d.y))
       .attr("width", xSubgroup.bandwidth())
-      .attr("height", d => height - y(d.y))
+      .attr("height", d => y(0) - y(d.y))
+      .attr("fill", d => myColor(d.x));
+
+// Show the bars negative values
+svg.append("g")
+    .selectAll("g")
+    // Enter in data = loop group per group
+    .data(data.map(d => d.y < 0 ? d : {y: 0}))
+    .join("g")
+      .attr("transform", d => `translate(${x(d.group)}, 0)`)
+    .selectAll("rect")
+    .data(function(d) { return data.filter(function(x){ return x.group == d.group }) })
+    .join("rect")
+      .attr("x", d => xSubgroup(d.x))
+      .attr("y", d => y(0))
+      .attr("width", xSubgroup.bandwidth())
+      .attr("height", d => y(0) - y(-d.y))
       .attr("fill", d => myColor(d.x));
 END
 
