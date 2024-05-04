@@ -129,6 +129,14 @@ multi sub NormalizeData(@data where @data.all ~~ Map,
                 $columns-from = $_.sort({.lc}).cache;
                 $columns-to = <group y x>;
             }
+            when $_.elems == 4 && $_.sort({.lc})>>.lc eqv <group label value variable> {
+                $columns-from = $_.sort({.lc}).cache;
+                $columns-to = <group label y x>;
+            }
+            when $_.elems == 3 && $_.sort({.lc})>>.lc eqv <label value variable> {
+                $columns-from = $_.sort({.lc}).cache;
+                $columns-to = <label y x>;
+            }
             when $_.elems == 3 && 'group' ∈ $_>>.lc {
                 my $k = 0;
                 $columns-to = $_.map({ $_.lc eq 'group' ?? 'group' !! <x y>[$k++] }).List;
