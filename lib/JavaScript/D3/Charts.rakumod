@@ -36,19 +36,40 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
                    Str :plot-label(:$title) = '',
                    Str :$x-axis-label = '',
                    Str :$y-axis-label = '',
+                   Str :$plot-labels-color = 'black',
+                   :$plot-labels-font-size is copy = Whatever,
+                   Str :$plot-labels-font-family = 'Courier',
                    :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
                    :$legends = Whatever,
                    Str :$format = 'jupyter',
                    :$div-id = Whatever
                    ) {
+    #-------------------------------------------------------
+    # Process $plot-labels-font-size
+    #-------------------------------------------------------
+    $plot-labels-font-size = do given $plot-labels-font-size {
+        when Whatever { 'function(d) { return Math.max(width / 200, 4) + "px" }' }
+        when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
+        when Str:D {}
+        default {
+            die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
+        }
+    }
+
+    #-------------------------------------------------------
     # Normalize data
+    #-------------------------------------------------------
     if [&&] @data.map({ so $_<group> }) {
         @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => Whatever);
     } else {
         @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => Whatever);
     }
 
+    note (:@data);
+    #-------------------------------------------------------
+    # Chart creation
+    #-------------------------------------------------------
     # Convert to JSON data
     my $jsData = to-json(@data, :!pretty);
 
@@ -99,6 +120,20 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
+
+    # Fill in plot label data
+    if [&&] @data.map({ $_<label> // False }) {
+
+        note 'HERE';
+        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetBarChartLabelsPart();
+
+        $res = $res
+                .subst('$PLOT_LABELS_DATA', $jsData)
+                .subst('$PLOT_LABELS_COLOR', '"' ~ $plot-labels-color ~ '"')
+                .subst(:g, '$PLOT_LABELS_FONT_SIZE', $plot-labels-font-size)
+                .subst(:g, '$PLOT_LABELS_FONT_FAMILY', $plot-labels-font-family)
+                .subst('$PLOT_LABELS_Y_OFFSET', '5');
+    }
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id );
 }
