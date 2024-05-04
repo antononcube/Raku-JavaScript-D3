@@ -1,8 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib '.';
-
 use JavaScript::D3;
 use Data::Summarizers;
 
@@ -21,6 +19,8 @@ my @data = [
     {:value(1059), :variable("Ohio")}, {:value(1096), :variable("California")}, {:value(1314), :variable("Illinois")}, {:value(1431), :variable("Pennsylvania")},
     {:value(1512), :variable("Texas")}, {:value(1640), :variable("Wisconsin")}, {:value(1710), :variable("New York")}];
 
+@data = @data.map({ $_<label> = $_<value>; $_ });
+
 say @data.elems;
 
 records-summary(@data);
@@ -29,7 +29,7 @@ spurt $*CWD ~ '/bar-chart.html',
         js-d3-bar-chart(@data,
                 color => 'steelblue',
                 background => 'ivory',
-                width => 1200,
+                width => 1600,
                 grid-lines => (Whatever, 12),
                 margins => %(left => 80, bottom => 100),
                 title => 'Number of cities per state',
