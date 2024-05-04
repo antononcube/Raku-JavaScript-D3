@@ -66,7 +66,6 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
         @data = JavaScript::D3::Utilities::NormalizeData(@data, columns-from => Whatever, columns-to => Whatever);
     }
 
-    note (:@data);
     #-------------------------------------------------------
     # Chart creation
     #-------------------------------------------------------
@@ -124,7 +123,6 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     # Fill in plot label data
     if [&&] @data.map({ $_<label> // False }) {
 
-        note 'HERE';
         $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetBarChartLabelsPart();
 
         $res = $res
