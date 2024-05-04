@@ -42,6 +42,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
                    :$grid-lines is copy = False,
                    :$margins is copy = Whatever,
                    :$legends = Whatever,
+                   Bool :$horizontal = False,
                    Str :$format = 'jupyter',
                    :$div-id = Whatever
                    ) {
@@ -87,9 +88,12 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     # Select code fragment to splice in
     my $jsPlotMiddle;
     if $hasGroups {
+        if $horizontal {
+            die 'The option horizontal is implemented only for data without groups.';
+        }
         $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetMultiBarChartPart()),
     } else {
-        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart()),
+        $jsPlotMiddle = JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetBarChartPart(:$horizontal)),
     }
 
     # Chose to add legend code fragment or not
@@ -123,7 +127,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     # Fill in plot label data
     if !$hasGroups && ([&&] @data.map({ $_<label> // False })) {
 
-        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetBarChartLabelsPart();
+        $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetBarChartLabelsPart(:$horizontal);
 
         $res = $res
                 .subst('$PLOT_LABELS_DATA', $jsData)

@@ -140,6 +140,7 @@ multi js-d3-bar-chart($data,
                       :$grid-lines = False,
                       :$margins = Whatever,
                       :$legends = Whatever,
+                      Bool :$horizontal = False,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever) {
     return JavaScript::D3::Charts::BarChart($data,
@@ -152,6 +153,7 @@ multi js-d3-bar-chart($data,
             :$grid-lines,
             :$margins,
             :$legends,
+            :$horizontal,
             :$format, :$div-id);
 }
 
