@@ -503,6 +503,46 @@ svg.selectAll("mybar")
     .attr("fill", $FILL_COLOR)
 END
 
+my $jsBarChartHorizontalPart = q:to/END/;
+// Obtain data
+var data = $DATA
+
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
+
+// Y axis
+var y = d3.scaleBand()
+  .range([0, height])
+  .domain(data.map(function(d) { return d.x; }))
+  .padding(0.2);
+
+svg.append("g")
+  .call(d3.axisLeft(y))
+  .selectAll("text")
+    .attr("transform", "translate(-10,0)")
+    .style("text-anchor", "end");
+
+// Add X axis
+var x = d3.scaleLinear()
+  .domain([0, valueMax])
+  .range([0, width]);
+
+svg.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x));
+
+// Bars
+svg.selectAll("mybar")
+  .data(data)
+  .enter()
+  .append("rect")
+    .attr("x", function(d) { return 0; })
+    .attr("y", function(d) { return y(d.x); })
+    .attr("height", y.bandwidth())
+    .attr("width", function(d) { return x(d.y); })
+    .attr("fill", $FILL_COLOR)
+END
+
 my $jsMultiBarChartPart = q:to/END/;
 // Obtain data
 var data = $DATA
@@ -525,7 +565,8 @@ var groups = d3.map(data, function(d){return(d.group)}).values()
 var x = d3.scaleBand()
   .domain(groups)
   .range([0, width])
-  .padding([0.2])
+  .padding([0.2]);
+
 svg.append("g")
 .attr("transform", "translate(0," + zeroLocation + ")")
 .call(d3.axisBottom(x).tickSize(0));
@@ -534,7 +575,8 @@ svg.append("g")
 //    .domain([-absMax, absMax]).nice()
 var y = d3.scaleLinear()
     .domain([valueMin, valueMax])
-    .range([ height, 0 ])
+    .range([ height, 0 ]);
+
 svg.append("g")
     .call(d3.axisLeft(y));
 
@@ -583,8 +625,6 @@ svg.append("g")
 END
 
 my $jsBarChartLabelsPart = q:to/BARCHART-PLOT-LABELS/;
-//var plotLabelData = $PLOT_LABELS_DATA
-
 svg.selectAll("mybar")
   .data(data)
   .enter()
@@ -599,20 +639,37 @@ svg.selectAll("mybar")
     .attr("text-anchor", "middle")
 BARCHART-PLOT-LABELS
 
+my $jsBarChartHorizontalLabelsPart = q:to/BARCHARTHOR-PLOT-LABELS/;
+hy = y.bandwidth() * 0.65;
+
+svg.selectAll("mybar")
+  .data(data)
+  .enter()
+  .append("text")
+    .text(function(d) {return d.label})
+    .attr("x", function(d){return x(d.y) + $PLOT_LABELS_Y_OFFSET })
+    .attr("y", function(d){return y(d.x) + hy})
+    .style("fill", $PLOT_LABELS_COLOR)
+    .style("stroke-width", "1px")
+    .style("font-size", $PLOT_LABELS_FONT_SIZE)
+    .attr("font-family", "$PLOT_LABELS_FONT_FAMILY")
+    .attr("text-anchor", "left")
+BARCHARTHOR-PLOT-LABELS
+
 #============================================================
 # BarChart code snippets accessors
 #============================================================
 
-our sub GetBarChartPart() {
-    return $jsBarChartPart;
+our sub GetBarChartPart(Bool :$horizontal = False) {
+    return $horizontal ?? $jsBarChartHorizontalPart !! $jsBarChartPart;
 }
 
 our sub GetMultiBarChartPart() {
     return $jsMultiBarChartPart;
 }
 
-our sub GetBarChartLabelsPart() {
-    return $jsBarChartLabelsPart;
+our sub GetBarChartLabelsPart(Bool :$horizontal = False) {
+    return $horizontal ?? $jsBarChartHorizontalLabelsPart !! $jsBarChartLabelsPart;
 }
 
 #============================================================
