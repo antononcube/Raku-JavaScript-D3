@@ -582,6 +582,23 @@ svg.append("g")
       .attr("fill", d => myColor(d.x));
 END
 
+my $jsBarChartLabelsPart = q:to/BARCHART-PLOT-LABELS/;
+//var plotLabelData = $PLOT_LABELS_DATA
+
+svg.selectAll("mybar")
+  .data(data)
+  .enter()
+  .append("text")
+    .text(function(d) {return d.label})
+    .attr("x", function(d){return x(d.x) + x.bandwidth()/2 })
+    .attr("y", function(d){return y(d.y) - $PLOT_LABELS_Y_OFFSET})
+    .style("fill", $PLOT_LABELS_COLOR)
+    .style("stroke-width", "1px")
+    .style("font-size", $PLOT_LABELS_FONT_SIZE)
+    .attr("font-family", "$PLOT_LABELS_FONT_FAMILY")
+    .attr("text-anchor", "middle")
+BARCHART-PLOT-LABELS
+
 #============================================================
 # BarChart code snippets accessors
 #============================================================
@@ -592,6 +609,10 @@ our sub GetBarChartPart() {
 
 our sub GetMultiBarChartPart() {
     return $jsMultiBarChartPart;
+}
+
+our sub GetBarChartLabelsPart() {
+    return $jsBarChartLabelsPart;
 }
 
 #============================================================
@@ -1079,7 +1100,7 @@ svg.selectAll()
   .style("fill", $PLOT_LABELS_COLOR)
   .style("stroke-width", "1px")
   .style("font-size", $PLOT_LABELS_FONT_SIZE)
-  .attr("font-family", "Courier")
+  .attr("font-family", "$PLOT_LABELS_FONT_FAMILY")
   .html(function(d){ return d.z });
 HEATMAP-PLOT-LABELS
 
