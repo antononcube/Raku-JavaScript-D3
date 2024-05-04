@@ -121,7 +121,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
     # Fill in plot label data
-    if [&&] @data.map({ $_<label> // False }) {
+    if !$hasGroups && ([&&] @data.map({ $_<label> // False })) {
 
         $res = $res ~ "\n" ~ JavaScript::D3::CodeSnippets::GetBarChartLabelsPart();
 
