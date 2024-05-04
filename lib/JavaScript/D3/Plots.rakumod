@@ -224,6 +224,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Numeric :$opacity = 0.7,
                       Str :$plot-labels-color = 'black',
                       :$plot-labels-font-size is copy = Whatever,
+                      Str :$plot-labels-font-family = 'Courier',
                       Str :plot-label(:$title) = '',
                       :$x-tick-labels is copy = Whatever,
                       :$y-tick-labels is copy = Whatever,
@@ -397,6 +398,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst('$PLOT_LABELS_COLOR', '"' ~ $plot-labels-color ~ '"')
                     .subst(:g, '$PLOT_LABELS_FONT_SIZE', $plot-labels-font-size)
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', $plot-labels-font-family)
                     .subst('$PLOT_LABELS_Y_OFFSET', '0');
         }
 
