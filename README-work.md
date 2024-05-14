@@ -2,11 +2,18 @@
 
 [![SparrowCI](https://ci.sparrowhub.io/project/gh-antononcube-Raku-JavaScript-D3/badge)](https://ci.sparrowhub.io)
 
-This repository has the a Raku package for generation of JavaScript's D3 code for making plots and charts.
+This repository has the Raku package for generation of 
+[JavaScript's D3](https://d3js.org/what-is-d3) 
+code for making plots and charts.
 
 This package is intended to be used in Jupyter notebooks with the
-[Raku kernel implemented by Brian Duggan](https://github.com/bduggan/raku-jupyter-kernel), [BD1].
+[Raku kernel implemented by Brian Duggan](https://github.com/bduggan/raku-jupyter-kernel), [BD1], or
+["Jupyter::Chatbook"](https://github.com/antononcube/Raku-Jupyter-Chatbook), [AAp4],
 The commands of the package generate JavaScript code that produces (nice) [D3.js](https://d3js.org/) plots or charts.
+See the video [AAv1].
+
+The package JavaScript graphs can be also included in HTML and Markdown documents.
+See the videos [AAv2, AAv3].
 
 For illustrative examples see the Jupyter notebook
 ["Tests-for-JavaScript-D3"](https://nbviewer.org/github/antononcube/Raku-JavaScript-D3/blob/main/resources/Tests-for-JavaScript-D3.ipynb).
@@ -169,7 +176,7 @@ In the lists below the highest priority items are placed first.
 3. [X] DONE Date list plot
 4. [ ] TODO Box plot
 
-#### Multiple dataset
+#### Multiple datasets
 
 1. [X] DONE List plot
 2. [X] DONE List line plot
@@ -181,6 +188,9 @@ In the lists below the highest priority items are placed first.
 #### Single dataset
 
 1. [X] DONE Bar chart
+   - [X] DONE Vertical   
+   - [X] DONE Horizontal   
+   - [X] DONE Chart label per bar   
 2. [X] DONE Histogram 
 3. [X] DONE Bubble chart
 4. [ ] TODO Density 2D chart -- rectangular bins
@@ -190,9 +200,9 @@ In the lists below the highest priority items are placed first.
 8. [X] DONE Heatmap plot
 9. [X] DONE Chessboard position
 
-#### Multiple dataset
+#### Multiple datasets
 
-1. [ ] TODO Bar chart
+1. [X] TODO Bar chart
 2. [ ] TODO Histogram
 3. [X] DONE Bubble chart
 4. [X] DONE Bubble chart with tooltips
@@ -308,6 +318,11 @@ Writing the Python version was a good brainstorming technique to produce reasona
 (2022),
 [Python-packages at GitHub/antononcube](https://github.com/antononcube/Python-packages).
 
+[AAp4] Anton Antonov,
+[Jupyter::Chatbook Raku package](https://github.com/antononcube/Raku-Jupyter-Chatbook),
+(2023-2024),
+[GitHub/antononcube](https://github.com/antononcube).
+
 [BD1] Brian Duggan,
 [Jupyter::Kernel Raku package](https://raku.land/cpan:BDUGGAN/Jupyter::Kernel),
 (2017-2022),
@@ -328,4 +343,9 @@ Writing the Python version was a good brainstorming technique to produce reasona
 [AAv2] Anton Antonov,
 ["Random mandalas generation (with D3.js via Raku)"](https://www.youtube.com/watch?v=THNnofZEAn4),
 (2022),
+[YouTube/@AAA4Prediction](https://www.youtube.com/@AAA4prediction).
+
+[AAv3] Anton Antonov,
+["Raku Literate Programming via command line pipelines"](https://www.youtube.com/watch?v=2UjAdQaKof8),
+(2023),
 [YouTube/@AAA4Prediction](https://www.youtube.com/@AAA4prediction).
