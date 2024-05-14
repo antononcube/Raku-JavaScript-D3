@@ -640,7 +640,7 @@ svg.selectAll("mybar")
 BARCHART-PLOT-LABELS
 
 my $jsBarChartHorizontalLabelsPart = q:to/BARCHARTHOR-PLOT-LABELS/;
-hy = y.bandwidth() * 0.65;
+var hy = y.bandwidth() * 0.65;
 
 svg.selectAll("mybar")
   .data(data)
