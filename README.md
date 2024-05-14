@@ -8,7 +8,7 @@ code for making plots and charts.
 
 This package is intended to be used in Jupyter notebooks with the
 [Raku kernel implemented by Brian Duggan](https://github.com/bduggan/raku-jupyter-kernel), [BD1], or
-["Jupyter::Chatbook"](https://github.com/antononcube/Raku-Jupyter-Chatbook), [AAp4],
+["Jupyter::Chatbook"](https://github.com/antononcube/Raku-Jupyter-Chatbook), [AAp4].
 The commands of the package generate JavaScript code that produces (nice) [D3.js](https://d3js.org/) plots or charts.
 See the video [AAv1].
 
