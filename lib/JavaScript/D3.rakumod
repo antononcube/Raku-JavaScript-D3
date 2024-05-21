@@ -187,32 +187,8 @@ multi js-d3-histogram($data,
 #| Makes a bubble chart for a list of numeric triplets or list of Maps with key C<<x y z>>.
 proto js-d3-bubble-chart($data, |) is export {*}
 
-multi js-d3-bubble-chart($data,
-                         Str :$background= 'white',
-                         Str :$color= 'steelblue',
-                         Numeric :$opacity = 0.7,
-                         :$width = 600, :$height = 400,
-                         Str :plot-label(:$title) = '',
-                         Str :x-label(:$x-axis-label) = '',
-                         Str :y-label(:$y-axis-label) = '',
-                         :$grid-lines = False,
-                         :$margins = Whatever,
-                         :$tooltip = Whatever,
-                         :$legends = Whatever,
-                         Str :$format = 'jupyter',
-                         :$div-id = Whatever) {
-    return JavaScript::D3::Charts::BubbleChart($data,
-            :$background,
-            :$color,
-            :$opacity,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$grid-lines,
-            :$margins,
-            :$tooltip,
-            :$legends,
-            :$format, :$div-id);
+multi js-d3-bubble-chart($data, *%args) {
+    return JavaScript::D3::Charts::BubbleChart($data, |%args);
 }
 
 #============================================================
