@@ -99,14 +99,15 @@ var svg = d3
 
 // Obtain title
 var title = $TITLE
+var titleFontSize = $TITLE_FONT_SIZE
 
 if ( title.length > 0 ) {
     svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
         .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        //.style("text-decoration", "underline")
+        .style("font-size", titleFontSize.toString() + "px")
+        .style("fill", $TITLE_FILL)
         .text(title);
 }
 END
@@ -114,7 +115,7 @@ END
 my $jsPlotAxesLabels = q:to/END/;
 // Obtain x-axis label
 var xAxisLabel = $X_AXIS_LABEL
-var xAxisLabelFontSize = 12
+var xAxisLabelFontSize = $X_AXIS_LABEL_FONT_SIZE
 
 if ( xAxisLabel.length > 0 ) {
     svg.append("text")
@@ -122,12 +123,13 @@ if ( xAxisLabel.length > 0 ) {
         .attr("y", height + margin.bottom - xAxisLabelFontSize/2)
         .attr("text-anchor", "middle")
         .style("font-size", xAxisLabelFontSize.toString() + "px")
+        .style("fill", $X_AXIS_LABEL_FILL)
         .text(xAxisLabel);
 }
 
 // Obtain y-axis label
 var yAxisLabel = $Y_AXIS_LABEL
-var yAxisLabelFontSize = 12
+var yAxisLabelFontSize = $Y_AXIS_LABEL_FONT_SIZE
 
 if ( yAxisLabel.length > 0 ) {
     svg.append("text")
@@ -136,6 +138,7 @@ if ( yAxisLabel.length > 0 ) {
         .attr("y", 0 - margin.left + yAxisLabelFontSize)
         .attr("text-anchor", "middle")
         .style("font-size", yAxisLabelFontSize.toString() + "px")
+        .style("fill", $Y_AXIS_LABEL_FILL)
         .text(yAxisLabel);
 }
 END
@@ -739,7 +742,7 @@ var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
 // Add a scale for bubble size
 const z = d3.scaleLinear()
     .domain([zMin, zMax])
-    .range([1, 40]);
+    .range([$Z_RANGE_MIN, $Z_RANGE_MAX]);
 
 // Add dots
 svg.append('g')
@@ -762,7 +765,7 @@ var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
 // Add a scale for bubble size
 const z = d3.scaleLinear()
     .domain([zMin, zMax])
-    .range([1, 40]);
+    .range([$Z_RANGE_MIN, $Z_RANGE_MAX]);
 
 // Add a scale for bubble color
 var myColor = d3.scaleOrdinal()
@@ -790,7 +793,7 @@ var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
 // Add a scale for bubble size
 const z = d3.scaleLinear()
     .domain([zMin, zMax])
-    .range([1, 40]);
+    .range([$Z_RANGE_MIN, $Z_RANGE_MAX]);
 
 // Add a scale for bubble color
 var myColor = d3.scaleOrdinal()

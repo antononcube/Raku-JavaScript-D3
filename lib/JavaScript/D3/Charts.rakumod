@@ -217,14 +217,22 @@ our multi BubbleChart($data where is-positional-of-lists($data, 2), *%args) {
 }
 
 our multi BubbleChart(@data is copy where @data.all ~~ Map,
+                      Numeric :$z-range-min = 1,
+                      Numeric :$z-range-max = 40,
                       Str :$background= 'white',
                       Str :$color= 'steelblue',
                       Numeric :$opacity = 0.7,
                       :$width = 600,
                       :$height = 600,
                       Str :plot-label(:$title) = '',
-                      Str :$x-axis-label = '',
-                      Str :$y-axis-label = '',
+                      UInt :plot-label-font-size(:$title-font-size) = 16,
+                      Str :plot-label-colir(:$title-color) = 'Black',
+                      Str :x-label(:$x-axis-label) = '',
+                      Str :x-label-color(:$x-axis-label-color) = 'Black',
+                      UInt :x-label-font-size(:$x-axis-label-font-size) = 12,
+                      Str :y-label(:$y-axis-label) = '',
+                      Str :y-label-color(:$y-axis-label-color) = 'Black',
+                      UInt :y-label-font-size(:$y-axis-label-font-size) = 12,
                       :$grid-lines is copy = False,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
@@ -277,13 +285,22 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$OPACITY', '"' ~ $opacity ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
-            .subst(:g, '$LEGEND_Y_GAP', '25');
+            .subst(:g, '$LEGEND_Y_GAP', '25')
+            .subst(:g, '$Z_RANGE_MIN', $z-range-min)
+            .subst(:g, '$Z_RANGE_MAX', $z-range-max);
+
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
@@ -311,7 +328,11 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      :$height = 600,
                      Str :plot-label(:$title) = '',
                      Str :$x-axis-label = '',
+                     UInt :$x-axis-label-font-size = 12;
+                     Str :$x-axis-label-color = 'Black';
                      Str :$y-axis-label = '',
+                     UInt :$y-axis-label-font-size = 12;
+                     Str :$y-axis-label-color = 'Black';
                      :$grid-lines is copy = False,
                      :$margins is copy = Whatever,
                      :$method is copy = Whatever,
@@ -338,7 +359,11 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
