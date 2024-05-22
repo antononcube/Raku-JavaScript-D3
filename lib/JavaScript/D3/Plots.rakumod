@@ -38,8 +38,14 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           :$width = 600,
                           :$height = 400,
                           Str :plot-label(:$title) = '',
-                          Str :$x-axis-label = '',
-                          Str :$y-axis-label = '',
+                          UInt :plot-label-font-size(:$title-font-size) = 16,
+                          Str :plot-label-color(:$title-color) = 'Black',
+                          Str :x-label(:$x-axis-label) = '',
+                          :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                          :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                          Str :y-label(:$y-axis-label) = '',
+                          :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                          :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                           :$grid-lines is copy = False,
                           :$margins is copy = Whatever,
                           :$legends = Whatever,
@@ -51,6 +57,18 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :$dataScalesAndAxesCode!,
                           Str :$dataAndScalesCode!
                           ) {
+    # Process labels colors and font sizes
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
+
+    # Process data
     my $jsData = to-json(@data, :!pretty);
 
     # Process margins
@@ -88,8 +106,14 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$LINE_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
@@ -166,7 +190,8 @@ our multi DateListPlot($data where is-str-time-series($data),
                        :$legends = Whatever,
                        Bool :$axes = True,
                        Str :$format = 'jupyter',
-                       :$div-id = Whatever
+                       :$div-id = Whatever,
+                       *%args
                        ) {
     my $res =
             ListPlotGeneric($data,
@@ -186,7 +211,9 @@ our multi DateListPlot($data where is-str-time-series($data),
                     singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
                     multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
                     dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(),
-                    dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales());
+                    dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales(),
+                    |%args
+            );
 
     $res = $res.subst(:g, '$TIME_PARSE_SPEC', '"' ~ $time-parse-spec ~ '"');
 
@@ -217,6 +244,15 @@ our multi HeatmapPlot($data where is-positional-of-lists($data, 2), *%args) {
 our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$width is copy = 600,
                       :$height is copy = 600,
+                      Str :plot-label(:$title) = '',
+                      UInt :plot-label-font-size(:$title-font-size) = 16,
+                      Str :plot-label-color(:$title-color) = 'Black',
+                      Str :x-label(:$x-axis-label) = '',
+                      :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                      :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                      Str :y-label(:$y-axis-label) = '',
+                      :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                      :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                       Str :$color-palette = 'Inferno',
                       Str :$background = 'white',
                       Str :$tick-labels-color = 'black',
@@ -225,7 +261,6 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$plot-labels-color = 'black',
                       :$plot-labels-font-size is copy = Whatever,
                       Str :$plot-labels-font-family = 'Courier',
-                      Str :plot-label(:$title) = '',
                       :$x-tick-labels is copy = Whatever,
                       :$y-tick-labels is copy = Whatever,
                       Bool :$sort-tick-labels = True,
@@ -239,6 +274,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$div-id = Whatever
                       ) {
 
+    #-------------------------------------------------------
+    # Process width & height
+    #-------------------------------------------------------
     given ($width, $height) {
         when (Whatever, Whatever) {
             $width = 600; $height = 600;
@@ -254,6 +292,19 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
             die 'The arguments $width and $height are expected to positive integers or Whatever.';
         }
     }
+
+    #-------------------------------------------------------
+    # Process labels colors and font sizes
+    #-------------------------------------------------------
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
 
     # Get values
     my @values = @data.map(*<z>).Array;
@@ -377,9 +428,17 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$TICK_LABELS_FONT_SIZE', $tick-labels-font-size)
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
-                .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
                 .subst(:g, '$X_TICK_LABELS', $x-tick-labels ?? to-json($x-tick-labels.Array, :!pretty) !! '[]')
                 .subst(:g, '$Y_TICK_LABELS', $y-tick-labels ?? to-json($y-tick-labels.Array, :!pretty) !! '[]')
+                .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+                .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
+                .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
+                .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+                .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
+                .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+                .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+                .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
+                .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
                 .subst(:g, '$MARGINS', to-json($margins):!pretty)
                 .subst(:g, '$LOW_VALUE', $low-value)
                 .subst(:g, '$HIGH_VALUE', $high-value);

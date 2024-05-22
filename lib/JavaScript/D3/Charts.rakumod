@@ -34,8 +34,14 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
                    :$width = 600,
                    :$height = 400,
                    Str :plot-label(:$title) = '',
-                   Str :$x-axis-label = '',
-                   Str :$y-axis-label = '',
+                   UInt :plot-label-font-size(:$title-font-size) = 16,
+                   Str :plot-label-color(:$title-color) = 'Black',
+                   Str :x-label(:$x-axis-label) = '',
+                   :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                   :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                   Str :y-label(:$y-axis-label) = '',
+                   :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                   :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                    Str :$plot-labels-color = 'black',
                    Str :$plot-labels-font-family = 'Courier',
                    :$plot-labels-font-size is copy = Whatever,
@@ -46,6 +52,20 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
                    Str :$format = 'jupyter',
                    :$div-id = Whatever
                    ) {
+
+    #-------------------------------------------------------
+    # Process labels colors and font sizes
+    #-------------------------------------------------------
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
+
     #-------------------------------------------------------
     # Process $plot-labels-font-size
     #-------------------------------------------------------
@@ -116,8 +136,14 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
@@ -157,13 +183,32 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                     :$width = 600,
                     :$height = 400,
                     Str :plot-label(:$title) = '',
-                    Str :$x-axis-label = '',
-                    Str :$y-axis-label = '',
+                    UInt :plot-label-font-size(:$title-font-size) = 16,
+                    Str :plot-label-color(:$title-color) = 'Black',
+                    Str :x-label(:$x-axis-label) = '',
+                    :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                    :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                    Str :y-label(:$y-axis-label) = '',
+                    :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                    :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                     :$grid-lines is copy = False,
                     :$margins is copy = Whatever,
                     Str :$format = 'jupyter',
                     :$div-id = Whatever
                     ) {
+
+    # Process labels colors and font sizes
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
+
+    # Process data
     my $jsData = to-json(@data, :!pretty);
 
     # Grid lines
@@ -183,8 +228,14 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
             .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
@@ -226,13 +277,13 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       :$height = 600,
                       Str :plot-label(:$title) = '',
                       UInt :plot-label-font-size(:$title-font-size) = 16,
-                      Str :plot-label-colir(:$title-color) = 'Black',
+                      Str :plot-label-color(:$title-color) = 'Black',
                       Str :x-label(:$x-axis-label) = '',
-                      Str :x-label-color(:$x-axis-label-color) = 'Black',
-                      UInt :x-label-font-size(:$x-axis-label-font-size) = 12,
+                      :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                      :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
                       Str :y-label(:$y-axis-label) = '',
-                      Str :y-label-color(:$y-axis-label-color) = 'Black',
-                      UInt :y-label-font-size(:$y-axis-label-font-size) = 12,
+                      :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                      :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                       :$grid-lines is copy = False,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
@@ -240,6 +291,18 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
+
+    # Process labels colors and font sizes
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
+
     # Grid lines
     $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
 

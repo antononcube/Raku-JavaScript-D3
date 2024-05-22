@@ -174,6 +174,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABELS_COLOR', '"white"')
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
 
             @chessData = @white-data.clone.map({ merge-hash($_, %( z => %chess-to-html{%chess-pieces{$_<z>} // $_<z>})) });
@@ -186,6 +187,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABELS_COLOR', "\"$whites-stroke-color\"")
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
         }
 
@@ -203,6 +205,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABELS_COLOR', '"black"')
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
         }
     }

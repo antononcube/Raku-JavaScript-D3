@@ -35,152 +35,40 @@ multi js-d3-config(:$v = 7, Bool :$direct = True) is export {
 #| Makes a list plot (scatter plot) for a list of numbers or a list of x-y coordinates.
 proto js-d3-list-plot($data, |) is export {*}
 
-multi js-d3-list-plot($data,
-                      Str :$background= 'white',
-                      Str :$color= 'steelblue',
-                      :$width = 600, :$height = 400,
-                      Str :plot-label(:$title) = '',
-                      Str :x-label(:$x-axis-label) = '',
-                      Str :y-label(:$y-axis-label) = '',
-                      :$grid-lines = False,
-                      :$margins = Whatever,
-                      :$legends = Whatever,
-                      Bool :$axes = True,
-                      Str :$format = 'jupyter',
-                      :$div-id = Whatever) {
-    return JavaScript::D3::Plots::ListPlot($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$grid-lines,
-            :$margins,
-            :$legends,
-            :$axes,
-            :$format, :$div-id);
+multi js-d3-list-plot($data, *%args) {
+    return JavaScript::D3::Plots::ListPlot($data, |%args);
 }
 
 #============================================================
 #| Makes a list line plot for a list of numbers or a list of x-y coordinates.
 proto js-d3-list-line-plot($data, |) is export {*}
 
-multi js-d3-list-line-plot($data,
-                           Str :$background= 'white',
-                           Str :$color= 'steelblue',
-                           :$width = 600, :$height = 400,
-                           Str :plot-label(:$title) = '',
-                           Str :x-label(:$x-axis-label) = '',
-                           Str :y-label(:$y-axis-label) = '',
-                           :$grid-lines = False,
-                           :$margins = Whatever,
-                           :$legends = Whatever,
-                           Bool :$axes = True,
-                           Str :$format = 'jupyter',
-                           :$div-id = Whatever) {
-    return JavaScript::D3::Plots::ListLinePlot($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$grid-lines,
-            :$margins,
-            :$legends,
-            :$axes,
-            :$format, :$div-id);
+multi js-d3-list-line-plot($data, *%args) {
+    return JavaScript::D3::Plots::ListLinePlot($data, |%args);
 }
 
 #============================================================
 #| Makes a list line plot for a list of numbers or a list of x-y coordinates.
 proto js-d3-date-list-plot($data, |) is export {*}
 
-multi js-d3-date-list-plot($data,
-                           Str :$background= 'white',
-                           Str :$color= 'steelblue',
-                           :$width = 600, :$height = 400,
-                           Str :plot-label(:$title) = '',
-                           Str :date-axis-label(:$x-axis-label) = '',
-                           Str :value-axis-label(:$y-axis-label) = '',
-                           Str :$time-parse-spec = "%Y-%m-%d",
-                           :$grid-lines = False,
-                           :$margins = Whatever,
-                           :$legends = Whatever,
-                           Bool :$axes = True,
-                           Str :$format = 'jupyter',
-                           :$div-id = Whatever) {
-    return JavaScript::D3::Plots::DateListPlot($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$time-parse-spec,
-            :$grid-lines,
-            :$margins,
-            :$legends,
-            :$axes,
-            :$format, :$div-id);
+multi js-d3-date-list-plot($data, *%args) {
+    return JavaScript::D3::Plots::DateListPlot($data, |%args);
 }
 
 #============================================================
 #| Makes a bar chart for a list of numbers, hash with numeric values, or a dataset with columns C<<Label Value>>.
 proto js-d3-bar-chart($data, |) is export {*}
 
-multi js-d3-bar-chart($data,
-                      Str :$background= 'white',
-                      Str :$color= 'steelblue',
-                      :$width = 600, :$height = 400,
-                      Str :plot-label(:$title) = '',
-                      Str :x-label(:$x-axis-label) = '',
-                      Str :y-label(:$y-axis-label) = '',
-                      Str :$plot-labels-color = 'black',
-                      Str :$plot-labels-font-family = 'Courier',
-                      :$plot-labels-font-size is copy = Whatever,
-                      :$grid-lines = False,
-                      :$margins = Whatever,
-                      :$legends = Whatever,
-                      Bool :$horizontal = False,
-                      Str :$format = 'jupyter',
-                      :$div-id = Whatever) {
-    return JavaScript::D3::Charts::BarChart($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$plot-labels-color, :$plot-labels-font-family, :$plot-labels-font-size,
-            :$grid-lines,
-            :$margins,
-            :$legends,
-            :$horizontal,
-            :$format, :$div-id);
+multi js-d3-bar-chart($data, *%args) {
+    return JavaScript::D3::Charts::BarChart($data, |%args);
 }
 
 #============================================================
 #| Makes a histogram for a list of numbers.
 proto js-d3-histogram($data, |) is export {*}
 
-multi js-d3-histogram($data,
-                      Str :$background= 'white',
-                      Str :$color= 'steelblue',
-                      :$width = 600, :$height = 400,
-                      Str :plot-label(:$title) = '',
-                      Str :x-label(:$x-axis-label) = '',
-                      Str :y-label(:$y-axis-label) = '',
-                      :$grid-lines = False,
-                      :$margins = Whatever,
-                      Str :$format = 'jupyter',
-                      :$div-id = Whatever) {
-    return JavaScript::D3::Charts::Histogram($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$x-axis-label, :$y-axis-label,
-            :$grid-lines,
-            :$margins,
-            :$format, :$div-id);
+multi js-d3-histogram($data, *%args) {
+    return JavaScript::D3::Charts::Histogram($data, |%args);
 }
 
 #============================================================

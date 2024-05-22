@@ -74,6 +74,59 @@ multi sub RecordColumns(@data where @data.all ~~ Map) {
 # Normalize records
 #============================================================
 
+our sub ProcessLabelsColorsAndFontSizes(
+        UInt :$title-font-size!,
+        Str :$title-color!,
+        :$x-axis-label-color is copy = Whatever,
+        :$x-axis-label-font-size is copy = Whatever,
+        :$y-axis-label-color is copy = Whatever,
+        :$y-axis-label-font-size is copy = Whatever) {
+
+    # Labels color
+    given ($x-axis-label-color, $y-axis-label-color) {
+        when (Whatever, Whatever) {
+            $x-axis-label-color = $title-color;
+            $y-axis-label-color = $title-color
+        }
+        when $_.head.isa(Whatever) && $_.tail ~~ Str:D {
+            $x-axis-label-color =  $y-axis-label-color;
+        }
+        when $_.head ~~ Str:D && $_.tail.isa(Whatever) {
+            $y-axis-label-color =  $x-axis-label-color;
+        }
+        default {
+            $x-axis-label-color = 'Black';
+            $y-axis-label-color = 'Black';
+        }
+    }
+
+    # Labels font size
+    given ($x-axis-label-font-size, $y-axis-label-font-size) {
+        when (Whatever, Whatever) {
+            $x-axis-label-font-size = max(4, round($title-font-size * 3 /4));
+            $y-axis-label-font-size = max(4, round($title-font-size * 3 /4));
+        }
+        when $_.head.isa(Whatever) && $_.tail ~~ Str:D {
+            $x-axis-label-font-size =  $y-axis-label-font-size;
+        }
+        when $_.head ~~ Str:D && $_.tail.isa(Whatever) {
+            $y-axis-label-font-size =  $x-axis-label-font-size;
+        }
+        default {
+            $x-axis-label-font-size = 12;
+            $y-axis-label-font-size = 12;
+        }
+    }
+
+
+    # Return
+    return [$x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size];
+}
+
+#============================================================
+# Normalize records
+#============================================================
+
 our proto NormalizeData($data,
                         :$columns-from = Whatever,
                         :$columns-to = Whatever) {*}

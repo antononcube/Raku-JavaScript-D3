@@ -814,24 +814,32 @@ const tooltip = d3.select(element.get(0))
 const showTooltip = function(event, d) {
     tooltip
       .transition()
-      .duration(200)
+      .duration(200);
+
+    let tooltipContent = "Group: " + d.group + '<br/>z: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString();
+    if (d.label) {
+        tooltipContent = "Label: " + d.label + '<br/>' + tooltipContent;
+    }
+
     tooltip
       .style("opacity", 1)
-      .html("Group: " + d.group + '<br/>z: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString())
+      .html(tooltipContent)
       .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2+10 + "px")
-  }
-  const moveTooltip = function(event, d) {
-    tooltip
-      .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2+10 + "px")
-  }
-  const hideTooltip = function(event, d) {
-    tooltip
-      .transition()
-      .duration(200)
-      .style("opacity", 0)
-  }
+      .style("top", (event.y)/2 + 10 + "px");
+};
+
+const moveTooltip = function(event, d) {
+tooltip
+  .style("left", (event.x)/2 + "px")
+  .style("top", (event.y)/2+10 + "px")
+};
+
+const hideTooltip = function(event, d) {
+tooltip
+  .transition()
+  .duration(200)
+  .style("opacity", 0)
+};
 
 // Add dots
   svg.append('g')
