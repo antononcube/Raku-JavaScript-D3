@@ -248,6 +248,97 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
+
+#============================================================
+# Box-Whisker chart
+#============================================================
+
+#| Makes a histogram for a list of numbers.
+our proto BoxWhiskerChart($data, |) is export {*}
+
+our multi BoxWhiskerChart($data where $data ~~ Seq, *%args) {
+    return BoxWhiskerChart($data.List, |%args);
+}
+
+our multi BoxWhiskerChart(@data where @data.all ~~ Numeric, *%args) {
+    my @data2 = |@data.map({ %( group => 'all', value => $_ ) }).List;
+    note @data2.raku;
+    note @data2.all ~~ Map:D;
+    return BoxWhiskerChart(@data2, |%args);
+}
+
+our multi BoxWhiskerChart(@data where @data.all ~~ Map:D,
+                          Str :group(:$group-column-name) = 'group',
+                          Str :value(:$value-column-name) = 'value',
+                          UInt :$box-width = 50,
+                          Str :$background = 'white',
+                          Str :$color = 'steelblue',
+                          :$width = 600,
+                          :$height = 400,
+                          Str :plot-label(:$title) = '',
+                          UInt :plot-label-font-size(:$title-font-size) = 16,
+                          Str :plot-label-color(:$title-color) = 'Black',
+                          Str :x-label(:$x-axis-label) = '',
+                          :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                          :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                          Str :y-label(:$y-axis-label) = '',
+                          :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                          :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                          :$grid-lines is copy = False,
+                          :$margins is copy = Whatever,
+                          Str :$format = 'jupyter',
+                          :$div-id = Whatever
+                    ) {
+
+    # Process labels colors and font sizes
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size
+            );
+
+    # Process data
+    my $jsData = to-json(@data, :!pretty);
+
+    # Grid lines
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
+
+    # Margins
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    # Stencil code
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
+                   JavaScript::D3::CodeSnippets::GetBoxWhiskerChartPart].join("\n");
+
+    # Concrete values
+    my $res = $jsChart
+            .subst('$DATA', $jsData)
+            .subst('$GROUP_COLUMN', '"' ~ $group-column-name ~ '"')
+            .subst('$VALUE_COLUMN', '"' ~ $value-column-name ~ '"')
+            .subst('$BOX_WIDTH', $box-width)
+            .subst('$DATA', $jsData)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$WIDTH', $width.Str)
+            .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
+            .subst(:g, '$TITLE', '"' ~ $title ~ '"')
+            .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
+            .subst(:g, '$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
 #============================================================
 # BubbleChart
 #============================================================
