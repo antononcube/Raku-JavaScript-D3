@@ -173,11 +173,16 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
 #| Makes a histogram for a list of numbers.
 our proto Histogram($data, |) is export {*}
 
+our multi Histogram($data, UInt $number-of-bins, *%args) {
+    return Histogram($data, :$number-of-bins, |%args);
+}
+
 our multi Histogram($data where $data ~~ Seq, *%args) {
     return Histogram($data.List, |%args);
 }
 
 our multi Histogram(@data where @data.all ~~ Numeric,
+                    UInt :bins(:$number-of-bins) = 20,
                     Str :$background= 'white',
                     Str :$color= 'steelblue',
                     :$width = 600,
@@ -224,6 +229,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     # Concrete values
     my $res = $jsChart
             .subst('$DATA', $jsData)
+            .subst('$NUMBER_OF_BINS', $number-of-bins)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)

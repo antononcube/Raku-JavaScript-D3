@@ -698,7 +698,7 @@ svg.append("g")
 var histogram = d3.histogram()
       .value(function(d) { return d; })  // I need to give the vector of value
       .domain(x.domain())  // then the domain of the graphic
-      .thresholds(x.ticks(70)); // then the numbers of bins
+      .thresholds(x.ticks($NUMBER_OF_BINS)); // then the numbers of bins
 
 // And apply this function to data to get the bins
 var bins = histogram(data);

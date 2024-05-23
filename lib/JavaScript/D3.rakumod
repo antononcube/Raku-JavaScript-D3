@@ -67,6 +67,10 @@ multi js-d3-bar-chart($data, *%args) {
 #| Makes a histogram for a list of numbers.
 proto js-d3-histogram($data, |) is export {*}
 
+multi js-d3-histogram($data, UInt $number-of-bins, *%args) {
+    return JavaScript::D3::Charts::Histogram($data, :$number-of-bins, |%args);
+}
+
 multi js-d3-histogram($data, *%args) {
     return JavaScript::D3::Charts::Histogram($data, |%args);
 }
