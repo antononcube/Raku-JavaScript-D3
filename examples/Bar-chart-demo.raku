@@ -34,6 +34,7 @@ spurt $*CWD ~ '/bar-chart.html',
                 width => 800,
                 grid-lines => (12, Whatever),
                 plot-labels-font-size => 12,
+                title-color => 'Blue',
                 margins => %(left => 120, bottom => 40),
                 title => 'Number of cities per state',
                 format => 'html');
