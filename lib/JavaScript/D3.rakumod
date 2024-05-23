@@ -76,6 +76,15 @@ multi js-d3-histogram($data, *%args) {
 }
 
 #============================================================
+#| Makes a box-whisker chart for a list of numbers or data with group and value fields.
+proto js-d3-box-whisker-chart($data, |) is export {*}
+
+multi js-d3-box-whisker-chart($data, *%args) {
+    return JavaScript::D3::Charts::BoxWhiskerChart($data, |%args);
+}
+
+
+#============================================================
 #| Makes a bubble chart for a list of numeric triplets or list of Maps with key C<<x y z>>.
 proto js-d3-bubble-chart($data, |) is export {*}
 
