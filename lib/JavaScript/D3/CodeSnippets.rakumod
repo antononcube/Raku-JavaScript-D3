@@ -427,6 +427,63 @@ our sub GetPlotDateDataScalesAndAxes() {
 #============================================================
 # Box-Whisker code snippets
 #============================================================
+my $jsBoxWhiskerPlot = q:to/END/;
+// Obtain data
+var data = $DATA
+
+// Compute summary statistics used for the box:
+var data_sorted = data.sort(d3.ascending)
+var q1 = d3.quantile(data_sorted, .25)
+var median = d3.quantile(data_sorted, .5)
+var q3 = d3.quantile(data_sorted, .75)
+var interQuantileRange = q3 - q1
+var min = q1 - 1.5 * interQuantileRange
+var max = q1 + 1.5 * interQuantileRange
+
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+
+// Show the Y scale
+var y = d3.scaleLinear()
+  .domain([valueMin,valueMax])
+  .range([height, 0]);
+svg.call(d3.axisLeft(y))
+
+// a few features for the box
+var center = width / 2
+var boxWidth = $BOX_WIDTH
+
+// Show the main vertical line
+svg
+.append("line")
+  .attr("x1", center)
+  .attr("x2", center)
+  .attr("y1", y(min) )
+  .attr("y2", y(max) )
+  .attr("stroke", $STROKE_COLOR)
+
+// Show the box
+svg
+.append("rect")
+  .attr("x", center - boxWidth/2)
+  .attr("y", y(q3) )
+  .attr("height", (y(q1)-y(q3)) )
+  .attr("width", boxWidth )
+  .attr("stroke", "black")
+  .style("fill", $FILL_COLOR)
+
+// show median, min and max horizontal lines
+svg
+.selectAll("toto")
+.data([min, median, max])
+.enter()
+.append("line")
+  .attr("x1", center-boxWidth/2)
+  .attr("x2", center+boxWidth/2)
+  .attr("y1", function(d){ return(y(d))} )
+  .attr("y2", function(d){ return(y(d))} )
+  .attr("stroke", $STROKE_COLOR)
+END
 
 my $jsMultiBoxWhiskerPlot = q:to/END/;
 // Obtain data
@@ -516,6 +573,10 @@ END
 #============================================================
 
 our sub GetBoxWhiskerChartPart() {
+    return $jsBoxWhiskerPlot;
+}
+
+our sub GetMultiBoxWhiskerChartPart() {
     return $jsMultiBoxWhiskerPlot;
 }
 
