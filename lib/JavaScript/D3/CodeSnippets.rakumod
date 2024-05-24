@@ -440,6 +440,8 @@ var interQuantileRange = q3 - q1
 var min = q1 - 1.5 * interQuantileRange
 var max = q1 + 1.5 * interQuantileRange
 
+var outliers = data.filter(d => d < min || max < d);
+
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
@@ -471,6 +473,19 @@ svg
   .attr("width", boxWidth )
   .attr("stroke", "black")
   .style("fill", $FILL_COLOR)
+
+if ($OUTLIERS) {
+    svg
+      .selectAll("whatever")
+      .data(outliers)
+      .enter()
+      .append("circle")
+        .attr("cy", function(d){ return y(d) })
+        .attr("cx", center)
+        .attr("r", 2)
+        .attr("color", "blue")
+        .attr("fill", $STROKE_COLOR)
+}
 
 // show median, min and max horizontal lines
 svg
