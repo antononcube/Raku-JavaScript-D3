@@ -261,12 +261,14 @@ our multi BoxWhiskerChart($data where $data ~~ Seq, *%args) {
 }
 
 our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
+                          Bool :$outliers = True,
+                          Bool :$horizontal = False,
                           UInt :$box-width = 50,
                           Str :$background = 'white',
                           Str :color(:$fill-color) = 'steelblue',
                           Str :$stroke-color = 'black',
-                          :$width = 200,
-                          :$height = 400,
+                          :$width is copy = Whatever,
+                          :$height is copy = Whatever,
                           Str :plot-label(:$title) = '',
                           UInt :plot-label-font-size(:$title-font-size) = 16,
                           Str :plot-label-color(:$title-color) = 'Black',
@@ -281,6 +283,9 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
                           Str :$format = 'jupyter',
                           :$div-id = Whatever
                           ) {
+
+    # Process width and height
+    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, :$horizontal, aspect-ratio => 2);
 
     # Process labels colors and font sizes
     ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
@@ -304,12 +309,13 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
 
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-                   JavaScript::D3::CodeSnippets::GetBoxWhiskerChartPart].join("\n");
+                   JavaScript::D3::CodeSnippets::GetBoxWhiskerChartPart(:$horizontal)].join("\n");
 
     # Concrete values
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BOX_WIDTH', $box-width)
+            .subst(:g, '$OUTLIERS', $outliers ?? 'true' !! 'false')
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
@@ -331,6 +337,8 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
 }
 
 our multi BoxWhiskerChart(@data where @data.all ~~ Map:D,
+                          Bool :$outliers = True,
+                          Bool :$horizontal = False,
                           Str :group(:$group-column-name) = 'group',
                           Str :value(:$value-column-name) = 'value',
                           UInt :$box-width = 50,
@@ -388,6 +396,7 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Map:D,
             .subst('$GROUP_COLUMN', '"' ~ $group-column-name ~ '"')
             .subst('$VALUE_COLUMN', '"' ~ $value-column-name ~ '"')
             .subst('$BOX_WIDTH', $box-width)
+            .subst(:g, '$OUTLIERS', $outliers ?? 'TRUE' !! 'FALSE')
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')

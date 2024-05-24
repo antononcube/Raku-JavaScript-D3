@@ -485,6 +485,80 @@ svg
   .attr("stroke", $STROKE_COLOR)
 END
 
+my $jsHorizonalBoxWhiskerPlot = q:to/END/;
+// Obtain data
+var data = $DATA
+
+// Compute summary statistics used for the box:
+var data_sorted = data.sort(d3.ascending)
+var q1 = d3.quantile(data_sorted, .25)
+var median = d3.quantile(data_sorted, .5)
+var q3 = d3.quantile(data_sorted, .75)
+var interQuantileRange = q3 - q1
+var min = q1 - 1.5 * interQuantileRange
+var max = q1 + 1.5 * interQuantileRange
+
+var outliers = data.filter(d => d < min || max < d);
+
+var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
+var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
+
+// Show the X scale
+var x = d3.scaleLinear()
+  .domain([valueMin,valueMax])
+  .range([0, width]);
+
+svg.call(d3.axisBottom(x))
+
+// a few features for the box
+var center = height / 2
+var boxWidth = $BOX_WIDTH
+
+// Show the main vertical line
+svg
+.append("line")
+  .attr("y1", center)
+  .attr("y2", center)
+  .attr("x1", x(min) )
+  .attr("x2", x(max) )
+  .attr("stroke", $STROKE_COLOR)
+
+// Show the box
+svg
+.append("rect")
+  .attr("x", x(q1) )
+  .attr("y", center - boxWidth/2)
+  .attr("width", (x(q3)-x(q1)) )
+  .attr("height", boxWidth )
+  .attr("stroke", "black")
+  .style("fill", $FILL_COLOR)
+
+if ($OUTLIERS) {
+    svg
+      .selectAll("whatever")
+      .data(outliers)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d){ return x(d) })
+        .attr("cy", center)
+        .attr("r", 2)
+        .attr("color", "blue")
+        .attr("fill", $STROKE_COLOR)
+}
+
+// show median, min and max horizontal lines
+svg
+.selectAll("toto")
+.data([min, median, max])
+.enter()
+.append("line")
+  .attr("y1", center-boxWidth/2)
+  .attr("y2", center+boxWidth/2)
+  .attr("x1", function(d){ return(x(d))} )
+  .attr("x2", function(d){ return(x(d))} )
+  .attr("stroke", $STROKE_COLOR)
+END
+
 my $jsMultiBoxWhiskerPlot = q:to/END/;
 // Obtain data
 var data = $DATA
@@ -572,8 +646,8 @@ END
 # Box-Whisker code accessors
 #============================================================
 
-our sub GetBoxWhiskerChartPart() {
-    return $jsBoxWhiskerPlot;
+our sub GetBoxWhiskerChartPart(Bool :$horizontal=False) {
+    return $horizontal ?? $jsHorizonalBoxWhiskerPlot !! $jsBoxWhiskerPlot;
 }
 
 our sub GetMultiBoxWhiskerChartPart() {
