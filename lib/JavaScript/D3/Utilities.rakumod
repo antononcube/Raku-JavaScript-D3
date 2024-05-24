@@ -71,7 +71,7 @@ multi sub RecordColumns(@data where @data.all ~~ Map) {
 }
 
 #============================================================
-# Normalize records
+# Labels colors and font sizes
 #============================================================
 
 our sub ProcessLabelsColorsAndFontSizes(
@@ -121,6 +121,36 @@ our sub ProcessLabelsColorsAndFontSizes(
 
     # Return
     return [$x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size];
+}
+
+#============================================================
+# Width and height
+#============================================================
+
+our sub ProcessWidthAndHeight(:$width! is copy,
+                              :$height! is copy,
+                              Bool :$horizontal = False,
+                              Numeric :$aspect-ratio = 3 / 2 ) {
+
+    given ($width, $height) {
+        when $_.head.isa(Whatever) && $_.tail ~~ UInt:D {
+           $width = $horizontal ?? $height * $aspect-ratio !! $height * 1 / $aspect-ratio;
+        }
+        when $_.head ~~ UInt:D && $_.tail.isa(Whatever) {
+           $height = $horizontal ?? $width * 1 / $aspect-ratio !! $width * $aspect-ratio;
+        }
+        default {
+            if $horizontal {
+                $width = 400;
+                $height = 600;
+            } else {
+                $width = 600;
+                $height = 400;
+            }
+        }
+    }
+
+    return ($width, $height);
 }
 
 #============================================================
