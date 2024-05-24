@@ -285,7 +285,7 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
                           ) {
 
     # Process width and height
-    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, :$horizontal, aspect-ratio => 2);
+    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => $horizontal ?? 1/2 !! 2);
 
     # Process labels colors and font sizes
     ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =

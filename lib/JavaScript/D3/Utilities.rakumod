@@ -129,24 +129,18 @@ our sub ProcessLabelsColorsAndFontSizes(
 
 our sub ProcessWidthAndHeight(:$width! is copy,
                               :$height! is copy,
-                              Bool :$horizontal = False,
-                              Numeric :$aspect-ratio = 3 / 2 ) {
+                              Numeric :$aspect-ratio = 2 / 3 ) {
 
     given ($width, $height) {
         when $_.head.isa(Whatever) && $_.tail ~~ UInt:D {
-           $width = $horizontal ?? $height * $aspect-ratio !! $height * 1 / $aspect-ratio;
+           $width = $height * 1 / $aspect-ratio;
         }
         when $_.head ~~ UInt:D && $_.tail.isa(Whatever) {
-           $height = $horizontal ?? $width * 1 / $aspect-ratio !! $width * $aspect-ratio;
+           $height = $width * $aspect-ratio;
         }
         default {
-            if $horizontal {
-                $width = 400;
-                $height = 600;
-            } else {
-                $width = 600;
-                $height = 400;
-            }
+            $width = 600;
+            $height = 400;
         }
     }
 
