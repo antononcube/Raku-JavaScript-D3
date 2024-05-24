@@ -140,7 +140,7 @@ our sub ProcessWidthAndHeight(:$width! is copy,
         }
         default {
             $width = 600;
-            $height = 400;
+            $height = $width * $aspect-ratio;
         }
     }
 
