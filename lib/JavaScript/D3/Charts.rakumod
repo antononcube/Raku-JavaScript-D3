@@ -461,6 +461,8 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       :$grid-lines is copy = False,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
+                      Str :$tooltip-background-color = 'black',
+                      Str :$tooltip-color = 'white',
                       :$legends = Whatever,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
@@ -536,8 +538,9 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25')
             .subst(:g, '$Z_RANGE_MIN', $z-range-min)
-            .subst(:g, '$Z_RANGE_MAX', $z-range-max);
-
+            .subst(:g, '$Z_RANGE_MAX', $z-range-max)
+            .subst(:g, '$TOOLTIP_COLOR', '"' ~ $tooltip-color ~ '"')
+            .subst(:g, '$TOOLTIP_BACKGROUND_COLOR', '"' ~ $tooltip-background-color ~ '"');
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

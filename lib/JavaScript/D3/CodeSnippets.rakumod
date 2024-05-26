@@ -1050,10 +1050,10 @@ const tooltip = d3.select(element.get(0))
     .append("div")
       .style("opacity", 0)
       .attr("class", "tooltip")
-      .style("background-color", "black")
+      .style("background-color", $TOOLTIP_BACKGROUND_COLOR)
       .style("border-radius", "5px")
       .style("padding", "10px")
-      .style("color", "white")
+      .style("color", $TOOLTIP_COLOR)
 
 // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
 const showTooltip = function(event, d) {
@@ -1097,7 +1097,7 @@ tooltip
       .attr("r",  d => z(d.z))
       .style("fill", d => myColor(d.group))
       .style("opacity", $OPACITY)
-    // -3- Trigger the functions
+    // -3- Trigger the tooltip functions
     .on("mouseover", showTooltip )
     .on("mousemove", moveTooltip )
     .on("mouseleave", hideTooltip )
