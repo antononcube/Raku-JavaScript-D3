@@ -46,10 +46,14 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :y-label(:$y-axis-label) = '',
                           :y-label-color(:$y-axis-label-color) is copy = Whatever,
                           :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                          :$tooltip = Whatever,
+                          Str :$tooltip-background-color = 'black',
+                          Str :$tooltip-color = 'white',
                           :$grid-lines is copy = False,
                           :$margins is copy = Whatever,
                           :$legends = Whatever,
                           Bool :$axes = True,
+                          UInt :$point-size = 6,
                           Str :$format = 'jupyter',
                           :$div-id = Whatever,
                           Str :$singleDatasetCode!,
@@ -68,9 +72,6 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             :$y-axis-label-font-size
             );
 
-    # Process data
-    my $jsData = to-json(@data, :!pretty);
-
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
@@ -79,6 +80,17 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
 
     # Groups
     my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+
+    # Tooltips
+    my Bool $hasTooltips = [||] @data.map({ so $_<tooltip> });
+
+    if $tooltip ~~ Bool:D && $tooltip && !$hasTooltips {
+        @data = @data.map({ $_<tooltip> = "({$_<x>}, {$_<y>})"; $_ });
+        $hasTooltips = True;
+    }
+
+    # Process data
+    my $jsData = to-json(@data, :!pretty);
 
     # Select code fragment to splice in
     my $jsPlotMiddle = $hasGroups ?? $multiDatasetCode !! $singleDatasetCode;
@@ -94,8 +106,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
 
     # Stencil
     my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
-                      $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
-                      $jsPlotMiddle]
+                         $hasTooltips ?? JavaScript::D3::CodeSnippets::GetTooltipPart() !! '',
+                         $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
+                         $jsPlotMiddle]
             .join("\n");
 
     # Concrete parameters
@@ -104,6 +117,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$POINT_COLOR', '"' ~ $color ~ '"')
             .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -115,11 +129,18 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
             .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$TOOLTIP_COLOR', '"' ~ $tooltip-color ~ '"')
+            .subst(:g, '$TOOLTIP_BACKGROUND_COLOR', '"' ~ $tooltip-background-color ~ '"')
+            .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
             .subst(:g, '$LEGEND_Y_GAP', '25');
 
+    if $hasTooltips {
+        my $marker = '// Trigger the tooltip functions';
+        $res .= subst($marker, $marker ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipMousePart)
+    }
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 

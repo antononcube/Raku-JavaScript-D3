@@ -270,21 +270,96 @@ our sub GetLegendCode() {
 
 
 #============================================================
+# Tooltip code snippets
+#============================================================
+
+my $jsTooltipPart = q:to/END/;
+// -1- Create a tooltip div that is hidden by default:
+const tooltip = d3.select(element.get(0))
+    .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", $TOOLTIP_BACKGROUND_COLOR)
+      .style("border-radius", "5px")
+      .style("padding", "10px")
+      .style("color", $TOOLTIP_COLOR)
+
+// -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+const showTooltip = function(event, d) {
+    tooltip
+      .transition()
+      .duration($TOOLTIP_DURATION);
+
+    var tooltipContent
+    if (d.tooltip) {
+        tooltipContent = d.tooltip;
+    } else if (d.label) {
+        tooltipContent = "Label: " + d.label;
+    } else if (d.group && d.x && d.y && d.z) {
+        tooltipContent = "Group: " + d.group + '<br/>z: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString();
+    } else if (d.group && d.x && d.y) {
+        tooltipContent = "Group: " + d.group + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString();
+    }
+
+    tooltip
+      .style("opacity", 1)
+      .html(tooltipContent)
+      .style("left", (event.x)/2 + "px")
+      .style("top", (event.y)/2 + 10 + "px");
+};
+
+const moveTooltip = function(event, d) {
+tooltip
+  .style("left", (event.x)/2 + "px")
+  .style("top", (event.y)/2+10 + "px")
+};
+
+const hideTooltip = function(event, d) {
+tooltip
+  .transition()
+  .duration($TOOLTIP_DURATION)
+  .style("opacity", 0)
+};
+END
+
+my $jsTooltipMousePart = q:to/END/;
+    .on("mouseover", showTooltip )
+    .on("mousemove", moveTooltip )
+    .on("mouseleave", hideTooltip )
+END
+
+#============================================================
+# Tooltip code snippets
+#============================================================
+
+our sub GetTooltipPart(UInt :duration(:$tooltip-duration) = 200) {
+    my $res = $jsTooltipPart
+        .subst('$TOOLTIP_DURATION', $tooltip-duration):g;
+
+    return $res;
+}
+
+our sub GetTooltipMousePart() {
+    return $jsTooltipMousePart;
+}
+
+#============================================================
 # ListPlot code snippets
 #============================================================
 
 my $jsScatterPlotPart = q:to/END/;
 // Add dots
 svg
-  .selectAll("whatever")
+  .selectAll("dot")
   .data(data)
   .enter()
   .append("circle")
     .attr("cx", function(d){ return x(d.x) })
     .attr("cy", function(d){ return y(d.y) })
-    .attr("r", 3)
+    .attr("r", $POINT_RADIUS)
     .attr("color", "blue")
     .attr("fill", $POINT_COLOR)
+  // Trigger the tooltip functions
 END
 
 my $jsMultiScatterPlotPart = q:to/END/;
@@ -301,9 +376,10 @@ svg
   .append("circle")
     .attr("cx", function(d){ return x(d.x) })
     .attr("cy", function(d){ return y(d.y) })
-    .attr("r", 3)
+    .attr("r", $POINT_RADIUS)
     .attr("color", "blue")
     .attr("fill", function (d) { return myColor(d.group) } )
+  // Trigger the tooltip functions
 END
 
 #============================================================
@@ -1097,7 +1173,7 @@ tooltip
       .attr("r",  d => z(d.z))
       .style("fill", d => myColor(d.group))
       .style("opacity", $OPACITY)
-    // -3- Trigger the tooltip functions
+    // Trigger the tooltip functions
     .on("mouseover", showTooltip )
     .on("mousemove", moveTooltip )
     .on("mouseleave", hideTooltip )
