@@ -42,7 +42,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
                    Str :y-label(:$y-axis-label) = '',
                    :y-label-color(:$y-axis-label-color) is copy = Whatever,
                    :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
-                   Str :$plot-labels-color = 'black',
+                   :$plot-labels-color is copy = Whatever,
                    Str :$plot-labels-font-family = 'Courier',
                    :$plot-labels-font-size is copy = Whatever,
                    :$grid-lines is copy = False,
@@ -77,6 +77,16 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
             die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
         }
     }
+
+    #-------------------------------------------------------
+    # Process $plot-labels-color
+    #-------------------------------------------------------
+    if $plot-labels-color.isa(Whatever) {
+        $plot-labels-color = $x-axis-label-color;
+    }
+
+    die 'The argument $plot-labels-color is expected to be a string or Whatever.'
+    unless $plot-labels-color ~~ Str:D;
 
     #-------------------------------------------------------
     # Normalize data
