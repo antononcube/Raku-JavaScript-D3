@@ -576,7 +576,7 @@ svg.append('g')
         .attr("y", d => y(d.q3) )
         .attr("height", d => (y(d.q1)-y(d.q3)) )
         .attr("width", boxWidth )
-        .attr("stroke", "black")
+        .attr("stroke", $STROKE_COLOR)
         .style("fill", $FILL_COLOR)
     // Trigger the tooltip functions
 
@@ -589,7 +589,7 @@ if ($OUTLIERS) {
         .attr("cy", function(d){ return y(d) })
         .attr("cx", center)
         .attr("r", 2)
-        .attr("color", "blue")
+        .attr("color", $STROKE_COLOR)
         .attr("fill", $STROKE_COLOR)
 }
 
@@ -635,7 +635,7 @@ svg.append('g')
         .attr("y", center - boxWidth/2)
         .attr("width", d => (x(d.q3)-x(d.q1)) )
         .attr("height", boxWidth )
-        .attr("stroke", "black")
+        .attr("stroke", $STROKE_COLOR)
         .style("fill", $FILL_COLOR)
     // Trigger the tooltip functions
 
@@ -648,7 +648,7 @@ if ($OUTLIERS) {
         .attr("cx", function(d){ return x(d) })
         .attr("cy", center)
         .attr("r", 2)
-        .attr("color", "blue")
+        .attr("color", $STROKE_COLOR)
         .attr("fill", $STROKE_COLOR)
 }
 
