@@ -503,7 +503,8 @@ our sub GetPlotDateDataScalesAndAxes() {
 #============================================================
 # Box-Whisker code snippets
 #============================================================
-my $jsBoxWhiskerPlot = q:to/END/;
+
+my $jsBoxWhiskerPlotBoxData = q:to/END/;
 // Obtain data
 var data = $DATA
 
@@ -521,7 +522,7 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
-tooltipContent = `
+const tooltipContent = `
   <table>
     <tr><td><b>max</b></td><td>${valueMax}</td></tr>
     <tr><td><b>75%</b></td><td>${q3}</td></tr>
@@ -544,6 +545,10 @@ const findClosestSmaller = (data, max) => {
 const minWhisker = findClosestLarger(data, min);
 const maxWhisker = findClosestSmaller(data, max);
 
+var boxData = [{"q1" : q1, "q3" : q3, "minWhisker" : minWhisker, "maxWhisker" : maxWhisker, "median" : median, "tooltip" : tooltipContent }];
+END
+
+my $jsVerticalBoxWhiskerPlot = q:to/END/;
 // Show the Y scale
 var y = d3.scaleLinear()
   .domain([valueMin,valueMax])
@@ -563,35 +568,17 @@ svg
   .attr("y2", y(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
-// Show the box with tooltip
-const tooltip = d3.select("body")
-  .append("div")
-  .style("position", "absolute")
-  .style("visibility", "hidden")
-  .style("background", "lightgrey")
-  .style("border", "1px solid black")
-  .style("border-radius", "3px")
-  .style("padding", "5px");
-
-svg
-.append("rect")
-  .attr("x", center - boxWidth/2)
-  .attr("y", y(q3) )
-  .attr("height", (y(q1)-y(q3)) )
-  .attr("width", boxWidth )
-  .attr("stroke", "black")
-  .style("fill", $FILL_COLOR)
-  .on("mouseover", function(event) {
-    tooltip.style("visibility", "visible")
-      .html(tooltipContent);
-  })
-  .on("mousemove", function(event) {
-    tooltip.style("top", (event.pageY - 10) + "px")
-      .style("left", (event.pageX + 10) + "px");
-  })
-  .on("mouseout", function() {
-    tooltip.style("visibility", "hidden");
-  });
+svg.append('g')
+    .selectAll('rect')
+    .data(boxData)
+    .join("rect")
+        .attr("x", center - boxWidth/2)
+        .attr("y", d => y(d.q3) )
+        .attr("height", d => (y(d.q1)-y(d.q3)) )
+        .attr("width", boxWidth )
+        .attr("stroke", "black")
+        .style("fill", $FILL_COLOR)
+    // Trigger the tooltip functions
 
 if ($OUTLIERS) {
     svg
@@ -620,46 +607,6 @@ svg
 END
 
 my $jsHorizonalBoxWhiskerPlot = q:to/END/;
-// Obtain data
-var data = $DATA
-
-// Compute summary statistics used for the box:
-var data_sorted = data.sort(d3.ascending)
-var q1 = d3.quantile(data_sorted, .25)
-var median = d3.quantile(data_sorted, .5)
-var q3 = d3.quantile(data_sorted, .75)
-var interQuantileRange = q3 - q1
-var min = q1 - 1.5 * interQuantileRange
-var max = q1 + 1.5 * interQuantileRange
-
-var outliers = data.filter(d => d < min || max < d);
-
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
-
-tooltipContent = `
-  <table>
-    <tr><td><b>max</b></td><td>${valueMax}</td></tr>
-    <tr><td><b>75%</b></td><td>${q3}</td></tr>
-    <tr><td><b>median</b></td><td>${median}</td></tr>
-    <tr><td><b>25%</b></td><td>${q1}</td></tr>
-    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
-  </table>
-`;
-
-const findClosestLarger = (data, min) => {
-  return data.filter(d => d > min).reduce((prev, curr) =>
-    (Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev), Infinity);
-};
-
-const findClosestSmaller = (data, max) => {
-  return data.filter(d => d < max).reduce((prev, curr) =>
-    (Math.abs(curr - max) < Math.abs(prev - max) ? curr : prev), Infinity);
-};
-
-const minWhisker = findClosestLarger(data, min);
-const maxWhisker = findClosestSmaller(data, max);
-
 // Show the X scale
 var x = d3.scaleLinear()
   .domain([valueMin,valueMax])
@@ -680,35 +627,17 @@ svg
   .attr("x2", x(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
-// Show the box with tooltip
-const tooltip = d3.select("body")
-  .append("div")
-  .style("position", "absolute")
-  .style("visibility", "hidden")
-  .style("background", "lightgrey")
-  .style("border", "1px solid black")
-  .style("border-radius", "3px")
-  .style("padding", "5px");
-
-svg
-.append("rect")
-  .attr("x", x(q1) )
-  .attr("y", center - boxWidth/2)
-  .attr("width", (x(q3)-x(q1)) )
-  .attr("height", boxWidth )
-  .attr("stroke", "black")
-  .style("fill", $FILL_COLOR)
-  .on("mouseover", function(event) {
-    tooltip.style("visibility", "visible")
-      .html(tooltipContent);
-  })
-  .on("mousemove", function(event) {
-    tooltip.style("top", (event.pageY - 10) + "px")
-      .style("left", (event.pageX + 10) + "px");
-  })
-  .on("mouseout", function() {
-    tooltip.style("visibility", "hidden");
-  });
+svg.append('g')
+    .selectAll('rect')
+    .data(boxData)
+    .join("rect")
+        .attr("x", d => x(d.q1) )
+        .attr("y", center - boxWidth/2)
+        .attr("width", d => (x(d.q3)-x(d.q1)) )
+        .attr("height", boxWidth )
+        .attr("stroke", "black")
+        .style("fill", $FILL_COLOR)
+    // Trigger the tooltip functions
 
 if ($OUTLIERS) {
     svg
@@ -824,7 +753,15 @@ END
 #============================================================
 
 our sub GetBoxWhiskerChartPart(Bool :$horizontal=False) {
-    my $res = $horizontal ?? $jsHorizonalBoxWhiskerPlot !! $jsBoxWhiskerPlot;
+    my $res = [
+        GetTooltipPart(),
+        $jsBoxWhiskerPlotBoxData,
+        $horizontal ?? $jsHorizonalBoxWhiskerPlot !! $jsVerticalBoxWhiskerPlot
+    ].join("\n\n");
+
+    my $marker = '// Trigger the tooltip functions';
+    $res .= subst($marker, $marker ~ "\n" ~ GetTooltipMousePart());
+
     return $res;
 }
 

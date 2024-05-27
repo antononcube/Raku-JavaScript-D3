@@ -288,6 +288,8 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
                           Str :y-label(:$y-axis-label) = '',
                           :y-label-color(:$y-axis-label-color) is copy = Whatever,
                           :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                          Str :$tooltip-background-color = 'black',
+                          Str :$tooltip-color = 'white',
                           :$grid-lines is copy = False,
                           :$margins is copy = Whatever,
                           Str :$format = 'jupyter',
@@ -341,7 +343,9 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Numeric,
             .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
             .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$MARGINS', to-json($margins):!pretty);
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$TOOLTIP_COLOR', '"' ~ $tooltip-color ~ '"')
+            .subst(:g, '$TOOLTIP_BACKGROUND_COLOR', '"' ~ $tooltip-background-color ~ '"');
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
@@ -365,6 +369,8 @@ our multi BoxWhiskerChart(@data where @data.all ~~ Map:D,
                           Str :y-label(:$y-axis-label) = '',
                           :y-label-color(:$y-axis-label-color) is copy = Whatever,
                           :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                          Str :$tooltip-background-color = 'black',
+                          Str :$tooltip-color = 'white',
                           :$grid-lines is copy = False,
                           :$margins is copy = Whatever,
                           Str :$format = 'jupyter',
