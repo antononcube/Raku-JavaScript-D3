@@ -521,7 +521,7 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
-tooltip = `
+tooltipContent = `
   <table>
     <tr><td><b>max</b></td><td>${valueMax}</td></tr>
     <tr><td><b>75%</b></td><td>${q3}</td></tr>
@@ -564,7 +564,7 @@ svg
   .attr("stroke", $STROKE_COLOR)
 
 // Show the box with tooltip
-const tooltipDiv = d3.select("body")
+const tooltip = d3.select("body")
   .append("div")
   .style("position", "absolute")
   .style("visibility", "hidden")
@@ -582,15 +582,15 @@ svg
   .attr("stroke", "black")
   .style("fill", $FILL_COLOR)
   .on("mouseover", function(event) {
-    tooltipDiv.style("visibility", "visible")
-      .html(tooltip);
+    tooltip.style("visibility", "visible")
+      .html(tooltipContent);
   })
   .on("mousemove", function(event) {
-    tooltipDiv.style("top", (event.pageY - 10) + "px")
+    tooltip.style("top", (event.pageY - 10) + "px")
       .style("left", (event.pageX + 10) + "px");
   })
   .on("mouseout", function() {
-    tooltipDiv.style("visibility", "hidden");
+    tooltip.style("visibility", "hidden");
   });
 
 if ($OUTLIERS) {
@@ -637,7 +637,7 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
-tooltip = `
+tooltipContent = `
   <table>
     <tr><td><b>max</b></td><td>${valueMax}</td></tr>
     <tr><td><b>75%</b></td><td>${q3}</td></tr>
@@ -681,7 +681,7 @@ svg
   .attr("stroke", $STROKE_COLOR)
 
 // Show the box with tooltip
-const tooltipDiv = d3.select("body")
+const tooltip = d3.select("body")
   .append("div")
   .style("position", "absolute")
   .style("visibility", "hidden")
@@ -699,15 +699,15 @@ svg
   .attr("stroke", "black")
   .style("fill", $FILL_COLOR)
   .on("mouseover", function(event) {
-    tooltipDiv.style("visibility", "visible")
-      .html(tooltip);
+    tooltip.style("visibility", "visible")
+      .html(tooltipContent);
   })
   .on("mousemove", function(event) {
-    tooltipDiv.style("top", (event.pageY - 10) + "px")
+    tooltip.style("top", (event.pageY - 10) + "px")
       .style("left", (event.pageX + 10) + "px");
   })
   .on("mouseout", function() {
-    tooltipDiv.style("visibility", "hidden");
+    tooltip.style("visibility", "hidden");
   });
 
 if ($OUTLIERS) {
@@ -824,7 +824,8 @@ END
 #============================================================
 
 our sub GetBoxWhiskerChartPart(Bool :$horizontal=False) {
-    return $horizontal ?? $jsHorizonalBoxWhiskerPlot !! $jsBoxWhiskerPlot;
+    my $res = $horizontal ?? $jsHorizonalBoxWhiskerPlot !! $jsBoxWhiskerPlot;
+    return $res;
 }
 
 our sub GetMultiBoxWhiskerChartPart() {
