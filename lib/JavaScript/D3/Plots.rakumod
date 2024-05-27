@@ -150,6 +150,12 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
 
 our proto ListPlot($data, |) is export {*}
 
+our multi ListPlot(@data where @data.all ~~ Pair:D, *%args) {
+    my $k = 0;
+    my @data2 = @data.map({ %( x => $k++, y => $_.value, tooltip => $_.key ) });
+    return ListPlot(@data2, |%args);
+}
+
 our multi ListPlot($data, *%args) {
     return ListPlotGeneric(
             $data,
