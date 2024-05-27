@@ -500,13 +500,13 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
 
     # Select code fragment to splice in
     my $jsChartMiddle = do given $tooltip {
-        when ($_.isa(Whatever) || $_ ~~ Bool && $_) && $hasGroups {
+        when ($_.isa(Whatever) || $_ ~~ Bool:D && $_) && $hasGroups {
             JavaScript::D3::CodeSnippets::GetTooltipMultiBubbleChartPart()
         }
-        when $_ ~~ Bool && !$_ && $hasGroups {
+        when $_ ~~ Bool:D && !$_ && $hasGroups {
             JavaScript::D3::CodeSnippets::MultiBubbleChartPart()
         }
-        when $_ ~~ Bool && $_ && !$hasGroups {
+        when $_ ~~ Bool:D && $_ && !$hasGroups {
             @data = @data.map({ $_.push(group => 'All') });
             JavaScript::D3::CodeSnippets::GetTooltipMultiBubbleChartPart()
         }
