@@ -521,6 +521,19 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
+const findClosestLarger = (data, min) => {
+  return data.filter(d => d > min).reduce((prev, curr) =>
+    (Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev), Infinity);
+};
+
+const findClosestSmaller = (data, max) => {
+  return data.filter(d => d < max).reduce((prev, curr) =>
+    (Math.abs(curr - max) < Math.abs(prev - max) ? curr : prev), Infinity);
+};
+
+const minWhisker = findClosestLarger(data, min);
+const maxWhisker = findClosestSmaller(data, max);
+
 // Show the Y scale
 var y = d3.scaleLinear()
   .domain([valueMin,valueMax])
@@ -536,8 +549,8 @@ svg
 .append("line")
   .attr("x1", center)
   .attr("x2", center)
-  .attr("y1", y(min) )
-  .attr("y2", y(max) )
+  .attr("y1", y(minWhisker) )
+  .attr("y2", y(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
 // Show the box
@@ -566,7 +579,7 @@ if ($OUTLIERS) {
 // show median, min and max horizontal lines
 svg
 .selectAll("toto")
-.data([min, median, max])
+.data([minWhisker, median, maxWhisker])
 .enter()
 .append("line")
   .attr("x1", center-boxWidth/2)
@@ -594,6 +607,19 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
+const findClosestLarger = (data, min) => {
+  return data.filter(d => d > min).reduce((prev, curr) =>
+    (Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev), Infinity);
+};
+
+const findClosestSmaller = (data, max) => {
+  return data.filter(d => d < max).reduce((prev, curr) =>
+    (Math.abs(curr - max) < Math.abs(prev - max) ? curr : prev), Infinity);
+};
+
+const minWhisker = findClosestLarger(data, min);
+const maxWhisker = findClosestSmaller(data, max);
+
 // Show the X scale
 var x = d3.scaleLinear()
   .domain([valueMin,valueMax])
@@ -610,8 +636,8 @@ svg
 .append("line")
   .attr("y1", center)
   .attr("y2", center)
-  .attr("x1", x(min) )
-  .attr("x2", x(max) )
+  .attr("x1", x(minWhisker) )
+  .attr("x2", x(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
 // Show the box
@@ -640,7 +666,7 @@ if ($OUTLIERS) {
 // show median, min and max horizontal lines
 svg
 .selectAll("toto")
-.data([min, median, max])
+.data([minWhisker, median, maxWhisker])
 .enter()
 .append("line")
   .attr("y1", center-boxWidth/2)
