@@ -1104,79 +1104,7 @@ svg.append('g')
       .style("fill", function (d) { return myColor(d.group); } )
       .style("opacity", $OPACITY)
       .attr("stroke", "black")
-END
-
-# See https://d3-graph-gallery.com/graph/bubble_tooltip.html
-my $jsTooltipMultiBubbleChartPart = q:to/END/;
-var zMin = Math.min.apply(Math, data.map(function(o) { return o.z; }))
-var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
-
-// Add a scale for bubble size
-const z = d3.scaleLinear()
-    .domain([zMin, zMax])
-    .range([$Z_RANGE_MIN, $Z_RANGE_MAX]);
-
-// Add a scale for bubble color
-var myColor = d3.scaleOrdinal()
-    .domain(data.map(function(o) { return o.group; }))
-    .range(d3.schemeSet2);
-
-// -1- Create a tooltip div that is hidden by default:
-const tooltip = d3.select(element.get(0))
-    .append("div")
-      .style("opacity", 0)
-      .attr("class", "tooltip")
-      .style("background-color", $TOOLTIP_BACKGROUND_COLOR)
-      .style("border-radius", "5px")
-      .style("padding", "10px")
-      .style("color", $TOOLTIP_COLOR)
-
-// -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
-const showTooltip = function(event, d) {
-    tooltip
-      .transition()
-      .duration(200);
-
-    let tooltipContent = "Group: " + d.group + '<br/>z: ' + d.z.toString() + '<br/>x: ' + d.x.toString() + '<br/>y: ' + d.y.toString();
-    if (d.label) {
-        tooltipContent = "Label: " + d.label + '<br/>' + tooltipContent;
-    }
-
-    tooltip
-      .style("opacity", 1)
-      .html(tooltipContent)
-      .style("left", (event.x)/2 + "px")
-      .style("top", (event.y)/2 + 10 + "px");
-};
-
-const moveTooltip = function(event, d) {
-tooltip
-  .style("left", (event.x)/2 + "px")
-  .style("top", (event.y)/2+10 + "px")
-};
-
-const hideTooltip = function(event, d) {
-tooltip
-  .transition()
-  .duration(200)
-  .style("opacity", 0)
-};
-
-// Add dots
-  svg.append('g')
-    .selectAll("dot")
-    .data(data)
-    .join("circle")
-      .attr("class", "bubbles")
-      .attr("cx", d => x(d.x))
-      .attr("cy", d => y(d.y))
-      .attr("r",  d => z(d.z))
-      .style("fill", d => myColor(d.group))
-      .style("opacity", $OPACITY)
     // Trigger the tooltip functions
-    .on("mouseover", showTooltip )
-    .on("mousemove", moveTooltip )
-    .on("mouseleave", hideTooltip )
 END
 
 #============================================================
@@ -1192,7 +1120,11 @@ our sub GetMultiBubbleChartPart() {
 }
 
 our sub GetTooltipMultiBubbleChartPart() {
-    return $jsTooltipMultiBubbleChartPart;
+    #return $jsTooltipMultiBubbleChartPart;
+    my $res =  GetTooltipPart() ~ "\n\n" ~ GetMultiBubbleChartPart();
+    my $marker = '// Trigger the tooltip functions';
+    $res .= subst($marker, $marker ~ "\n" ~ GetTooltipMousePart());
+    return $res;
 }
 
 #============================================================
