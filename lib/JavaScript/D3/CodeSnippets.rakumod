@@ -523,11 +523,11 @@ var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
 tooltip = `
   <table>
-    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
-    <tr><td><b>25%</b></td><td>${q1}</td></tr>
-    <tr><td><b>median</b></td><td>${median}</td></tr>
-    <tr><td><b>75%</b></td><td>${q3}</td></tr>
     <tr><td><b>max</b></td><td>${valueMax}</td></tr>
+    <tr><td><b>75%</b></td><td>${q3}</td></tr>
+    <tr><td><b>median</b></td><td>${median}</td></tr>
+    <tr><td><b>25%</b></td><td>${q1}</td></tr>
+    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
   </table>
 `;
 
@@ -639,11 +639,11 @@ var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
 tooltip = `
   <table>
-    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
-    <tr><td><b>25%</b></td><td>${q1}</td></tr>
-    <tr><td><b>median</b></td><td>${median}</td></tr>
-    <tr><td><b>75%</b></td><td>${q3}</td></tr>
     <tr><td><b>max</b></td><td>${valueMax}</td></tr>
+    <tr><td><b>75%</b></td><td>${q3}</td></tr>
+    <tr><td><b>median</b></td><td>${median}</td></tr>
+    <tr><td><b>25%</b></td><td>${q1}</td></tr>
+    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
   </table>
 `;
 
