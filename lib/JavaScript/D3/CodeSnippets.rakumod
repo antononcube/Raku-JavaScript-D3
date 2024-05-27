@@ -521,6 +521,16 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
+tooltip = `
+  <table>
+    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
+    <tr><td><b>25%</b></td><td>${q1}</td></tr>
+    <tr><td><b>median</b></td><td>${median}</td></tr>
+    <tr><td><b>75%</b></td><td>${q3}</td></tr>
+    <tr><td><b>max</b></td><td>${valueMax}</td></tr>
+  </table>
+`;
+
 const findClosestLarger = (data, min) => {
   return data.filter(d => d > min).reduce((prev, curr) =>
     (Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev), Infinity);
@@ -553,7 +563,16 @@ svg
   .attr("y2", y(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
-// Show the box
+// Show the box with tooltip
+const tooltipDiv = d3.select("body")
+  .append("div")
+  .style("position", "absolute")
+  .style("visibility", "hidden")
+  .style("background", "lightgrey")
+  .style("border", "1px solid black")
+  .style("border-radius", "3px")
+  .style("padding", "5px");
+
 svg
 .append("rect")
   .attr("x", center - boxWidth/2)
@@ -562,6 +581,17 @@ svg
   .attr("width", boxWidth )
   .attr("stroke", "black")
   .style("fill", $FILL_COLOR)
+  .on("mouseover", function(event) {
+    tooltipDiv.style("visibility", "visible")
+      .html(tooltip);
+  })
+  .on("mousemove", function(event) {
+    tooltipDiv.style("top", (event.pageY - 10) + "px")
+      .style("left", (event.pageX + 10) + "px");
+  })
+  .on("mouseout", function() {
+    tooltipDiv.style("visibility", "hidden");
+  });
 
 if ($OUTLIERS) {
     svg
@@ -607,6 +637,16 @@ var outliers = data.filter(d => d < min || max < d);
 var valueMin = Math.min.apply(Math, data.map(function(o) { return o; }))
 var valueMax = Math.max.apply(Math, data.map(function(o) { return o; }))
 
+tooltip = `
+  <table>
+    <tr><td><b>min</b></td><td>${valueMin}</td></tr>
+    <tr><td><b>25%</b></td><td>${q1}</td></tr>
+    <tr><td><b>median</b></td><td>${median}</td></tr>
+    <tr><td><b>75%</b></td><td>${q3}</td></tr>
+    <tr><td><b>max</b></td><td>${valueMax}</td></tr>
+  </table>
+`;
+
 const findClosestLarger = (data, min) => {
   return data.filter(d => d > min).reduce((prev, curr) =>
     (Math.abs(curr - min) < Math.abs(prev - min) ? curr : prev), Infinity);
@@ -640,7 +680,16 @@ svg
   .attr("x2", x(maxWhisker) )
   .attr("stroke", $STROKE_COLOR)
 
-// Show the box
+// Show the box with tooltip
+const tooltipDiv = d3.select("body")
+  .append("div")
+  .style("position", "absolute")
+  .style("visibility", "hidden")
+  .style("background", "lightgrey")
+  .style("border", "1px solid black")
+  .style("border-radius", "3px")
+  .style("padding", "5px");
+
 svg
 .append("rect")
   .attr("x", x(q1) )
@@ -649,6 +698,17 @@ svg
   .attr("height", boxWidth )
   .attr("stroke", "black")
   .style("fill", $FILL_COLOR)
+  .on("mouseover", function(event) {
+    tooltipDiv.style("visibility", "visible")
+      .html(tooltip);
+  })
+  .on("mousemove", function(event) {
+    tooltipDiv.style("top", (event.pageY - 10) + "px")
+      .style("left", (event.pageX + 10) + "px");
+  })
+  .on("mouseout", function() {
+    tooltipDiv.style("visibility", "hidden");
+  });
 
 if ($OUTLIERS) {
     svg
