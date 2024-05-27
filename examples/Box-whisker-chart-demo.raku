@@ -1,15 +1,11 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
 use JavaScript::D3;
 use Data::Importers;
 
 my $url = "https://pldb.io/posts/age.tsv";
-my @dsDataLines = data-import($url).lines.map({ $_.split("\t") })>>.Array;
-
-my @field-names = @dsDataLines.head.Array;
-my @dsData = @dsDataLines.tail(*-2).map({ @field-names.Array Z=> $_.Array })>>.Hash;
+my @dsData = data-import($url, headers => 'auto');
 
 @dsData = @dsData.map({
     $_<ageAtCreation> = $_<ageAtCreation>.UInt;
@@ -23,11 +19,24 @@ my @dsData = @dsDataLines.tail(*-2).map({ @field-names.Array Z=> $_.Array })>>.H
 }).Array;
 
 say @dsData.elems;
+#
+#spurt $*CWD ~ '/box-whisker-chart.html',
+#        js-d3-box-whisker-chart(@dsData.map(*<numberOfUsersEstimate>).map({ log($_ + 1, 10)}),
+#                :!horizontal,
+#                :outliers,
+#                width => 200,
+#                title => 'lg(numberOfUsersEstimate)',
+#                format => 'html');
 
 spurt $*CWD ~ '/box-whisker-chart.html',
-        js-d3-box-whisker-chart(@dsData.map(*<numberOfUsersEstimate>).map({ log($_ + 1, 10)}),
-                :horizontal,
+        js-d3-box-whisker-chart(@dsData.map(*<ageAtCreation>),
+                :!horizontal,
                 :outliers,
-                width => 600,
-                title => 'lg(Number of users estimate)',
+                width => 400,
+                title => 'ageAtCreation',
+                title-color => 'Salmon',
+                stroke-color => 'DarkRed',
+                fill-color => 'Pink',
+                tooltip-color => 'DarkRed',
+                tooltip-background-color => 'Ivory',
                 format => 'html');
