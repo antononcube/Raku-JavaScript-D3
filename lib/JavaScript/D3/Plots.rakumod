@@ -139,8 +139,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
 
     if $hasTooltips {
         my $marker = '// Trigger the tooltip functions';
-        $res .= subst($marker, $marker ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipMousePart)
+        $res .= subst($marker, $marker ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipMousePart);
     }
+
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
