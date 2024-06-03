@@ -34,7 +34,7 @@ our multi ListPlotGeneric($data where $data ~~ Positional && $data.all ~~ Numeri
 
 our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :$background = 'white',
-                          Str :$color = 'steelblue',
+                          Str :color(:$stroke-color) = 'steelblue',
                           Str :$color-scheme = 'schemeSet2',
                           :$width = 600,
                           :$height = 400,
@@ -117,8 +117,8 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     my $res = $jsScatterPlot
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$POINT_COLOR', '"' ~ $color ~ '"')
-            .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+            .subst('$POINT_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst('$LINE_COLOR', '"' ~ $stroke-color ~ '"')
             .subst('$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
