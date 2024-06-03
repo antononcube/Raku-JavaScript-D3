@@ -33,8 +33,9 @@ our multi ListPlotGeneric($data where $data ~~ Positional && $data.all ~~ Numeri
 }
 
 our multi ListPlotGeneric(@data where @data.all ~~ Map,
-                          Str :$background= 'white',
-                          Str :$color= 'steelblue',
+                          Str :$background = 'white',
+                          Str :$color = 'steelblue',
+                          Str :$color-scheme = 'schemeSet2',
                           :$width = 600,
                           :$height = 400,
                           Str :plot-label(:$title) = '',
@@ -53,7 +54,8 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           :$margins is copy = Whatever,
                           :$legends = Whatever,
                           Bool :$axes = True,
-                          UInt :$point-size = 6,
+                          Numeric :$point-size = 6,
+                          Numeric :$stroke-width = 1.5,
                           Str :$format = 'jupyter',
                           :$div-id = Whatever,
                           Str :$singleDatasetCode!,
@@ -117,7 +119,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$POINT_COLOR', '"' ~ $color ~ '"')
             .subst('$LINE_COLOR', '"' ~ $color ~ '"')
+            .subst('$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
+            .subst(:g, '$STROKE_WIDTH', $stroke-width)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)

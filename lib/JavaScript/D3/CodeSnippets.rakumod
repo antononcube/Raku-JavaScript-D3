@@ -366,7 +366,7 @@ my $jsMultiScatterPlotPart = q:to/END/;
 // Add a scale for dot color
 var myColor = d3.scaleOrdinal()
     .domain(data.map(function(o) { return o.group; }))
-    .range(d3.schemeSet2);
+    .range(d3.$COLOR_SCHEME);
 
 // Add dots
 svg
@@ -405,7 +405,7 @@ var lineFunc = d3.line()
 // Add the path using this helper function
 svg.append('path')
   .attr('d', lineFunc(data))
-  .attr("stroke-width", 1.5)
+  .attr("stroke-width", $STROKE_WIDTH)
   .attr('stroke', $LINE_COLOR)
   .attr('fill', 'none');
 END
@@ -426,7 +426,7 @@ svg.selectAll(".line")
       .join("path")
         .attr("fill", "none")
         .attr("stroke", function(d){ return myColor(d[0]) })
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", $STROKE_WIDTH)
         .attr("d", function(d){
           return d3.line()
             .x(function(d) { return x(d.x); })
