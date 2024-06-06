@@ -28,6 +28,7 @@ spurt $*CWD ~ '/list-plot.html',
                 background => 'ivory',
                 height => 600,
                 width => 800,
+                y-axis-scale => 'line', # 'log'
                 title-color => 'Blue',
                 margins => %(left => 120, bottom => 40),
                 title => 'Random pets',
