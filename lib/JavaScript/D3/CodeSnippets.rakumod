@@ -156,12 +156,12 @@ var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
 var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
 
 // X scale and Axis
-var x = d3.scaleLinear()
+var x = d3.$X_AXIS_SCALE
     .domain([xMin, xMax])
     .range([0, width]);
 
 // Y scale and Axis
-var y = d3.scaleLinear()
+var y = d3.$Y_AXIS_SCALE
     .domain([yMin, yMax])
     .range([height, 0]);
 END
@@ -244,11 +244,30 @@ our sub GetPlotMarginsTitleAndLabelsCode(Str $format = 'jupyter') {
             $jsPlotMarginsTitleAndLabels !! $jsPlotMarginsTitleAndLabels.subst(:g, 'element.get(0)', '"#my_dataviz"');
 }
 
-our sub GetPlotDataAndScalesCode() {
-    return $jsPlotDataAndScales;
+our sub ProcessAxisScale($scale = Whatever) {
+    return do given $scale {
+        when Whatever { 'scaleLinear()' }
+        when WhateverCode { 'scaleLinear()' }
+        when $_ ~~ Str:D && $_.lc ∈ <line linear> { 'scaleLinear()' }
+        when $_ ~~ Str:D && $_.lc ∈ <log logarith logarithmic> { 'scaleLog()' }
+        default { $_ }
+    }
+}
+our sub GetPlotDataAndScalesCode(
+        :$x-axis-scale = Whatever,
+        :$y-axis-scale = Whatever) {
+    return
+            $jsPlotDataAndScales
+            .subst('$X_AXIS_SCALE', ProcessAxisScale($x-axis-scale))
+            .subst('$Y_AXIS_SCALE', ProcessAxisScale($y-axis-scale));
 }
 
-our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $codeFragment = $jsPlotDataScalesAndAxes) {
+our sub GetPlotDataScalesAndAxesCode(
+        UInt $nXTicks = 0,
+        UInt $nYTicks = 0,
+        Str $codeFragment = $jsPlotDataScalesAndAxes,
+        :$x-axis-scale = Whatever,
+        :$y-axis-scale = Whatever) {
     my $res = $codeFragment;
     if $nXTicks > 0 {
         $res = $res.subst('.call(d3.axisBottom(x))', ".call(d3.axisBottom(x).ticks($nXTicks).tickSizeInner(-height))");
@@ -256,12 +275,23 @@ our sub GetPlotDataScalesAndAxesCode(UInt $nXTicks = 0, UInt $nYTicks = 0, Str $
     if $nYTicks > 0 {
         $res = $res.subst('.call(d3.axisLeft(y))', ".call(d3.axisLeft(y).ticks($nYTicks).tickSizeInner(-width))");
     }
+    $res = $res
+            .subst('$X_AXIS_SCALE', ProcessAxisScale($x-axis-scale))
+            .subst('$Y_AXIS_SCALE', ProcessAxisScale($y-axis-scale));
     return $res;
 }
 
-our sub GetPlotPreparationCode(Str $format = 'jupyter', UInt $nXTicks = 0, UInt $nYTicks = 0, Bool :$axes = True) {
+our sub GetPlotPreparationCode(
+        Str $format = 'jupyter',
+        UInt $nXTicks = 0,
+        UInt $nYTicks = 0,
+        Bool :$axes = True,
+        :$x-axis-scale = Whatever,
+        :$y-axis-scale = Whatever) {
     return [GetPlotMarginsTitleAndLabelsCode($format),
-            $axes ?? GetPlotDataScalesAndAxesCode($nXTicks, $nYTicks) !! GetPlotDataAndScalesCode()].join("\n");
+            $axes
+            ?? GetPlotDataScalesAndAxesCode($nXTicks, $nYTicks, :$x-axis-scale, :$y-axis-scale)
+            !! GetPlotDataAndScalesCode(:$x-axis-scale, :$y-axis-scale)].join("\n");
 }
 
 our sub GetLegendCode() {
@@ -472,7 +502,7 @@ var x = d3.scaleTime()
       .range([ 0, width ]);
 
 // Y scale and Axis
-var y = d3.scaleLinear()
+var y = d3.$Y_AXIS_SCALE
     .domain([yMin, yMax])
     .range([height, 0]);
 END
@@ -492,12 +522,12 @@ END
 # DateListPlot code snippets accessors
 #============================================================
 
-our sub GetPlotDateDataAndScales() {
-    return $jsPlotDateDataAndScales;
+our sub GetPlotDateDataAndScales(:$y-axis-scale = Whatever) {
+    return $jsPlotDateDataAndScales.subst('$Y_AXIS_SCALE', ProcessAxisScale($y-axis-scale));
 }
 
-our sub GetPlotDateDataScalesAndAxes() {
-    return $jsPlotDateDataAndScales ~ "\n" ~ $jsPlotDateAxes;
+our sub GetPlotDateDataScalesAndAxes(:$y-axis-scale = Whatever) {
+    return GetPlotDateDataAndScales(:$y-axis-scale) ~ "\n" ~ $jsPlotDateAxes;
 }
 
 #============================================================

@@ -44,9 +44,11 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :x-label(:$x-axis-label) = '',
                           :x-label-color(:$x-axis-label-color) is copy = Whatever,
                           :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                          :$x-axis-scale = Whatever,
                           Str :y-label(:$y-axis-label) = '',
                           :y-label-color(:$y-axis-label-color) is copy = Whatever,
                           :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                          :$y-axis-scale = Whatever,
                           :$tooltip = Whatever,
                           Str :$tooltip-background-color = 'black',
                           Str :$tooltip-color = 'white',
@@ -109,7 +111,9 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
     # Stencil
     my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
                          $hasTooltips ?? JavaScript::D3::CodeSnippets::GetTooltipPart() !! '',
-                         $axes ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode) !! $dataAndScalesCode,
+                         $axes ??
+                         JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, $dataScalesAndAxesCode, :$x-axis-scale, :$y-axis-scale)
+                         !! $dataAndScalesCode,
                          $jsPlotMiddle]
             .join("\n");
 
@@ -162,13 +166,15 @@ our multi ListPlot(@data where @data.all ~~ Pair:D, *%args) {
 }
 
 our multi ListPlot($data, *%args) {
+    my $x-axis-scale = %args<x-axis-scale> // Whatever;
+    my $y-axis-scale = %args<y-axis-scale> // Whatever;
     return ListPlotGeneric(
             $data,
             |%args,
             singleDatasetCode => JavaScript::D3::CodeSnippets::GetScatterPlotPart(),
             multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiScatterPlotPart(),
-            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(),
-            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode());
+            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(:$x-axis-scale, :$y-axis-scale),
+            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(:$x-axis-scale, :$y-axis-scale));
 }
 
 #============================================================
@@ -178,13 +184,15 @@ our multi ListPlot($data, *%args) {
 our proto ListLinePlot($data, |) is export {*}
 
 our multi ListLinePlot($data, *%args) {
+    my $x-axis-scale = %args<x-axis-scale> // Whatever;
+    my $y-axis-scale = %args<y-axis-scale> // Whatever;
     return ListPlotGeneric(
             $data,
             |%args,
             singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
             multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
-            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(),
-            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode());
+            dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(:$x-axis-scale, :$y-axis-scale),
+            dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(:$x-axis-scale, :$y-axis-scale));
 }
 
 #============================================================
@@ -225,6 +233,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                        :$div-id = Whatever,
                        *%args
                        ) {
+    my $y-axis-scale = %args<y-axis-scale> // Whatever;
     my $res =
             ListPlotGeneric($data,
                     :$background,
@@ -242,8 +251,8 @@ our multi DateListPlot($data where is-str-time-series($data),
                     :$div-id,
                     singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
                     multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
-                    dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(),
-                    dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales(),
+                    dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(:$y-axis-scale),
+                    dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales(:$y-axis-scale),
                     |%args
             );
 
