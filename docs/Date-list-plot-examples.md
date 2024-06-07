@@ -60,7 +60,7 @@ say dimensions(@dsTS2);
 ```
 
 ```perl6, results=asis
-js-d3-date-list-plot(@dsTS2, width=>1000, format=>'html');
+js-d3-date-list-plot(@dsTS2, width=>1000, background => 'none', format=>'html');
 ```
 
 ------
