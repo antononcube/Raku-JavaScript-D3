@@ -20,6 +20,7 @@ require(['d3'], function(d3) {
 });
 END
 
+#| Configuration JavaScript code to be executed in %%javascript magic cell in a Jupyter notebook.
 multi js-d3-config(:$v = 7, Bool :$direct = True) is export {
     if $direct {
         return $jsD3ConfigCode.subst('$VER', $v);
