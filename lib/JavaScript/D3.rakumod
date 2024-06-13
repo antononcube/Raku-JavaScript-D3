@@ -5,6 +5,7 @@ use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
 use JavaScript::D3::Images;
 use JavaScript::D3::Chess;
+use JavaScript::D3::Graph;
 use Hash::Merge;
 
 
@@ -503,4 +504,12 @@ multi sub js-d3-chessboard(*%args) {
 }
 multi sub js-d3-chessboard($data, *%args) {
     return JavaScript::D3::Chess::Chessboard($data, |%args);
+}
+
+#============================================================
+#| Makes a graph plot.
+proto js-d3-graph-plot(|) is export {*}
+
+multi sub js-d3-graph-plot($data, *%args) {
+    return JavaScript::D3::Graph::GraphPlot($data, |%args);
 }
