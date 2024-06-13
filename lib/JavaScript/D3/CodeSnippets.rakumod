@@ -1486,3 +1486,131 @@ HEATMAP-PLOT-LABELS
 our sub GetTooltipHeatmapPlotLabelsPart() {
     return $jsTooltipHeatmapPlotLabelsPart;
 }
+
+#============================================================
+# Graph code snippets
+#============================================================
+
+my $jsGraphPart = q:to/GRAPH-END/;
+const edges = $DATA;
+
+const nodes = Array.from(new Set(edges.flatMap(e => [e.from, e.to])), id => ({id}));
+
+const links = edges.map(e => ({
+  source: e.from,
+  target: e.to,
+  weight: e.weight,
+  label: e.label
+}));
+
+var svg = d3
+  .select(element.get(0))
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("background", "none")
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")")
+
+const simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.weight * 20))
+    .force("charge", d3.forceManyBody())
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+const link = svg.append("g")
+    .attr("class", "links")
+  .selectAll("line")
+  .data(links)
+  .enter().append("line")
+    .attr("class", "link")
+    .attr('stroke', $LINK_STROKE_COLOR)
+    .attr("stroke-width", $LINK_STROKE_WIDTH);
+
+const node = svg.append("g")
+    .attr("class", "nodes")
+  .selectAll("circle")
+  .data(nodes)
+  .enter().append("circle")
+    .attr("class", "node")
+    .attr("r", $NODE_SIZE)
+    .attr('stroke', $NODE_STROKE_COLOR)
+    .attr('fill', $NODE_FILL_COLOR)
+    .call(drag(simulation));
+
+node.append("title")
+    .text(d => d.id);
+
+const nodeLabel = svg.append("g")
+    .attr("class", "node-labels")
+  .selectAll("text")
+  .data(nodes)
+  .enter().append("text")
+    .attr("class", "node-label")
+    .attr("dy", -10)
+    .attr('stroke', $NODE_LABEL_STROKE_COLOR)
+    .text(d => d.id);
+
+const linkLabel = svg.append("g")
+    .attr("class", "link-labels")
+  .selectAll("text")
+  .data(links)
+  .enter().append("text")
+    .filter(d => d.label !== "")
+    .attr("class", "link-label")
+    .attr('stroke', $LINK_LABEL_STROKE_COLOR)
+    .text(d => d.label);
+
+simulation.on("tick", () => {
+  link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+  node
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y);
+
+  nodeLabel
+      .attr("x", d => d.x)
+      .attr("y", d => d.y);
+
+  linkLabel
+      .attr("x", d => (d.source.x + d.target.x) / 2)
+      .attr("y", d => (d.source.y + d.target.y) / 2);
+});
+
+function drag(simulation) {
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+
+  return d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
+}
+GRAPH-END
+
+
+#============================================================
+# Graph code snippets accessors
+#============================================================
+
+our sub GetGraphPart() {
+    return $jsGraphPart;
+}

@@ -45,6 +45,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str :plot-label(:$title) = '',
                     UInt :plot-label-font-size(:$title-font-size) = 16,
                     Str :plot-label-color(:$title-color) = 'Black',
+                    :$vertex-label-color is copy = Whatever,
+                    :$edge-label-color is copy = Whatever,
                     Str:D :$background = 'white',
                     Str:D :$vertex-color = 'SteelBlue',
                     Numeric:D :$vertex-size = 2,
@@ -56,12 +58,26 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     ) {
 
     #------------------------------------------------------
-    # Process edge thickness
+    # Arguments
     #------------------------------------------------------
+    # Process edge thickness
     die 'The value of $edge-thickness is expected to be a non-negative numbeer or Whatever'
     unless $edge-thickness ~~ Numeric:D && $edge-thickness ≥ 0 || $edge-thickness.isa(Whatever);
 
     $edge-thickness = $edge-thickness.isa(Whatever) ?? 'd => Math.sqrt(d.weight)' !! $edge-thickness.Str;
+
+    # Vertex label color
+    if $vertex-label-color.isa(Whatever) { $vertex-label-color = $title-color; }
+    die 'The value of $vertex-label-color is expected to be a string or Whatever'
+    unless $vertex-label-color ~~ Str:D;
+
+    # Edge label color
+    if $edge-label-color.isa(Whatever) { $edge-label-color = $title-color; }
+    die 'The value of $edge-label-color is expected to be a string or Whatever'
+    unless $edge-label-color ~~ Str:D;
+
+    # Process margins
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     #------------------------------------------------------
     # Plot creation
@@ -80,9 +96,9 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$NODE_STROKE_COLOR', '"' ~ $vertex-color ~ '"')
             .subst(:g, '$NODE_FILL_COLOR', '"' ~ $vertex-color ~ '"')
             .subst(:g, '$NODE_SIZE', $vertex-size.Str)
-            .subst(:g, '$NODE_LABEL_STROKE_COLOR', '"' ~ $title-color ~ '"')
+            .subst(:g, '$NODE_LABEL_STROKE_COLOR', '"' ~ $vertex-label-color ~ '"')
             .subst(:g, '$LINK_STROKE_COLOR', '"' ~ $edge-color ~ '"')
-            .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $title-color ~ '"')
+            .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
