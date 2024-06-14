@@ -7,6 +7,8 @@ use Data::Summarizers;
 use Data::Reshapers;
 
 my @nodes = random-pet-name(7);
+
+
 my @data = random-tabular-dataset(12, <from to weight label>,
         generators => [
             { @nodes.roll($_).List },
@@ -18,7 +20,14 @@ my @data = random-tabular-dataset(12, <from to weight label>,
 .say for @data;
 
 # These kind of specs also work
+my @data1 = random-tabular-dataset(12, <from to>,
+        generators => [
+            { @nodes.roll($_).List },
+            { @nodes.roll($_).List },
+        ]);
+
 my @data2 = @data.map(*<from to>);
+
 my @data3 = @data.map(*<from to weight>);
 
 # Plot
@@ -27,7 +36,7 @@ spurt $*CWD ~ '/graph-plot.html',
                 width => 700,
                 height => 500,
                 title => 'Random pet graph',
-                vertex-size => 10,
+                vertex-size => 4,
                 title-color => 'DarkRed',
                 vertex-label-color => 'Gray',
                 format => 'html');
