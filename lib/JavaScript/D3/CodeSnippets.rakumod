@@ -1503,18 +1503,8 @@ const links = edges.map(e => ({
   label: e.label
 }));
 
-var svg = d3
-  .select(element.get(0))
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .style("background", "none")
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")")
-
 const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.weight * 20))
+    .force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -1548,6 +1538,7 @@ const nodeLabel = svg.append("g")
   .enter().append("text")
     .attr("class", "node-label")
     .attr("dy", -10)
+    .attr('fill', $NODE_LABEL_STROKE_COLOR)
     .attr('stroke', $NODE_LABEL_STROKE_COLOR)
     .text(d => d.id);
 
@@ -1558,6 +1549,7 @@ const linkLabel = svg.append("g")
   .enter().append("text")
     .filter(d => d.label !== "")
     .attr("class", "link-label")
+    .attr('fill', $LINK_LABEL_STROKE_COLOR)
     .attr('stroke', $LINK_LABEL_STROKE_COLOR)
     .text(d => d.label);
 
