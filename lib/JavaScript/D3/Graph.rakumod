@@ -46,7 +46,9 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     UInt :plot-label-font-size(:$title-font-size) = 16,
                     Str :plot-label-color(:$title-color) = 'Black',
                     :$vertex-label-color is copy = Whatever,
+                    :$vertex-label-font-size is copy = Whatever,
                     :$edge-label-color is copy = Whatever,
+                    :$edge-label-font-size is copy = Whatever,
                     Str:D :$background = 'white',
                     Str:D :$vertex-color = 'SteelBlue',
                     Numeric:D :$vertex-size = 2,
@@ -71,10 +73,20 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     die 'The value of $vertex-label-color is expected to be a string or Whatever'
     unless $vertex-label-color ~~ Str:D;
 
+    # Vertex label font size
+    if $vertex-label-font-size.isa(Whatever) { $vertex-label-font-size = round($title-font-size * 0.8); }
+    die 'The value of $vertex-label-font-size is expected to be a number or Whatever'
+    unless $vertex-label-font-size ~~ Numeric:D;
+
     # Edge label color
-    if $edge-label-color.isa(Whatever) { $edge-label-color = $title-color; }
+    if $edge-label-color.isa(Whatever) { $edge-label-color = $vertex-label-color; }
     die 'The value of $edge-label-color is expected to be a string or Whatever'
     unless $edge-label-color ~~ Str:D;
+
+    # Edge label font size
+    if $edge-label-font-size.isa(Whatever) { $edge-label-font-size = round($title-font-size * 0.8); }
+    die 'The value of $edge-label-font-size is expected to be a number or Whatever'
+    unless $edge-label-font-size ~~ Numeric:D;
 
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
@@ -97,7 +109,9 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$NODE_FILL_COLOR', '"' ~ $vertex-color ~ '"')
             .subst(:g, '$NODE_SIZE', $vertex-size.Str)
             .subst(:g, '$NODE_LABEL_STROKE_COLOR', '"' ~ $vertex-label-color ~ '"')
+            .subst(:g, '$NODE_LABEL_FONT_SIZE', $vertex-label-font-size)
             .subst(:g, '$LINK_STROKE_COLOR', '"' ~ $edge-color ~ '"')
+            .subst(:g, '$LINK_LABEL_FONT_SIZE', $edge-label-font-size)
             .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
             .subst(:g, '$WIDTH', $width.Str)
