@@ -17,9 +17,13 @@ my @data = random-tabular-dataset(12, <from to weight label>,
 
 .say for @data;
 
+# These kind of specs also work
+my @data2 = @data.map(*<from to>);
+my @data3 = @data.map(*<from to weight>);
+
 # Plot
 spurt $*CWD ~ '/graph-plot.html',
-        js-d3-graph-plot(@data.map(*<from to weight>),
+        js-d3-graph-plot(@data,
                 width => 700,
                 height => 500,
                 title => 'Random pet graph',
