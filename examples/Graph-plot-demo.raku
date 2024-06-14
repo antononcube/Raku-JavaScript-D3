@@ -30,9 +30,14 @@ my @data2 = @data.map(*<from to>);
 
 my @data3 = @data.map(*<from to weight>);
 
+my @data4 =
+        :Carson("Reno"), :Enterprise("Spring_Valley"), :Summerlin_South("Spring_Valley"), :North_Las_Vegas("Sunrise_Manor"), :Winchester("Paradise"),
+        :Henderson("Whitney"), :Paradise("Winchester"), :Las_Vegas("Summerlin_South"), :Sunrise_Manor("Winchester"), :Spring_Valley("Summerlin_South"),
+        :Whitney("Sunrise_Manor"), :Reno("Sparks"), :Pahrump("Summerlin_South"), :Sparks("Reno");
+
 # Plot
 spurt $*CWD ~ '/graph-plot.html',
-        js-d3-graph-plot(@data,
+        js-d3-graph-plot(@data4,
                 width => 700,
                 height => 500,
                 title => 'Random pet graph',
