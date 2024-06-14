@@ -95,7 +95,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Plot creation
     #------------------------------------------------------
     # Convert to JSON data
-    my $jsData = to-json(@data, :!pretty);
+    my $jsData = to-json(@data.map({ merge-hash( %(weight => 1, label => ''), $_ ) }).Array, :!pretty);
 
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
