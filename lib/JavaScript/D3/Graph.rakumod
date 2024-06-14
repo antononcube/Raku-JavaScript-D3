@@ -40,8 +40,8 @@ our multi GraphPlot($data where is-positional-of-lists($data, 4), *%args) {
 }
 
 our multi GraphPlot(@data is copy where @data.all ~~ Map,
-                    :$width = 400,
-                    :$height = Whatever,
+                    :$width is copy = 400,
+                    :$height is copy = Whatever,
                     Str :plot-label(:$title) = '',
                     UInt :plot-label-font-size(:$title-font-size) = 16,
                     Str :plot-label-color(:$title-color) = 'Black',
@@ -91,7 +91,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
 
     #------------------------------------------------------
     # Process width and height
-    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => $horizontal ?? 1/2 !! 2);
+    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => 1 / 1.618);
 
     #------------------------------------------------------
     # Process margins
