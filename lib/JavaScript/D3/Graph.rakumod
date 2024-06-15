@@ -53,6 +53,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str:D :$vertex-color = 'SteelBlue',
                     Numeric:D :$vertex-size = 2,
                     Str:D :$edge-color = 'SteelBlue',
+                    :%force is copy = %(),
                     :$edge-thickness is copy = 1,
                     :$margins is copy = Whatever,
                     Str :$format = 'jupyter',
@@ -94,6 +95,26 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => 1 / 1.618);
 
     #------------------------------------------------------
+    # Process force
+    my %forceDefault =
+            center => ('width / 2', 'height / 2'),
+            x-strength => Whatever,
+            y-strength => Whatever,
+            collision-radius => Whatever,
+            charge-strength => Whatever,
+            link-distance => Whatever;
+
+    %force = merge-hash(%forceDefault, %force);
+
+    if %force<link-distance> ~~ Str:D && %force<link-distance> eq 'weights' {
+        %force<link-distance> = 'd => d.weight';
+    }
+
+    if %force<center>.isa(Whatever) {
+        %force<center> = ('width / 2', 'height / 2');
+    }
+
+    #------------------------------------------------------
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
@@ -128,6 +149,22 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
+
+    # Force components
+    if !%force<link-distance>.isa(Whatever) { $res .= subst('$FORCE_LINK_DISTANCE', %force<link-distance>) }
+    if !%force<charge-strength>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_STRENGTH', %force<charge-strength>) }
+    if !%force<x-strength>.isa(Whatever) { $res .= subst('$FORCE_X_STRENGTH', %force<x-strength>) }
+    if !%force<y-strength>.isa(Whatever) { $res .= subst('$FORCE_Y_STRENGTH', %force<y-strength>) }
+    if !%force<collision-radius>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_RADIUS', %force<collision-radius>) }
+    if !%force<center>.isa(Whatever) { $res .= subst('$FORCE_CENTER_X', %force<center>.head) }
+    if !%force<center>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center>.tail) }
+
+    $res = $res
+            .subst('.distance($FORCE_LINK_DISTANCE)')
+            .subst('.strength($FORCE_CHARGE_STRENGTH)')
+            .subst('.x($FORCE_X_STRENGTH)')
+            .subst('.y($FORCE_Y_STRENGTH)')
+            .subst('.radius($FORCE_COLLIDE_RADIUS)');
 
     #------------------------------------------------------
     # Result

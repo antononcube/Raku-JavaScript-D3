@@ -1503,10 +1503,14 @@ const links = edges.map(e => ({
   label: e.label
 }));
 
+//.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
 const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("link", d3.forceLink(links).id(d => d.id).distance($FORCE_LINK_DISTANCE))
+    .force("charge", d3.forceManyBody().strength($FORCE_CHARGE_STRENGTH))
+    .force("x", d3.forceX().strength($FORCE_X_STRENGTH))
+    .force("y", d3.forceY().strength($FORCE_Y_STRENGTH))
+    .force("collision", d3.forceCollide().radius($FORCE_COLLIDE_RADIUS))
+    .force("center", d3.forceCenter($FORCE_CENTER_X, $FORCE_CENTER_Y));
 
 const link = svg.append("g")
     .attr("class", "links")
