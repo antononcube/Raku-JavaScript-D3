@@ -162,8 +162,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     $res = $res
             .subst('.distance($FORCE_LINK_DISTANCE)')
             .subst('.strength($FORCE_CHARGE_STRENGTH)')
-            .subst('.x($FORCE_X_STRENGTH)')
-            .subst('.y($FORCE_Y_STRENGTH)')
+            .subst('.strength($FORCE_X_STRENGTH)')
+            .subst('.strength($FORCE_Y_STRENGTH)')
             .subst('.radius($FORCE_COLLIDE_RADIUS)');
 
     #------------------------------------------------------
