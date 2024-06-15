@@ -44,5 +44,12 @@ spurt $*CWD ~ '/graph-plot.html',
                 vertex-size => 4,
                 title-color => 'DarkRed',
                 vertex-label-color => 'Gray',
+                force => %(
+                    charge-strength => -40,
+                    x-strength => 0.01,
+                    y-strength => 0.03,
+                    collision-radius => 0.7,
+                    link-distance => 'd => d.weight*35'
+                ),
                 format => 'html');
 
