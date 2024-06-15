@@ -1505,11 +1505,11 @@ const links = edges.map(e => ({
 
 //.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
 const simulation = d3.forceSimulation(nodes)
-    .force("link", d3.forceLink(links).id(d => d.id).distance($FORCE_LINK_DISTANCE))
-    .force("charge", d3.forceManyBody().strength($FORCE_CHARGE_STRENGTH))
-    .force("x", d3.forceX().strength($FORCE_X_STRENGTH))
-    .force("y", d3.forceY().strength($FORCE_Y_STRENGTH))
-    .force("collision", d3.forceCollide().radius($FORCE_COLLIDE_RADIUS))
+    .force("link", d3.forceLink(links).id(d => d.id).distance($FORCE_LINK_DISTANCE).iterations($FORCE_LINK_ITER))
+    .force("charge", d3.forceManyBody().strength($FORCE_CHARGE_STRENGTH).distanceMin($FORCE_CHARGE_DIST_MIN).distanceMax($FORCE_CHARGE_DIST_MAX))
+    .force("x", d3.forceX().strength($FORCE_X_STRENGTH).x($FORCE_X))
+    .force("y", d3.forceY().strength($FORCE_Y_STRENGTH).y($FORCE_Y))
+    .force("collision", d3.forceCollide().strength($FORCE_COLLIDE_STRENGTH).radius($FORCE_COLLIDE_RADIUS).iterations($FORCE_COLLIDE_ITER))
     .force("center", d3.forceCenter($FORCE_CENTER_X, $FORCE_CENTER_Y));
 
 const link = svg.append("g")

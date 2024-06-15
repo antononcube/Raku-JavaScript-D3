@@ -9,6 +9,43 @@ use JSON::Fast;
 
 
 #============================================================
+# Force spec
+#============================================================
+
+my %forceProperties =
+    center => {
+        x => 0.5,
+        y => 0.5
+    },
+    charge => {
+        :enabled,
+        strength => -30,
+        distanceMin => 1,
+        distanceMax => 2000
+    },
+    collision => {
+        :enabled,
+        strength => 0.7,
+        iterations => 1,
+        radius => 5
+    },
+    x => {
+        :!enabled,
+        strength => 0.1,
+        x => 0.5
+    },
+    y => {
+        :!enabled,
+        strength => 0.1,
+        y => 0.5
+    },
+    link => {
+        :enabled,
+        distance => 30,
+        iterations => 1
+    };
+
+#============================================================
 # Graph
 #============================================================
 
@@ -96,15 +133,17 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
 
     #------------------------------------------------------
     # Process force
-    my %forceDefault =
-            center => ('width / 2', 'height / 2'),
-            x-strength => Whatever,
-            y-strength => Whatever,
-            collision-radius => Whatever,
-            charge-strength => Whatever,
-            link-distance => Whatever;
+    my %forceDefault;
+    %forceDefault<center> = %( x => 'width / 2', y => 'height / 2');
+    %forceDefault<x> = %( strength => Whatever, :enabled );
+    %forceDefault<y> = %( strength => Whatever, :enabled );
+    %forceDefault<collision> = %( strength => Whatever, radius => Whatever );
+    %forceDefault<charge> = %( strength => Whatever );
+    %forceDefault<link> = %( distance => Whatever );
 
-    %force = merge-hash(%forceDefault, %force);
+    %forceDefault = merge-hash(%forceProperties, %forceDefault, :deep);
+
+    %force = merge-hash(%forceDefault, %force, :deep);
 
     if %force<link-distance> ~~ Str:D && %force<link-distance> eq 'weights' {
         %force<link-distance> = 'd => d.weight';
@@ -151,20 +190,32 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     # Force components
-    if !%force<link-distance>.isa(Whatever) { $res .= subst('$FORCE_LINK_DISTANCE', %force<link-distance>) }
-    if !%force<charge-strength>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_STRENGTH', %force<charge-strength>) }
-    if !%force<x-strength>.isa(Whatever) { $res .= subst('$FORCE_X_STRENGTH', %force<x-strength>) }
-    if !%force<y-strength>.isa(Whatever) { $res .= subst('$FORCE_Y_STRENGTH', %force<y-strength>) }
-    if !%force<collision-radius>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_RADIUS', %force<collision-radius>) }
-    if !%force<center>.isa(Whatever) { $res .= subst('$FORCE_CENTER_X', %force<center>.head) }
-    if !%force<center>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center>.tail) }
+    if !%force<link><distance>.isa(Whatever) { $res .= subst('$FORCE_LINK_DISTANCE', %force<link><distance>) }
+    if !%force<link><iterations>.isa(Whatever) { $res .= subst('$FORCE_LINK_ITER', %force<link><iterations>) }
+    if !%force<charge><strength>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_STRENGTH', %force<charge><strength>) }
+    if !%force<charge><distanceMin>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_DIST_MIN', %force<charge><distanceMin>) }
+    if !%force<charge><distanceMax>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_DIST_MAX', %force<charge><distanceMax>) }
+    if !%force<x><strength>.isa(Whatever) { $res .= subst('$FORCE_X_STRENGTH', %force<x><strength>) }
+    if !%force<y><strength>.isa(Whatever) { $res .= subst('$FORCE_Y_STRENGTH', %force<y><strength>) }
+    if !%force<collision><radius>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_RADIUS', %force<collision><radius>) }
+    if !%force<collision><strength>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_STRENGTH', %force<collision><strength>) }
+    if !%force<center><x>.isa(Whatever) { $res .= subst('$FORCE_CENTER_X', %force<center><x>) }
+    if !%force<center><y>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center><y>) }
 
     $res = $res
             .subst('.distance($FORCE_LINK_DISTANCE)')
+            .subst('.iterations($FORCE_LINK_ITER)')
             .subst('.strength($FORCE_CHARGE_STRENGTH)')
+            .subst('.distanceMin($FORCE_CHARGE_DIST_MIN)')
+            .subst('.distanceMax($FORCE_CHARGE_DIST_MAX)')
+            .subst('.x($FORCE_X)')
             .subst('.strength($FORCE_X_STRENGTH)')
             .subst('.strength($FORCE_Y_STRENGTH)')
-            .subst('.radius($FORCE_COLLIDE_RADIUS)');
+            .subst('.y($FORCE_Y)')
+            .subst('.strength($FORCE_COLLIDE_STRENGTH)')
+            .subst('.radius($FORCE_COLLIDE_RADIUS)')
+            .subst('.iterations($FORCE_COLLIDE_ITER)')
+            ;
 
     #------------------------------------------------------
     # Result
