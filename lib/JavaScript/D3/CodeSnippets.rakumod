@@ -1490,6 +1490,8 @@ our sub GetTooltipHeatmapPlotLabelsPart() {
 #============================================================
 # Graph code snippets
 #============================================================
+# For the force settings see GitHub gist:
+# https://gist.github.com/steveharoz/8c3e2524079a8c440df60c1ab72b5d03
 
 my $jsGraphPart = q:to/GRAPH-END/;
 const edges = $DATA;
