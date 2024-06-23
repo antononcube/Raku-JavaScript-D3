@@ -1504,7 +1504,8 @@ const links = edges.map(e => ({
   source: e.from,
   target: e.to,
   weight: e.weight,
-  label: e.label
+  label: e.label,
+  highlight: highlightNodes.has(e.from) && highlightNodes.has(e.to)
 }));
 
 //.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
@@ -1522,7 +1523,7 @@ const link = svg.append("g")
   .data(links)
   .enter().append("line")
     .attr("class", "link")
-    .attr('stroke', $LINK_STROKE_COLOR)
+    .attr("stroke", d => d.highlight ? $HIGHLIGHT_STROKE_COLOR : $LINK_STROKE_COLOR)
     .attr("stroke-width", $LINK_STROKE_WIDTH);
 
 const node = svg.append("g")
@@ -1532,8 +1533,8 @@ const node = svg.append("g")
   .enter().append("circle")
     .attr("class", "node")
     .attr("r", $NODE_SIZE)
-    .attr('stroke', d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR  : $NODE_STROKE_COLOR)
-    .attr('fill', d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
+    .attr("stroke", d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR : $NODE_STROKE_COLOR)
+    .attr("fill", d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
     .call(drag(simulation));
 
 node.append("title")
