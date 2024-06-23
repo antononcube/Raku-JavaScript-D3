@@ -1498,6 +1498,8 @@ const edges = $DATA;
 
 const nodes = Array.from(new Set(edges.flatMap(e => [e.from, e.to])), id => ({id}));
 
+const highlightNodes = new Set([$HIGHLIGHT_SET]);
+
 const links = edges.map(e => ({
   source: e.from,
   target: e.to,
@@ -1530,8 +1532,8 @@ const node = svg.append("g")
   .enter().append("circle")
     .attr("class", "node")
     .attr("r", $NODE_SIZE)
-    .attr('stroke', $NODE_STROKE_COLOR)
-    .attr('fill', $NODE_FILL_COLOR)
+    .attr('stroke', d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR  : $NODE_STROKE_COLOR)
+    .attr('fill', d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
     .call(drag(simulation));
 
 node.append("title")

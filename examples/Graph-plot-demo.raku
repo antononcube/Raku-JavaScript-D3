@@ -44,6 +44,7 @@ spurt $*CWD ~ '/graph-plot.html',
                 vertex-size => 4,
                 title-color => 'DarkRed',
                 vertex-label-color => 'Gray',
+                #highlight => ['Carson', 'Pahrump'],
                 force => %(
                     charge => {strength => -40},
                     x => { strength => 0.01, x => 0.1},

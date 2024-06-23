@@ -92,6 +92,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str:D :$edge-color = 'SteelBlue',
                     :%force is copy = %(),
                     :$edge-thickness is copy = 1,
+                    :@highlight = Empty,
+                    Str:D :$highlight-color = 'Orange',
                     :$margins is copy = Whatever,
                     Str :$format = 'jupyter',
                     :$div-id = Whatever
@@ -182,6 +184,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LINK_LABEL_FONT_SIZE', $edge-label-font-size)
             .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
+            .subst(:g, '$HIGHLIGHT_STROKE_COLOR', '"' ~ $highlight-color ~ '"')
+            .subst(:g, '$HIGHLIGHT_FILL_COLOR', '"' ~ $highlight-color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -201,6 +205,11 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     if !%force<collision><strength>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_STRENGTH', %force<collision><strength>) }
     if !%force<center><x>.isa(Whatever) { $res .= subst('$FORCE_CENTER_X', %force<center><x>) }
     if !%force<center><y>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center><y>) }
+    if @highlight {
+        $res .= subst('$HIGHLIGHT_SET', "\"@highlight.join("\", \"")\"")
+    } else {
+        $res .= subst('$HIGHLIGHT_SET','')
+    }
 
     $res = $res
             .subst('.distance($FORCE_LINK_DISTANCE)')
