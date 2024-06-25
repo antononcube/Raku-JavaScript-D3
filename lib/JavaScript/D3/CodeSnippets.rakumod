@@ -1507,7 +1507,7 @@ const links = edges.map(e => ({
   target: e.to,
   weight: e.weight,
   label: e.label,
-  highlight: highlightLinkNodes.has(e.from + "-" + e.to) || highlightLinkNodes.has(e.to + "-" + e.from)
+  highlight: highlightLinkNodes.has(e.from + "-" + e.to)
 }));
 
 //.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))

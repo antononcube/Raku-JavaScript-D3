@@ -77,6 +77,7 @@ our multi GraphPlot($data where is-positional-of-lists($data, 4), *%args) {
 }
 
 our multi GraphPlot(@data is copy where @data.all ~~ Map,
+                    Bool:D :$directed-edges = False,
                     :$width is copy = 400,
                     :$height is copy = Whatever,
                     Str :plot-label(:$title) = '',
@@ -209,9 +210,13 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Process highlight spec
     if @highlight {
         my @links = @highlight.grep({ $_ ~~ Pair:D }).map({ $_.kv.join('-') });
+        if ! $directed-edges {
+           @links = [|@links, |@highlight.grep({ $_ ~~ Pair:D }).map({ $_.kv.reverse.join('-') })];
+        }
         if @links {
             $res .= subst('$HIGHLIGHT_LINK_SET', "\"{ @links.join("\", \"") }\"")
         }
+        note (:@links);
 
         my @nodes = @highlight.grep({ $_ ~~ Str:D });
         if @nodes {
