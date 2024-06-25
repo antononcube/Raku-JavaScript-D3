@@ -1,8 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
-
 use JavaScript::D3;
 use Data::Generators;
 use Data::Summarizers;
@@ -50,6 +48,7 @@ spurt $*CWD ~ '/graph-plot.html',
                 #highlight => ['Carson', 'Pahrump', 'Summerlin_South'],
                 #highlight => ['Reno' => 'Carson', 'Pahrump' => 'Summerlin_South'],
                 #highlight => ['Carson', 'Pahrump', 'Summerlin_South', 'Reno' => 'Carson', 'Pahrump' => 'Summerlin_South'],
+                #:!directed-edges,
                 force => %(
                     charge => {strength => -40},
                     x => { strength => 0.01, x => 0.1},
