@@ -216,7 +216,6 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
         if @links {
             $res .= subst('$HIGHLIGHT_LINK_SET', "\"{ @links.join("\", \"") }\"")
         }
-        note (:@links);
 
         my @nodes = @highlight.grep({ $_ ~~ Str:D });
         if @nodes {
