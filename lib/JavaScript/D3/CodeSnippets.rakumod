@@ -1500,12 +1500,14 @@ const nodes = Array.from(new Set(edges.flatMap(e => [e.from, e.to])), id => ({id
 
 const highlightNodes = new Set([$HIGHLIGHT_SET]);
 
+const highlightLinkNodes = new Set([$HIGHLIGHT_LINK_SET]);
+
 const links = edges.map(e => ({
   source: e.from,
   target: e.to,
   weight: e.weight,
   label: e.label,
-  highlight: highlightNodes.has(e.from) && highlightNodes.has(e.to)
+  highlight: highlightLinkNodes.has(e.from + "-" + e.to) || highlightLinkNodes.has(e.to + "-" + e.from)
 }));
 
 //.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))

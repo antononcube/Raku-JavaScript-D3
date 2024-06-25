@@ -205,10 +205,18 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     if !%force<collision><strength>.isa(Whatever) { $res .= subst('$FORCE_COLLIDE_STRENGTH', %force<collision><strength>) }
     if !%force<center><x>.isa(Whatever) { $res .= subst('$FORCE_CENTER_X', %force<center><x>) }
     if !%force<center><y>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center><y>) }
+
+    # Process highlight spec
     if @highlight {
-        $res .= subst('$HIGHLIGHT_SET', "\"@highlight.join("\", \"")\"")
-    } else {
-        $res .= subst('$HIGHLIGHT_SET','')
+        my @links = @highlight.grep({ $_ ~~ Pair:D }).map({ $_.kv.join('-') });
+        if @links {
+            $res .= subst('$HIGHLIGHT_LINK_SET', "\"{ @links.join("\", \"") }\"")
+        }
+
+        my @nodes = @highlight.grep({ $_ ~~ Str:D });
+        if @nodes {
+            $res .= subst('$HIGHLIGHT_SET', "\"{ @nodes.join("\", \"") }\"")
+        }
     }
 
     $res = $res
@@ -224,7 +232,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst('.strength($FORCE_COLLIDE_STRENGTH)')
             .subst('.radius($FORCE_COLLIDE_RADIUS)')
             .subst('.iterations($FORCE_COLLIDE_ITER)')
-            ;
+            .subst('$HIGHLIGHT_LINK_SET', '')
+            .subst('$HIGHLIGHT_SET', '');
 
     #------------------------------------------------------
     # Result
