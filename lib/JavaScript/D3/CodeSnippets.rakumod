@@ -1519,6 +1519,20 @@ const simulation = d3.forceSimulation(nodes)
     .force("collision", d3.forceCollide().strength($FORCE_COLLIDE_STRENGTH).radius($FORCE_COLLIDE_RADIUS).iterations($FORCE_COLLIDE_ITER))
     .force("center", d3.forceCenter($FORCE_CENTER_X, $FORCE_CENTER_Y));
 
+svg.append('defs').append('marker')
+    .attr("id",'arrowhead')
+    .attr('viewBox','-0 -5 10 10') //the bound of the SVG viewport for the current SVG fragment. defines a coordinate system 10 wide and 10 high starting on (0,-5)
+     .attr('refX', $ARROWHEAD_OFFSET) // x coordinate for the reference point of the marker. If circle is bigger, this need to be bigger.
+     .attr('refY',0)
+     .attr('orient','auto')
+        .attr('markerWidth', $ARROWHEAD_SIZE)
+        .attr('markerHeight', $ARROWHEAD_SIZE)
+        .attr('xoverflow','visible')
+    .append('svg:path')
+    .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+    .attr('fill', $LINK_STROKE_COLOR)
+    .style('stroke','none');
+
 const link = svg.append("g")
     .attr("class", "links")
   .selectAll("line")
@@ -1526,7 +1540,8 @@ const link = svg.append("g")
   .enter().append("line")
     .attr("class", "link")
     .attr("stroke", d => d.highlight ? $HIGHLIGHT_STROKE_COLOR : $LINK_STROKE_COLOR)
-    .attr("stroke-width", $LINK_STROKE_WIDTH);
+    .attr("stroke-width", $LINK_STROKE_WIDTH)
+    .attr('marker-end','url(#arrowhead)')
 
 const node = svg.append("g")
     .attr("class", "nodes")

@@ -77,7 +77,7 @@ our multi GraphPlot($data where is-positional-of-lists($data, 4), *%args) {
 }
 
 our multi GraphPlot(@data is copy where @data.all ~~ Map,
-                    Bool:D :$directed-edges = False,
+                    Bool:D :d(:directed(:$directed-edges)) = False,
                     :$width is copy = 400,
                     :$height is copy = Whatever,
                     Str :plot-label(:$title) = '',
@@ -93,6 +93,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str:D :$edge-color = 'SteelBlue',
                     :%force is copy = %(),
                     :$edge-thickness is copy = 1,
+                    :$arrowhead-size is copy = Whatever,
+                    :$arrowhead-offset is copy = Whatever,
                     :@highlight = Empty,
                     Str:D :$highlight-color = 'Orange',
                     :$margins is copy = Whatever,
@@ -129,6 +131,16 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     if $edge-label-font-size.isa(Whatever) { $edge-label-font-size = $vertex-label-font-size; }
     die 'The value of $edge-label-font-size is expected to be a number or Whatever'
     unless $edge-label-font-size ~~ Numeric:D;
+
+    #------------------------------------------------------
+    # Arrowhead size and offset
+    if $arrowhead-size.isa(Whatever) { $arrowhead-size = $edge-thickness + 1; }
+    die 'The value of $arrowhead-size is expected to be a number or Whatever'
+    unless $arrowhead-size ~~ Numeric:D;
+
+    if $arrowhead-offset.isa(Whatever) { $arrowhead-offset = 2 * $arrowhead-size + $vertex-size; }
+    die 'The value of $arrowhead-offset is expected to be a number or Whatever'
+    unless $arrowhead-offset ~~ Numeric:D;
 
     #------------------------------------------------------
     # Process width and height
@@ -185,6 +197,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LINK_LABEL_FONT_SIZE', $edge-label-font-size)
             .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
+            .subst(:g, '$ARROWHEAD_SIZE', $arrowhead-size)
+            .subst(:g, '$ARROWHEAD_OFFSET', $arrowhead-offset)
             .subst(:g, '$HIGHLIGHT_STROKE_COLOR', '"' ~ $highlight-color ~ '"')
             .subst(:g, '$HIGHLIGHT_FILL_COLOR', '"' ~ $highlight-color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
@@ -221,6 +235,10 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
         if @nodes {
             $res .= subst('$HIGHLIGHT_SET', "\"{ @nodes.join("\", \"") }\"")
         }
+    }
+
+    if !$directed-edges {
+        $res .= subst(".attr('marker-end','url(#arrowhead)')");
     }
 
     $res = $res
