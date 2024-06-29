@@ -87,10 +87,10 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     :$vertex-label-font-size is copy = Whatever,
                     :$edge-label-color is copy = Whatever,
                     :$edge-label-font-size is copy = Whatever,
-                    Str:D :$background = 'white',
-                    Str:D :$vertex-color = 'SteelBlue',
+                    Str:D :$background = 'White',
+                    :$vertex-color is copy = Whatever,
                     Numeric:D :$vertex-size = 2,
-                    Str:D :$edge-color = 'SteelBlue',
+                    :$edge-color is copy = 'SteelBlue',
                     :%force is copy = %(),
                     :$edge-thickness is copy = 1,
                     :$arrowhead-size is copy = Whatever,
@@ -133,8 +133,25 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     unless $edge-label-font-size ~~ Numeric:D;
 
     #------------------------------------------------------
+    # Vertex and edge colors processing
+    given ($vertex-color, $edge-color) {
+        when (Whatever, Whatever) {
+            $vertex-color = 'SteelBlue'; $edge-color = 'SteelBlue';
+        }
+        when $_.head.isa(Whatever) && ($_.tail ~~ Str:D) {
+            $vertex-color = $_.tail;
+        }
+        when ($_.head ~~ Str:D) && $_.tail.isa(Whatever) {
+            $edge-color = $_.head;
+        }
+        when !( ($_.head ~~ Str:D) && ($_.tail ~~ Str:D) ) {
+            die 'The arguments vertex-color and edge-color are expected to be strings or Whatever.';
+        }
+    }
+
+    #------------------------------------------------------
     # Arrowhead size and offset
-    if $arrowhead-size.isa(Whatever) { $arrowhead-size = $edge-thickness + 1; }
+    if $arrowhead-size.isa(Whatever) { $arrowhead-size = $edge-thickness + 2; }
     die 'The value of $arrowhead-size is expected to be a number or Whatever'
     unless $arrowhead-size ~~ Numeric:D;
 
