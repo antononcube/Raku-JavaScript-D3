@@ -138,6 +138,9 @@ our sub ProcessWidthAndHeight(:$width! is copy,
         when $_.head ~~ UInt:D && $_.tail.isa(Whatever) {
            $height = $width * $aspect-ratio;
         }
+        when $_.head ~~ UInt:D && $_.tail ~~ UInt:D {
+            # do nothing
+        }
         default {
             $width = 600;
             $height = $width * $aspect-ratio;
