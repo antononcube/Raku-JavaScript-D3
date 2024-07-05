@@ -226,7 +226,10 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     # Force components
-    if !%force<link><distance>.isa(Whatever) { $res .= subst('$FORCE_LINK_DISTANCE', %force<link><distance>) }
+    if !%force<link><distance>.isa(Whatever) {
+        my $ds = %force<link><distance>.Str.lc ∈ <edgeweight weight> ?? 'd => d.weight' !!  %force<link><distance>;
+        $res .= subst('$FORCE_LINK_DISTANCE', $ds)
+    }
     if !%force<link><iterations>.isa(Whatever) { $res .= subst('$FORCE_LINK_ITER', %force<link><iterations>) }
     if !%force<charge><strength>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_STRENGTH', %force<charge><strength>) }
     if !%force<charge><distanceMin>.isa(Whatever) { $res .= subst('$FORCE_CHARGE_DIST_MIN', %force<charge><distanceMin>) }
