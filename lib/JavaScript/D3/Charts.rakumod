@@ -111,7 +111,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     # Groups
-    my Bool $hasGroups = [&&] @data.map({ (<group x y> (&) $_).elems == 3 });
+    my Bool $hasGroups = [&&] @data.map({ (<group x y> (&) $_.keys).elems == 3 });
 
     note "Multi-dataset bar plots require all records to have the keys <group x y>."
     when !$hasGroups && ( [&&] @data.map({ so $_<group> }) );
