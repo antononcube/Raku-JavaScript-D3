@@ -123,7 +123,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$POINT_COLOR', '"' ~ $stroke-color ~ '"')
             .subst('$LINE_COLOR', '"' ~ $stroke-color ~ '"')
-            .subst('$COLOR_SCHEME', $color-scheme)
+            .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
             .subst(:g, '$WIDTH', $width.Str)
@@ -219,6 +219,7 @@ our multi DateListPlot($data where is-positional-of-str-date-time-value-lists($d
 our multi DateListPlot($data where is-str-time-series($data),
                        Str :$background= 'white',
                        Str :$color= 'steelblue',
+                       Str :$color-scheme = 'schemeSet2',
                        :$width = 600,
                        :$height = 400,
                        Str :plot-label(:$title) = '',
@@ -238,6 +239,7 @@ our multi DateListPlot($data where is-str-time-series($data),
             ListPlotGeneric($data,
                     :$background,
                     :$color,
+                    :$color-scheme,
                     :$width,
                     :$height,
                     :$title,

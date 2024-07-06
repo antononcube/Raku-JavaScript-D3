@@ -448,7 +448,7 @@ var sumstat = d3.group(data, d => d.group);
 // Add a scale for line color
 var myColor = d3.scaleOrdinal()
     .domain(data.map(function(o) { return o.group; }))
-    .range(d3.schemeSet2);
+    .range(d3.$COLOR_SCHEME);
 
 // Draw the line
 svg.selectAll(".line")
@@ -967,7 +967,7 @@ var xSubgroup = d3.scaleBand()
 // Color palette = one color per subgroup
 var myColor = d3.scaleOrdinal()
     .domain(subgroups)
-    .range(d3.schemeSet2);
+    .range(d3.$COLOR_SCHEME);
 
 // Show the bars positive values
 svg.append("g")
@@ -1145,7 +1145,7 @@ const z = d3.scaleLinear()
 // Add a scale for bubble color
 var myColor = d3.scaleOrdinal()
     .domain(data.map(function(o) { return o.group; }))
-    .range(d3.schemeSet2);
+    .range(d3.$COLOR_SCHEME);
 
 // Add dots
 svg.append('g')
@@ -1157,7 +1157,7 @@ svg.append('g')
       .attr("r",  d => z(d.z))
       .style("fill", function (d) { return myColor(d.group); } )
       .style("opacity", $OPACITY)
-      .attr("stroke", "black")
+      .attr("stroke", $STROKE_COLOR)
     // Trigger the tooltip functions
 END
 

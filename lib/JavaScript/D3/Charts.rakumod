@@ -31,6 +31,7 @@ our multi BarChart(%data, *%args) {
 our multi BarChart(@data is copy where @data.all ~~ Map,
                    Str :$background= 'white',
                    Str :$color= 'steelblue',
+                   Str :$color-scheme = 'schemeSet2',
                    :$width = 600,
                    :$height = 400,
                    Str :plot-label(:$title) = '',
@@ -144,6 +145,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -195,6 +197,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
                     UInt :bins(:$number-of-bins) = 20,
                     Str :$background= 'white',
                     Str :$color= 'steelblue',
+                    Str :$color-scheme = 'schemeSet2',
                     :$width = 600,
                     :$height = 400,
                     Str :plot-label(:$title) = '',
@@ -242,6 +245,7 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst('$NUMBER_OF_BINS', $number-of-bins)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -460,8 +464,10 @@ our multi BubbleChart($data where is-positional-of-lists($data, 2), *%args) {
 our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Numeric :$z-range-min = 1,
                       Numeric :$z-range-max = 40,
-                      Str :$background= 'white',
-                      Str :$color= 'steelblue',
+                      Str :$background = 'White',
+                      Str :color(:$fill-color) = 'SteelBlue',
+                      Str :stroke(:$stroke-color) = 'Gray',
+                      Str :$color-scheme = 'schemeSet2',
                       Numeric :$opacity = 0.7,
                       :$width = 600,
                       :$height = 600,
@@ -536,7 +542,9 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
+            .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$OPACITY', '"' ~ $opacity ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
