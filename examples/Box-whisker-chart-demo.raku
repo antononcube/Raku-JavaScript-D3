@@ -4,17 +4,17 @@ use v6.d;
 use JavaScript::D3;
 use Data::Importers;
 
-my $url = "https://pldb.io/posts/age.tsv";
+my $url = "https://raw.githubusercontent.com/antononcube/RakuForPrediction-blog/main/Data/ageAtCreation.tsv";
 my @dsData = data-import($url, headers => 'auto');
 
 @dsData = @dsData.map({
-    $_<ageAtCreation> = $_<ageAtCreation>.UInt;
+    $_<ageAtCreation> = $_<ageAtCreation>.Int;
     $_<rank> = $_<rank>.Int;
     $_<pldbScore> = $_<pldbScore>.Int;
     $_<appeared> = $_<appeared>.Int;
     $_<numberOfUsersEstimate> = $_<numberOfUsersEstimate>.Int;
     $_<numberOfJobsEstimate> = $_<numberOfJobsEstimate>.Int;
-    $_<foundationScore> = $_<foundationScore>.Int;
+    $_<measurements> = $_<measurements>.Int;
     $_
 }).Array;
 
