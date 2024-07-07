@@ -196,7 +196,16 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Convert to JSON data
     my $jsData = to-json(@data.map({ merge-hash( %(weight => 1, label => ''), $_ ) }).Array, :!pretty);
 
-    my $jsVertexCoords = to-json(%vertex-coordinates, :!pretty);
+    my $jsVertexCoords = [];
+    if %vertex-coordinates {
+        $jsVertexCoords = do if %vertex-coordinates.values.all ~~ Map:D {
+            to-json(%vertex-coordinates, :!pretty);
+        } elsif %vertex-coordinates.values.all ~~ Positional:D {
+            to-json(%vertex-coordinates.map({ $_.key => %( x => $_.value.head, y => $_.value.tail) }).Hash, :!pretty);
+        } else {
+            die 'The value of vertex-coordinats is expected to be a Map of Maps with keys <x y>, or a Map of Positionals of length two.'
+        }
+    }
 
     #------------------------------------------------------
     # Stencil code
