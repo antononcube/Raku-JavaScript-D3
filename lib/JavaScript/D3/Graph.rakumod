@@ -86,7 +86,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str :plot-label-color(:$title-color) = 'Black',
                     :$vertex-label-color is copy = Whatever,
                     :$vertex-label-font-size is copy = Whatever,
-                    Str:D :$vertex-label-font-family = 'Courier New',
+                    :$vertex-label-font-family is copy = 'Courier New',
                     :$edge-label-color is copy = Whatever,
                     :$edge-label-font-size is copy = Whatever,
                     Str:D :$background = 'White',
@@ -108,7 +108,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Arguments
     #======================================================
     # Process edge thickness
-    die 'The value of $edge-thickness is expected to be a non-negative numbeer or Whatever'
+    die 'The value of $edge-thickness is expected to be a non-negative numbeer or Whatever.'
     unless $edge-thickness ~~ Numeric:D && $edge-thickness ≥ 0 || $edge-thickness.isa(Whatever);
 
     $edge-thickness = $edge-thickness.isa(Whatever) ?? 'd => Math.sqrt(d.weight)' !! $edge-thickness.Str;
@@ -116,22 +116,27 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     #------------------------------------------------------
     # Vertex label color
     if $vertex-label-color.isa(Whatever) { $vertex-label-color = $title-color; }
-    die 'The value of $vertex-label-color is expected to be a string or Whatever'
+    die 'The value of $vertex-label-color is expected to be a string or Whatever.'
     unless $vertex-label-color ~~ Str:D;
 
     # Vertex label font size
     if $vertex-label-font-size.isa(Whatever) { $vertex-label-font-size = round($title-font-size * 0.8); }
-    die 'The value of $vertex-label-font-size is expected to be a number or Whatever'
+    die 'The value of $vertex-label-font-size is expected to be a number or Whatever.'
     unless $vertex-label-font-size ~~ Numeric:D;
+
+    # Vertex label font family
+    if $vertex-label-font-family.isa(Whatever) { $vertex-label-font-family = 'Courier New'; }
+    die 'The value of $vertex-label-font-family is expected to be a string or Whatever.'
+    unless $vertex-label-font-family ~~ Str:D;
 
     # Edge label color
     if $edge-label-color.isa(Whatever) { $edge-label-color = $vertex-label-color; }
-    die 'The value of $edge-label-color is expected to be a string or Whatever'
+    die 'The value of $edge-label-color is expected to be a string or Whatever.'
     unless $edge-label-color ~~ Str:D;
 
     # Edge label font size
     if $edge-label-font-size.isa(Whatever) { $edge-label-font-size = $vertex-label-font-size; }
-    die 'The value of $edge-label-font-size is expected to be a number or Whatever'
+    die 'The value of $edge-label-font-size is expected to be a number or Whatever.'
     unless $edge-label-font-size ~~ Numeric:D;
 
     #------------------------------------------------------
@@ -154,11 +159,11 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     #------------------------------------------------------
     # Arrowhead size and offset
     if $arrowhead-size.isa(Whatever) { $arrowhead-size = $edge-thickness + 2; }
-    die 'The value of $arrowhead-size is expected to be a number or Whatever'
+    die 'The value of $arrowhead-size is expected to be a number or Whatever.'
     unless $arrowhead-size ~~ Numeric:D;
 
     if $arrowhead-offset.isa(Whatever) { $arrowhead-offset = 2 * $arrowhead-size + $vertex-size; }
-    die 'The value of $arrowhead-offset is expected to be a number or Whatever'
+    die 'The value of $arrowhead-offset is expected to be a number or Whatever.'
     unless $arrowhead-offset ~~ Numeric:D;
 
     #------------------------------------------------------
