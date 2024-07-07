@@ -86,6 +86,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str :plot-label-color(:$title-color) = 'Black',
                     :$vertex-label-color is copy = Whatever,
                     :$vertex-label-font-size is copy = Whatever,
+                    Str:D :$vertex-label-font-family = 'Courier New',
                     :$edge-label-color is copy = Whatever,
                     :$edge-label-font-size is copy = Whatever,
                     Str:D :$background = 'White',
@@ -225,6 +226,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$NODE_SIZE', $vertex-size.Str)
             .subst(:g, '$NODE_LABEL_STROKE_COLOR', '"' ~ $vertex-label-color ~ '"')
             .subst(:g, '$NODE_LABEL_FONT_SIZE', $vertex-label-font-size)
+            .subst(:g, '$NODE_LABEL_FONT_FAMILY', '"' ~ $vertex-label-font-family ~ '"')
             .subst(:g, '$LINK_STROKE_COLOR', '"' ~ $edge-color ~ '"')
             .subst(:g, '$LINK_LABEL_FONT_SIZE', $edge-label-font-size)
             .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
