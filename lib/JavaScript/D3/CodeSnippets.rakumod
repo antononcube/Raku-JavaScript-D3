@@ -1665,16 +1665,21 @@ const nodes = Object.keys(vertexCoordinates).map(key => ({
   y: vertexCoordinates[key].y
 }));
 
-const xExtent = d3.extent(nodes, d => d.x);
-const yExtent = d3.extent(nodes, d => d.y);
+var xMin = Math.min.apply(Math, nodes.map(function(o) { return o.x; }))
+var xMax = Math.max.apply(Math, nodes.map(function(o) { return o.x; }))
 
-const xScale = d3.scaleLinear()
-  .domain(xExtent)
-  .range([0, width]);
+var yMin = Math.min.apply(Math, nodes.map(function(o) { return o.y; }))
+var yMax = Math.max.apply(Math, nodes.map(function(o) { return o.y; }))
 
-const yScale = d3.scaleLinear()
-  .domain(yExtent)
-  .range([height, 0]);
+// X scale and Axis
+var xScale = d3.scaleLinear()
+    .domain([xMin, xMax])
+    .range([0, width]);
+
+// Y scale and Axis
+var yScale = d3.scaleLinear()
+    .domain([yMin, yMax])
+    .range([height, 0]);
 
 nodes.forEach(node => {
   node.x = xScale(node.x);
