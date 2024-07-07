@@ -78,6 +78,7 @@ our multi GraphPlot($data where is-positional-of-lists($data, 4), *%args) {
 
 our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Bool:D :d(:directed(:$directed-edges)) = False,
+                    :%vertex-coordinates = %(),
                     :$width is copy = 400,
                     :$height is copy = Whatever,
                     Str :plot-label(:$title) = '',
@@ -195,15 +196,20 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Convert to JSON data
     my $jsData = to-json(@data.map({ merge-hash( %(weight => 1, label => ''), $_ ) }).Array, :!pretty);
 
+    my $jsVertexCoords = to-json(%vertex-coordinates, :!pretty);
+
     #------------------------------------------------------
     # Stencil code
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-                   JavaScript::D3::CodeSnippets::GetGraphPart()].join("\n");
+    my $jsChart = [
+        JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
+        %vertex-coordinates ??  JavaScript::D3::CodeSnippets::GetGraphWithCoordsPart() !! JavaScript::D3::CodeSnippets::GetGraphPart()
+    ].join("\n");
 
     #------------------------------------------------------
     # Concrete values
     my $res = $jsChart
             .subst('$DATA', $jsData)
+            .subst('$VERTEX_COORDINATES', $jsVertexCoords)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst(:g, '$NODE_STROKE_COLOR', '"' ~ $vertex-color ~ '"')
             .subst(:g, '$NODE_FILL_COLOR', '"' ~ $vertex-color ~ '"')

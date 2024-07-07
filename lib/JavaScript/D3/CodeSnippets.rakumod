@@ -1488,7 +1488,7 @@ our sub GetTooltipHeatmapPlotLabelsPart() {
 }
 
 #============================================================
-# Graph code snippets
+# Graph-force code snippets
 #============================================================
 # For the force settings see GitHub gist:
 # https://gist.github.com/steveharoz/8c3e2524079a8c440df60c1ab72b5d03
@@ -1635,4 +1635,138 @@ GRAPH-END
 
 our sub GetGraphPart() {
     return $jsGraphPart;
+}
+
+
+#============================================================
+# Graph-with-coordinates code snippets
+#============================================================
+
+my $jsGraphWithCoordsPart = q:to/GRAPH-COORDS-END/;
+const edges = $DATA;
+
+const vertexCoordinates = $VERTEX_COORDINATES;
+
+const highlightNodes = new Set([$HIGHLIGHT_SET]);
+
+const highlightLinkNodes = new Set([$HIGHLIGHT_LINK_SET]);
+
+const links = edges.map(e => ({
+  source: e.from,
+  target: e.to,
+  weight: e.weight,
+  label: e.label,
+  highlight: highlightLinkNodes.has(e.from + "-" + e.to)
+}));
+
+const nodes = Object.keys(vertexCoordinates).map(key => ({
+  id: key,
+  x: vertexCoordinates[key].x,
+  y: vertexCoordinates[key].y
+}));
+
+const xExtent = d3.extent(nodes, d => d.x);
+const yExtent = d3.extent(nodes, d => d.y);
+
+const xScale = d3.scaleLinear()
+  .domain(xExtent)
+  .range([0, width]);
+
+const yScale = d3.scaleLinear()
+  .domain(yExtent)
+  .range([height, 0]);
+
+nodes.forEach(node => {
+  node.x = xScale(node.x);
+  node.y = yScale(node.y);
+});
+
+const link = svg.append("g")
+    .attr("class", "links")
+  .selectAll("line")
+  .data(links)
+  .enter().append("line")
+    .attr("class", "link")
+    .attr("stroke", d => d.highlight ? $HIGHLIGHT_STROKE_COLOR : $LINK_STROKE_COLOR)
+    .attr("stroke-width", $LINK_STROKE_WIDTH)
+    .attr("x1", d => nodes.find(n => n.id === d.source).x)
+    .attr("y1", d => nodes.find(n => n.id === d.source).y)
+    .attr("x2", d => nodes.find(n => n.id === d.target).x)
+    .attr("y2", d => nodes.find(n => n.id === d.target).y);
+
+const node = svg.append("g")
+    .attr("class", "nodes")
+  .selectAll("circle")
+  .data(nodes)
+  .enter().append("circle")
+    .attr("class", "node")
+    .attr("r", $NODE_SIZE)
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+    .attr("stroke", d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR : $NODE_STROKE_COLOR)
+    .attr("fill", d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
+    .call(d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended));
+
+
+node.append("title")
+    .text(d => d.id);
+
+const nodeLabel = svg.append("g")
+    .attr("class", "node-labels")
+  .selectAll("text")
+  .data(nodes)
+  .enter().append("text")
+    .attr("class", "node-label")
+    .style("font-size", $NODE_LABEL_FONT_SIZE)
+    .attr("font-family", "Courier")
+    .attr("dy", -10)
+    .attr("x", d => d.x)
+    .attr("y", d => d.y)
+    .attr('fill', $NODE_LABEL_STROKE_COLOR)
+    .attr('stroke', $NODE_LABEL_STROKE_COLOR)
+    .text(d => d.id);
+
+const linkLabel = svg.append("g")
+    .attr("class", "link-labels")
+  .selectAll("text")
+  .data(links)
+  .enter().append("text")
+    .filter(d => d.label !== "")
+    .attr("class", "link-label")
+    .style("font-size", $LINK_LABEL_FONT_SIZE)
+    .attr("font-family", "Courier")
+    .attr('fill', $LINK_LABEL_STROKE_COLOR)
+    .attr('stroke', $LINK_LABEL_STROKE_COLOR)
+    .text(d => d.label);
+
+function dragstarted(event, d) {
+  d3.select(this).raise().attr("stroke", $NODE_STROKE_COLOR);
+}
+
+function dragged(event, d) {
+  d.x = event.x;
+  d.y = event.y;
+  d3.select(this).attr("cx", d.x).attr("cy", d.y);
+  link
+    .attr("x1", l => nodes.find(n => n.id === l.source).x)
+    .attr("y1", l => nodes.find(n => n.id === l.source).y)
+    .attr("x2", l => nodes.find(n => n.id === l.target).x)
+    .attr("y2", l => nodes.find(n => n.id === l.target).y);
+}
+
+function dragended(event, d) {
+  d3.select(this).attr("stroke", null);
+}
+GRAPH-COORDS-END
+
+
+#============================================================
+# Graph code snippets accessors
+#============================================================
+
+our sub GetGraphWithCoordsPart() {
+    return $jsGraphWithCoordsPart;
 }
