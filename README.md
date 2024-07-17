@@ -138,9 +138,9 @@ js-d3-graphics --help
 ```
 ```
 # Usage:
-#   /Users/antonov/.rakubrew/versions/moar-2024.02/share/perl6/site/bin/js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
-#   /Users/antonov/.rakubrew/versions/moar-2024.02/share/perl6/site/bin/js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
-#   /Users/antonov/.rakubrew/versions/moar-2024.02/share/perl6/site/bin/js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
+#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
+#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
+#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
 #   
 #     <cmd>                 Graphics command.
 #     [<points> ...]        Data points.
@@ -206,7 +206,7 @@ In the lists below the highest priority items are placed first.
 1. [X] DONE List plot
 2. [X] DONE List line plot
 3. [X] DONE Date list plot
-4. [ ] TODO Box plot
+4. [X] DONE Box plot
 
 #### Multiple datasets
 
@@ -215,6 +215,25 @@ In the lists below the highest priority items are placed first.
 3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
 
+### Graph plots
+
+1. [ ] TODO Graph plot using d3-force
+    - [X] DONE Core graph plot
+    - [X] DONE Directed graphs
+    - [X] DONE Vertex label styling
+    - [X] DONE Edge label styling
+    - [ ] TODO Vertex shape styling
+    - [ ] TODO Edge shape styling
+    - [ ] TODO Curved edges
+2. [ ] TODO Graph plot using vertex coordinates
+    - [X] DONE Core graph plot
+    - [ ] TODO Directed graphs
+    - [X] DONE Vertex label styling
+    - [X] DONE Edge label styling
+    - [ ] TODO Vertex shape styling
+    - [ ] TODO Edge shape styling
+    - [ ] TODO Curved edges
+   
 ### Charts
 
 #### Single dataset
@@ -252,8 +271,8 @@ User specified or automatic:
 5. [X] DONE Plot grid lines 
      - [X] DONE Automatic 
      - [X] DONE User specified number of ticks
-6. [ ] TODO Title style (font size, color, face)
-7. [ ] TODO Axes labels style (font size, color, face)
+6. [X] DONE Title style (font size, color, face)
+7. [X] DONE Axes labels style (font size, color, face)
 8. [ ] TODO Grid lines style
 
 ### Infrastructural

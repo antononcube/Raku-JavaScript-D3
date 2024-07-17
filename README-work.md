@@ -174,7 +174,7 @@ In the lists below the highest priority items are placed first.
 1. [X] DONE List plot
 2. [X] DONE List line plot
 3. [X] DONE Date list plot
-4. [ ] TODO Box plot
+4. [X] DONE Box plot
 
 #### Multiple datasets
 
@@ -183,6 +183,25 @@ In the lists below the highest priority items are placed first.
 3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
 
+### Graph plots
+
+1. [ ] TODO Graph plot using d3-force
+    - [X] DONE Core graph plot
+    - [X] DONE Directed graphs
+    - [X] DONE Vertex label styling
+    - [X] DONE Edge label styling
+    - [ ] TODO Vertex shape styling
+    - [ ] TODO Edge shape styling
+    - [ ] TODO Curved edges
+2. [ ] TODO Graph plot using vertex coordinates
+    - [X] DONE Core graph plot
+    - [ ] TODO Directed graphs
+    - [X] DONE Vertex label styling
+    - [X] DONE Edge label styling
+    - [ ] TODO Vertex shape styling
+    - [ ] TODO Edge shape styling
+    - [ ] TODO Curved edges
+   
 ### Charts
 
 #### Single dataset
@@ -220,8 +239,8 @@ User specified or automatic:
 5. [X] DONE Plot grid lines 
      - [X] DONE Automatic 
      - [X] DONE User specified number of ticks
-6. [ ] TODO Title style (font size, color, face)
-7. [ ] TODO Axes labels style (font size, color, face)
+6. [X] DONE Title style (font size, color, face)
+7. [X] DONE Axes labels style (font size, color, face)
 8. [ ] TODO Grid lines style
 
 ### Infrastructural
