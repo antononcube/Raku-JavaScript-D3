@@ -1744,9 +1744,13 @@ const linkLabel = svg.append("g")
     .filter(d => d.label !== "")
     .attr("class", "link-label")
     .style("font-size", $LINK_LABEL_FONT_SIZE)
-    .attr("font-family", "Courier")
+    .attr("font-family", $LINK_LABEL_FONT_FAMILY)
     .attr('fill', $LINK_LABEL_STROKE_COLOR)
     .attr('stroke', $LINK_LABEL_STROKE_COLOR)
+    .attr("font-weight", 100)
+    .attr("dy", -10)
+    .attr("x", d => xScale((vertexCoordinates[d.source].x + vertexCoordinates[d.target].x) / 2))
+    .attr("y", d => yScale((vertexCoordinates[d.source].y + vertexCoordinates[d.target].y) / 2))
     .text(d => d.label);
 
 function dragstarted(event, d) {

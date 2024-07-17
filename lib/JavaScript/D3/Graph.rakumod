@@ -89,6 +89,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     :$vertex-label-font-family is copy = 'Courier New',
                     :$edge-label-color is copy = Whatever,
                     :$edge-label-font-size is copy = Whatever,
+                    :$edge-label-font-family is copy = 'Courier New',
                     Str:D :$background = 'White',
                     :$vertex-color is copy = Whatever,
                     Numeric:D :$vertex-size = 2,
@@ -138,6 +139,11 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     if $edge-label-font-size.isa(Whatever) { $edge-label-font-size = $vertex-label-font-size; }
     die 'The value of $edge-label-font-size is expected to be a number or Whatever.'
     unless $edge-label-font-size ~~ Numeric:D;
+
+    # Edge label font family
+    if $edge-label-font-family.isa(Whatever) { $edge-label-font-family = 'Courier New'; }
+    die 'The value of $edge-label-font-family is expected to be a string or Whatever.'
+    unless $edge-label-font-family ~~ Str:D;
 
     #------------------------------------------------------
     # Vertex and edge colors processing
@@ -235,6 +241,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LINK_STROKE_COLOR', '"' ~ $edge-color ~ '"')
             .subst(:g, '$LINK_LABEL_FONT_SIZE', $edge-label-font-size)
             .subst(:g, '$LINK_LABEL_STROKE_COLOR', '"' ~ $edge-label-color ~ '"')
+            .subst(:g, '$LINK_LABEL_FONT_FAMILY', '"' ~ $edge-label-font-family ~ '"')
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
             .subst(:g, '$ARROWHEAD_SIZE', $arrowhead-size)
             .subst(:g, '$ARROWHEAD_OFFSET', $arrowhead-offset)
