@@ -1,5 +1,7 @@
 unit module JavaScript::D3::Random;
 
+use Data::Generators;
+
 #============================================================
 # Random mandala
 #============================================================
@@ -118,4 +120,61 @@ our sub Scribble(
     }
 
     return @r;
+}
+
+#============================================================
+# Random Koch curve
+#============================================================
+
+sub cross(@v) {
+    if (@v.all ~~ Numeric:D) && @v.elems == 2 {
+        return [ -@v[1], @v[0] ];
+    } elsif @v.elems == 2 && @v[0].elems == 3 && @v[1].elems == 3 {
+        my ($a, $b) = @v;
+        return [
+            $a[1] * $b[2] - $a[2] * $b[1],
+            $a[2] * $b[0] - $a[0] * $b[2],
+            $a[0] * $b[1] - $a[1] * $b[0]
+        ];
+    } else {
+        die "A 2D vector or two 3D vectors are expected as arguments.";
+    }
+}
+
+#-----------------------------------------------------------
+sub random-koch-curve-helper(@spec, @points) {
+    my ($posspec, $widthspec, $heightspec) = @spec;
+    my ($p1, $p5) = @points;
+    my $alpha1 = $posspec - $widthspec / 2;
+    my $alpha2 = $posspec + $widthspec / 2;
+    my $p2 = (1 - $alpha1) <<*<< $p1 <<+>> $alpha1 <<*<< $p5;
+    my $p4 = (1 - $alpha2) <<*<< $p1 <<+>> $alpha2 <<*<< $p5;
+    my $p3 = (1 - $posspec) <<*<< $p1 <<+>> $posspec <<*<< $p5 <<+>> ($p5 <<->> $p1).&cross >>*>> $heightspec;
+    return ($p1, $p2, $p3, $p4, $p5);
+}
+
+#-----------------------------------------------------------
+proto sub RandomKochCurve($pts, $possdist, $widthdist, $heightdist, Int $n) is export {*}
+
+multi sub RandomKochCurve(Whatever, $possdist, $widthdist, $heightdist, Int $n) {
+    return RandomKochCurve([[0, 0], [1, 0]], $possdist, $widthdist, $heightdist, $n);
+}
+
+multi sub RandomKochCurve(@pts, $possdist, $widthdist, $heightdist, Int $n) {
+    my @out = @pts;
+    for ^$n {
+        @out = @out.rotor(2 => -1);
+
+        my @ps = $possdist ~~ Numeric:D ?? $possdist xx @out.elems !! random-variate($possdist, @out.elems);
+        my @ws = $widthdist ~~ Numeric:D ?? $widthdist xx @out.elems !! random-variate($widthdist, @out.elems);
+        my @hs = $heightdist ~~ Numeric:D ?? $heightdist xx @out.elems !! random-variate($heightdist, @out.elems);
+
+        @out = do for ^@out.elems -> $i {
+            random-koch-curve-helper([ @ps[$i], @ws[$i], @hs[$i] ], @out[$i])
+        }
+
+        @out = [@out.head, |@out.tail(*-1).map({ $_.tail(*-1) })];
+        @out .= map(*.Slip);
+    }
+    return @out;
 }

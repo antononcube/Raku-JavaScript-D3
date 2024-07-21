@@ -457,6 +457,27 @@ multi js-d3-random-scribble(
 }
 
 #============================================================
+#| Makes a random Koch curve.
+proto sub js-d3-random-koch-curve(|) is export {*}
+
+multi sub js-d3-random-koch-curve($points, $possdist, $widthdist, $heightdist, Int $n, *%args) {
+    my @snowflake = RandomKochCurve($points, $possdist, $widthdist, $heightdist, $n);
+    my $width = %args<width> // 600;
+    my $height = %args<height> // ($width * max(@snowflake.map(*.tail))),
+    my %args2 = %args.grep({ $_.key ∉ <width height axes> });
+    return js-d3-list-line-plot(
+            @snowflake,
+            :$width,
+            :$height,
+            axes => %args<axes> // False,
+            |%args2);
+}
+
+multi sub js-d3-random-koch-curve($points, :p(:$position-spec)!, :w(:$width-spec)!, :h(:$height-spec)!, Int :$n!, *%args) {
+    return js-d3-random-koch-curve($points, $position-spec, $width-spec, $height-spec, $n, |%args);
+}
+
+#============================================================
 #| Displays the image using a given URL or file name.
 proto js-d3-image-display(|) is export {*}
 
