@@ -461,7 +461,7 @@ multi js-d3-random-scribble(
 proto sub js-d3-random-koch-curve(|) is export {*}
 
 multi sub js-d3-random-koch-curve($points, $possdist, $widthdist, $heightdist, Int $n, *%args) {
-    my @snowflake = RandomKochCurve($points, $possdist, $widthdist, $heightdist, $n);
+    my @snowflake = JavaScript::D3::Random::KochCurve($points, $possdist, $widthdist, $heightdist, $n);
     my $width = %args<width> // 600;
     my $height = %args<height> // ($width * max(@snowflake.map(*.tail))),
     my %args2 = %args.grep({ $_.key ∉ <width height axes> });

@@ -154,13 +154,13 @@ sub random-koch-curve-helper(@spec, @points) {
 }
 
 #-----------------------------------------------------------
-proto sub RandomKochCurve($pts, $possdist, $widthdist, $heightdist, Int $n) is export {*}
+our proto sub KochCurve($pts, $possdist, $widthdist, $heightdist, Int $n) is export {*}
 
-multi sub RandomKochCurve(Whatever, $possdist, $widthdist, $heightdist, Int $n) {
-    return RandomKochCurve([[0, 0], [1, 0]], $possdist, $widthdist, $heightdist, $n);
+multi sub KochCurve(Whatever, $possdist, $widthdist, $heightdist, Int $n) {
+    return KochCurve([[0, 0], [1, 0]], $possdist, $widthdist, $heightdist, $n);
 }
 
-multi sub RandomKochCurve(@pts, $possdist, $widthdist, $heightdist, Int $n) {
+multi sub KochCurve(@pts, $possdist, $widthdist, $heightdist, Int $n) {
     my @out = @pts;
     for ^$n {
         @out = @out.rotor(2 => -1);
