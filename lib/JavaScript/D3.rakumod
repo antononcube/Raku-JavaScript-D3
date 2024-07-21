@@ -473,6 +473,10 @@ multi sub js-d3-random-koch-curve($points, $possdist, $widthdist, $heightdist, I
             |%args2);
 }
 
+multi sub js-d3-random-koch-curve(:p(:$position-spec)!, :w(:$width-spec)!, :h(:$height-spec)!, Int :$n!, *%args) {
+    return js-d3-random-koch-curve(Whatever, $position-spec, $width-spec, $height-spec, $n, |%args);
+}
+
 multi sub js-d3-random-koch-curve($points, :p(:$position-spec)!, :w(:$width-spec)!, :h(:$height-spec)!, Int :$n!, *%args) {
     return js-d3-random-koch-curve($points, $position-spec, $width-spec, $height-spec, $n, |%args);
 }
