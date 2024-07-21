@@ -35,6 +35,7 @@ our multi ListPlotGeneric($data where $data ~~ Positional && $data.all ~~ Numeri
 our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :$background = 'white',
                           Str :color(:$stroke-color) = 'steelblue',
+                          :$fill-color is copy = Whatever,
                           Str :$color-scheme = 'schemeSet2',
                           :$width = 600,
                           :$height = 400,
@@ -56,6 +57,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           :$margins is copy = Whatever,
                           :$legends = Whatever,
                           Bool :$axes = True,
+                          Bool :$filled = False,
                           Numeric :$point-size = 6,
                           Numeric :$stroke-width = 1.5,
                           Str :$format = 'jupyter',
@@ -93,6 +95,11 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
         $hasTooltips = True;
     }
 
+    # Fill color
+    if $fill-color.isa(Whatever) { $fill-color = $stroke-color; }
+    die 'The value of $fill-color is expected to be a string or Whatever.'
+    unless $fill-color ~~ Str:D;
+
     # Process data
     my $jsData = to-json(@data, :!pretty);
 
@@ -122,7 +129,8 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$POINT_COLOR', '"' ~ $stroke-color ~ '"')
-            .subst('$LINE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
             .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
@@ -189,7 +197,7 @@ our multi ListLinePlot($data, *%args) {
     return ListPlotGeneric(
             $data,
             |%args,
-            singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
+            singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(filled => %args<filled> // False),
             multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
             dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(:$x-axis-scale, :$y-axis-scale),
             dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(:$x-axis-scale, :$y-axis-scale));
@@ -230,6 +238,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
                        Bool :$axes = True,
+                       Bool :$filled = False,
                        Str :$format = 'jupyter',
                        :$div-id = Whatever,
                        *%args
@@ -251,7 +260,7 @@ our multi DateListPlot($data where is-str-time-series($data),
                     :$axes,
                     format => 'asis',
                     :$div-id,
-                    singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(),
+                    singleDatasetCode => JavaScript::D3::CodeSnippets::GetPathPlotPart(:$filled),
                     multiDatasetCode => JavaScript::D3::CodeSnippets::GetMultiPathPlotPart(),
                     dataScalesAndAxesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataScalesAndAxes(:$y-axis-scale),
                     dataAndScalesCode => JavaScript::D3::CodeSnippets::GetPlotDateDataAndScales(:$y-axis-scale),

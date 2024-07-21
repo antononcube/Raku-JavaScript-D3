@@ -440,6 +440,21 @@ svg.append('path')
   .attr('fill', 'none');
 END
 
+my $jsFilledPathPlotPart = q:to/END/;
+// prepare a helper function
+var areaFunc = d3.area()
+  .x(function(d) { return x(d.x) })
+  .y0(function(d) { return y(0) })
+  .y1(function(d) { return y(d.y) })
+
+// Add the path using this helper function
+svg.append('path')
+  .attr('d', areaFunc(data))
+  .attr("stroke-width", $STROKE_WIDTH)
+  .attr('stroke', $LINE_COLOR)
+  .attr('fill', $FILL_COLOR);
+END
+
 # See https://d3-graph-gallery.com/graph/line_several_group.html
 my $jsMultiPathPlotPart = q:to/END/;
 // group the data: I want to draw one line per group
@@ -469,8 +484,8 @@ END
 # ListLinePlot code snippets accessors
 #============================================================
 
-our sub GetPathPlotPart() {
-    return $jsPathPlotPart;
+our sub GetPathPlotPart(Bool :$filled = False) {
+    return $filled ?? $jsFilledPathPlotPart !! $jsPathPlotPart;
 }
 
 our sub GetMultiPathPlotPart() {
