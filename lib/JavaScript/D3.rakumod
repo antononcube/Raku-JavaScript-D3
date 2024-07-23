@@ -7,6 +7,7 @@ use JavaScript::D3::Images;
 use JavaScript::D3::Chess;
 use JavaScript::D3::Graph;
 use Hash::Merge;
+use JSON::Fast;
 
 
 #============================================================
@@ -479,6 +480,64 @@ multi sub js-d3-random-koch-curve(:p(:$position-spec)!, :w(:$width-spec)!, :h(:$
 
 multi sub js-d3-random-koch-curve($points, :p(:$position-spec)!, :w(:$width-spec)!, :h(:$height-spec)!, Int :$n!, *%args) {
     return js-d3-random-koch-curve($points, $position-spec, $width-spec, $height-spec, $n, |%args);
+}
+
+#============================================================
+#| Makes a random Mondrian.
+proto sub js-d3-random-mondrian(|) is export {*}
+
+multi sub js-d3-random-mondrian(:$width is copy = 800,
+                                :$height is copy = Whatever,
+                                UInt:D :n(:$max-iterations) = 7,
+                                :color-palette(:$color-scheme) is copy = Whatever,
+                                Str:D :stroke(:$stroke-color) = 'Black',
+                                Numeric:D :$stroke-width = 4,
+                                :$margins is copy = Whatever,
+                                Str:D :$background = 'White',
+                                Str:D :$format= "jupyter",
+                                :$div-id = Whatever,
+                                *%args
+                                ) {
+
+    # Process width and height
+    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height);
+
+    # Make rectangles
+    my @rects = JavaScript::D3::Random::Mondrian($width, $height, $max-iterations);
+
+    # Get core code
+    my $jsCode = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
+                  JavaScript::D3::CodeSnippets::GetMondrianPart()].join("\n");
+
+    #-------------------------------------------------------
+    # Process $color-palette
+    #-------------------------------------------------------
+    if $color-scheme.isa(Whatever) { $color-scheme = 'None'}
+    die 'The argument $color-scheme is expected to be a string or Whatever'
+    unless $color-scheme ~~ Str:D;
+
+    #-------------------------------------------------------
+    # Margins
+    #-------------------------------------------------------
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    #--------------------------------------------------------
+    # Finishing
+    #--------------------------------------------------------
+    $jsCode = $jsCode
+            .subst('$DATA', to-json(@rects, :!pretty))
+            .subst(:g, '$WIDTH', $width)
+            .subst(:g, '$HEIGHT', $height)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst(:g, '$MARGINS', to-json($margins):!pretty)
+            .subst(:g, '$TITLE_FONT_SIZE', %args<title-font-size> // 12)
+            .subst(:g, '$TITLE_FILL', '"' ~ (%args<title-color> // '') ~ '"')
+            .subst(:g, '$TITLE', '"' ~ (%args<title> // '') ~ '"')
+            .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
+            .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$STROKE_WIDTH', $stroke-width);
+
+    return JavaScript::D3::CodeSnippets::WrapIt($jsCode, :$format, :$div-id);
 }
 
 #============================================================

@@ -1788,11 +1788,87 @@ function dragended(event, d) {
 }
 GRAPH-COORDS-END
 
-
 #============================================================
 # Graph code snippets accessors
 #============================================================
 
 our sub GetGraphWithCoordsPart() {
     return $jsGraphWithCoordsPart;
+}
+
+#============================================================
+# Mondrian code snippet
+#============================================================
+my $jsMondrianPart = q:to/MONDRIAN-END/;
+const data = $DATA;
+
+const colorScheme = $COLOR_SCHEME;
+
+var color;
+if (colorScheme.toLowerCase()  === 'none') {
+    color = d3.scaleOrdinal(d3.schemeAccent)
+} else {
+    color = d3.scaleOrdinal(d3[colorScheme])
+};
+
+const weightedColors = {
+    "Black": 1,
+    "Gray": 1,
+    "Blue": 4,
+    "Red": 4,
+    "Yellow": 4,
+    "White": 16
+};
+
+function getRandomWeightedColor() {
+    const colors = [];
+    for (const [color, weight] of Object.entries(weightedColors)) {
+        for (let i = 0; i < weight; i++) {
+            colors.push(color);
+        }
+    }
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+var xMin = Math.min.apply(Math, data.map(function(o) { return Math.min(o.x1, o.x2); }))
+var xMax = Math.max.apply(Math, data.map(function(o) { return Math.max(o.x1, o.x2); }))
+
+var yMin = Math.min.apply(Math, data.map(function(o) { return Math.min(o.y1, o.y2); }))
+var yMax = Math.max.apply(Math, data.map(function(o) { return Math.min(o.y1, o.y2); }))
+
+// X scale and Axis
+var xScale = d3.scaleLinear()
+    .domain([xMin, xMax])
+    .range([0, width]);
+
+// Y scale and Axis
+var yScale = d3.scaleLinear()
+    .domain([yMin, yMax])
+    .range([0, height]);
+
+svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", d => xScale(d.x1))
+    .attr("y", d => yScale(d.y1))
+    .attr("width", d => xScale(d.x2) - xScale(d.x1))
+    .attr("height", d => yScale(d.y2) - yScale(d.y1))
+    .attr("fill", (d, i) => {
+        if (colorScheme.toLowerCase() === 'none') {
+            return getRandomWeightedColor();
+        } else {
+            return color(Math.random());
+        }
+    })
+    .attr("stroke-width", $STROKE_WIDTH)
+    .attr("stroke", $STROKE_COLOR);
+MONDRIAN-END
+
+#============================================================
+# Mondrian code snippet accessor
+#============================================================
+
+our sub GetMondrianPart() {
+    return $jsMondrianPart;
 }

@@ -178,3 +178,41 @@ multi sub KochCurve(@pts, $possdist, $widthdist, $heightdist, Int $n) {
     }
     return @out;
 }
+
+#============================================================
+# Random Mondrian
+#============================================================
+sub rectangle-splitting(%d where { %d<x1> < %d<x2> && %d<y1> < %d<y2> }) {
+    my $t = random-variate(BetaDistribution.new(10, 10));
+    my $r = rand;
+    my $x1 = %d<x1>;
+    my $y1 = %d<y1>;
+    my $x2 = %d<x2>;
+    my $y2 = %d<y2>;
+
+    given $r {
+        when $_ < 0.3 * ($x2 - $x1) / ($y2 - $y1) {
+            return (
+            { :$x1, :$y1, x2 => $x1 + ($x2 - $x1) * $t, :$y2},
+            { x1 => $x1 + ($x2 - $x1) * $t, :$y1, :$x2, :$y2}
+            );
+        }
+        when 1 - $_ < 0.5 * ($y2 - $y1) / ($x2 - $x1) {
+            return (
+            { :$x1, :$y1, :$x2, y2 => $y1 + ($y2 - $y1) * $t },
+            { :$x1, y1 => $y1 + ($y2 - $y1) * $t, :$x2, :$y2}
+            );
+        }
+        default {
+            return (%d,);
+        }
+    }
+}
+
+our sub Mondrian(Numeric:D $width, Numeric:D $height, UInt:D $max-iterations = 6) {
+    my @rects = [{x1 => 0, y1 => 0, x2 => $width, y2 => $height}, ];
+    for ^$max-iterations {
+        @rects .= map({ rectangle-splitting($_).Slip })
+    }
+    return @rects;
+}
