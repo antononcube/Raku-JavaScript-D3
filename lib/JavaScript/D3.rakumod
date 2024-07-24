@@ -489,6 +489,7 @@ proto sub js-d3-random-mondrian(|) is export {*}
 multi sub js-d3-random-mondrian(:$width is copy = 800,
                                 :$height is copy = Whatever,
                                 UInt:D :n(:$max-iterations) = 7,
+                                Numeric:D :$jitter = 0,
                                 :$color-scheme is copy = Whatever,
                                 Str:D :stroke(:$stroke-color) = 'Black',
                                 Numeric:D :$stroke-width = 4,
@@ -504,7 +505,7 @@ multi sub js-d3-random-mondrian(:$width is copy = 800,
     ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height);
 
     # Make rectangles
-    my @rects = JavaScript::D3::Random::Mondrian($width, $height, $max-iterations);
+    my @rects = JavaScript::D3::Random::Mondrian($width, $height, $max-iterations, :$jitter);
 
     # Get core code
     my $jsCode = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
