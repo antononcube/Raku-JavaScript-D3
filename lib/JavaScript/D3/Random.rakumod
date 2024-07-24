@@ -182,8 +182,8 @@ multi sub KochCurve(@pts, $possdist, $widthdist, $heightdist, Int $n) {
 #============================================================
 # Random Mondrian
 #============================================================
-sub rectangle-splitting(%d where { %d<x1> < %d<x2> && %d<y1> < %d<y2> }) {
-    my $t = random-variate(BetaDistribution.new(10, 10));
+sub rectangle-splitting(%d where { %d<x1> < %d<x2> && %d<y1> < %d<y2> }, :$distribution) {
+    my $t = random-variate($distribution);
     my $r = rand;
     my $x1 = %d<x1>;
     my $y1 = %d<y1>;
@@ -212,10 +212,12 @@ sub rectangle-splitting(%d where { %d<x1> < %d<x2> && %d<y1> < %d<y2> }) {
 our sub Mondrian(Numeric:D $width,
                  Numeric:D $height,
                  UInt:D $max-iterations = 6,
-                 Numeric:D :$jitter = 0) {
+                 Numeric:D :$jitter = 0,
+                 :$distribution is copy = Whatever) {
+    if $distribution.isa(Whatever) { $distribution = BetaDistribution.new(10, 10) }
     my @rects = [{x1 => 0, y1 => 0, x2 => $width, y2 => $height}, ];
     for ^$max-iterations {
-        @rects .= map({ rectangle-splitting($_).Slip })
+        @rects .= map({ rectangle-splitting($_, :$distribution).Slip })
     }
     if $jitter {
         @rects = @rects.map({ <x1 y1 x2 y2> Z=> $_<x1 y1 x2 y2> <<+>> random-real([0, $jitter], 4) })».Hash.pick(*)
