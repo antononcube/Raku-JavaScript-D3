@@ -1837,7 +1837,7 @@ var xScale = d3.scaleLinear()
 // Y scale and Axis
 var yScale = d3.scaleLinear()
     .domain([yMin, yMax])
-    .range([height, 0]);
+    .range([0, height]);
 
 svg.selectAll("rect")
     .data(data)
