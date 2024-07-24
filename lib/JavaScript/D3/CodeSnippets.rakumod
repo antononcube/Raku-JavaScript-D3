@@ -1811,14 +1811,7 @@ if (colorScheme.toLowerCase()  === 'none') {
     color = d3.scaleOrdinal(d3[colorScheme])
 };
 
-const weightedColors = {
-    "Black": 1,
-    "Gray": 1,
-    "Blue": 4,
-    "Red": 4,
-    "Yellow": 4,
-    "White": 16
-};
+const weightedColors = $COLOR_PALETTE;
 
 function getRandomWeightedColor() {
     const colors = [];

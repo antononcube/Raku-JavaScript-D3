@@ -489,11 +489,12 @@ proto sub js-d3-random-mondrian(|) is export {*}
 multi sub js-d3-random-mondrian(:$width is copy = 800,
                                 :$height is copy = Whatever,
                                 UInt:D :n(:$max-iterations) = 7,
-                                :color-palette(:$color-scheme) is copy = Whatever,
+                                :$color-scheme is copy = Whatever,
                                 Str:D :stroke(:$stroke-color) = 'Black',
                                 Numeric:D :$stroke-width = 4,
-                                :$margins is copy = Whatever,
+                                :fill-color(:$color-palette) is copy = Whatever,
                                 Str:D :$background = 'White',
+                                :$margins is copy = Whatever,
                                 Str:D :$format= "jupyter",
                                 :$div-id = Whatever,
                                 *%args
@@ -510,11 +511,20 @@ multi sub js-d3-random-mondrian(:$width is copy = 800,
                   JavaScript::D3::CodeSnippets::GetMondrianPart()].join("\n");
 
     #-------------------------------------------------------
-    # Process $color-palette
+    # Process $color-scheme
     #-------------------------------------------------------
     if $color-scheme.isa(Whatever) { $color-scheme = 'None'}
-    die 'The argument $color-scheme is expected to be a string or Whatever'
+    die 'The argument $color-scheme is expected to be a string or Whatever.'
     unless $color-scheme ~~ Str:D;
+
+    #-------------------------------------------------------
+    # Process $color-palette
+    #-------------------------------------------------------
+    if $color-palette.isa(Whatever) {
+        $color-palette = {"Black" => 1, "Gray" => 1, "Blue" => 4, "Red" => 4, "Yellow" => 4, "White" => 16};
+    }
+    die 'The argument $color-palette is expected to be a Map or Whatever.'
+    unless $color-palette ~~ Map:D;
 
     #-------------------------------------------------------
     # Margins
@@ -534,6 +544,7 @@ multi sub js-d3-random-mondrian(:$width is copy = 800,
             .subst(:g, '$TITLE_FILL', '"' ~ (%args<title-color> // '') ~ '"')
             .subst(:g, '$TITLE', '"' ~ (%args<title> // '') ~ '"')
             .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
+            .subst(:g, '$COLOR_PALETTE', to-json($color-palette))
             .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
             .subst(:g, '$STROKE_WIDTH', $stroke-width);
 
