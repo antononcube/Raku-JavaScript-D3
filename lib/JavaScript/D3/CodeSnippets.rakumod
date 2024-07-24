@@ -1827,7 +1827,7 @@ var xMin = Math.min.apply(Math, data.map(function(o) { return Math.min(o.x1, o.x
 var xMax = Math.max.apply(Math, data.map(function(o) { return Math.max(o.x1, o.x2); }))
 
 var yMin = Math.min.apply(Math, data.map(function(o) { return Math.min(o.y1, o.y2); }))
-var yMax = Math.max.apply(Math, data.map(function(o) { return Math.min(o.y1, o.y2); }))
+var yMax = Math.max.apply(Math, data.map(function(o) { return Math.max(o.y1, o.y2); }))
 
 // X scale and Axis
 var xScale = d3.scaleLinear()
@@ -1837,7 +1837,7 @@ var xScale = d3.scaleLinear()
 // Y scale and Axis
 var yScale = d3.scaleLinear()
     .domain([yMin, yMax])
-    .range([0, height]);
+    .range([height, 0]);
 
 svg.selectAll("rect")
     .data(data)
