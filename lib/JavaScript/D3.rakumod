@@ -523,7 +523,7 @@ multi sub js-d3-random-mondrian(:$width is copy = 800,
     # Process $color-palette
     #-------------------------------------------------------
     if $color-palette.isa(Whatever) {
-        $color-palette = {"Black" => 1, "Gray" => 1, "Blue" => 4, "Red" => 4, "Yellow" => 4, "White" => 16};
+        $color-palette = {'#000000' => 1, '#878787' => 1, '#194F9A' => 4, '#BC0118' => 4, '#FACA02' => 4, '#FDFDFD' => 16};
     }
     die 'The argument $color-palette is expected to be a Map or Whatever.'
     unless $color-palette ~~ Map:D;
