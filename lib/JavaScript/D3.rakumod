@@ -482,6 +482,10 @@ multi sub js-d3-random-koch-curve($points, :p(:$position-spec)!, :w(:$width-spec
     return js-d3-random-koch-curve($points, $position-spec, $width-spec, $height-spec, $n, |%args);
 }
 
+multi sub js-d3-random-koch-curve(UInt:D $n = 4, *%args) {
+    return js-d3-random-koch-curve(Whatever, 1/2, 1/3, sqrt(3)/6, $n, |%args);
+}
+
 #============================================================
 #| Makes a random Mondrian.
 proto sub js-d3-random-mondrian(|) is export {*}
