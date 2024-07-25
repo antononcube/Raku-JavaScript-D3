@@ -13,7 +13,9 @@ my %nameToFunc =
         'histogram' => &js-d3-histogram,
         'list-line-plot' => &js-d3-list-line-plot,
         'list-plot' => &js-d3-list-plot,
+        'random-koch-curve' => &js-d3-random-koch-curve,
         'random-mandala' => &js-d3-random-mandala,
+        'random-mondrian' => &js-d3-random-mondrian,
         'random-scribble' => &js-d3-random-scribble,
         'heatmap' => &js-d3-heatmap-plot,
         'heatmap-plot' => &js-d3-heatmap-plot,
@@ -39,16 +41,21 @@ multi sub MAIN(Str $cmd, #= Graphics command.
 
     my &func = %nameToFunc{$cmd};
 
-    my $res = &func(
-    @points,
-    :$width, :$height,
-    :$title,
-    :$x-label, :$y-label,
-    :$background,
-    :$color,
-    :$grid-lines,
-    :$margins,
-    :$format);
+    my %args = :$width, :$height,
+               :$title,
+               :$x-label, :$y-label,
+               :$background,
+               :$color,
+               :$grid-lines,
+               :$margins,
+               :$format;
+
+    my $res = do given $cmd {
+        when 'random-mondrian' { &func(|%args); }
+        when 'random-koch-curve' { &func(@points.head, |%args); }
+        default { &func(@points, |%args); }
+    }
+
     say $res.subst('<body>', "<body style=\"background-color:$background;\">");
 }
 
