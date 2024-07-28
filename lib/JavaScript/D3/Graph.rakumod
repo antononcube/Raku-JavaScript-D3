@@ -142,7 +142,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     :$edge-label-font-size is copy = Whatever,
                     :$edge-label-font-family is copy = 'Courier New',
                     Str:D :$background = 'White',
-                    :$vertex-color is copy = Whatever,
+                    :vertex-color(:$vertex-fill-color) is copy = Whatever,
+                    :$vertex-stroke-color is copy = Whatever,
                     Numeric:D :$vertex-size = 2,
                     :$edge-color is copy = 'SteelBlue',
                     :%force is copy = %(),
@@ -197,12 +198,12 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
 
     #------------------------------------------------------
     # Vertex and edge colors processing
-    given ($vertex-color, $edge-color) {
+    given ($vertex-fill-color, $edge-color) {
         when (Whatever, Whatever) {
-            $vertex-color = 'SteelBlue'; $edge-color = 'SteelBlue';
+            $vertex-fill-color = 'SteelBlue'; $edge-color = 'SteelBlue';
         }
         when $_.head.isa(Whatever) && ($_.tail ~~ Str:D) {
-            $vertex-color = $_.tail;
+            $vertex-fill-color = $_.tail;
         }
         when ($_.head ~~ Str:D) && $_.tail.isa(Whatever) {
             $edge-color = $_.head;
@@ -211,6 +212,10 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             die 'The arguments vertex-color and edge-color are expected to be strings or Whatever.';
         }
     }
+
+    if $vertex-stroke-color.isa(Whatever) { $vertex-stroke-color = $vertex-fill-color }
+    die 'The value of $vertex-stroke-color is expected to be a string or Whatever.'
+    unless $vertex-stroke-color ~~ Str:D;
 
     #------------------------------------------------------
     # Arrowhead size and offset
@@ -282,8 +287,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst('$DATA', $jsData)
             .subst('$VERTEX_COORDINATES', $jsVertexCoords)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst(:g, '$NODE_STROKE_COLOR', '"' ~ $vertex-color ~ '"')
-            .subst(:g, '$NODE_FILL_COLOR', '"' ~ $vertex-color ~ '"')
+            .subst(:g, '$NODE_STROKE_COLOR', '"' ~ $vertex-stroke-color ~ '"')
+            .subst(:g, '$NODE_FILL_COLOR', '"' ~ $vertex-fill-color ~ '"')
             .subst(:g, '$NODE_SIZE', $vertex-size.Str)
             .subst(:g, '$NODE_LABEL_STROKE_COLOR', '"' ~ $vertex-label-color ~ '"')
             .subst(:g, '$NODE_LABEL_FONT_SIZE', $vertex-label-font-size)
