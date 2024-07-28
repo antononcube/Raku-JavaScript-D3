@@ -46,6 +46,57 @@ my %forceProperties =
     };
 
 #============================================================
+# Highlight spec processing
+#============================================================
+# Default highlight colors
+my @defaultHighlightColors =
+        <#faba8c #a71c00 #f29838 #feffdb #5f885e #ddede3 #7db79f #7da9ac #9fcede #cc6f84>;
+
+sub is-positional-of-strings-or-pairs($list) {
+    return False unless $list ~~ Positional:D;
+    for |$list -> $item {
+        return False unless $item ~~ Str:D or $item ~~ Pair:D;
+    }
+    return True;
+}
+
+sub ProcessHighlightSpec($highlight, Bool :$directed-edges = False) {
+    if ! $highlight {
+        return Empty
+    }
+    my %spec = do given $highlight {
+        when is-positional-of-strings-or-pairs($_) {
+            %('Orange' => $_ )
+        }
+
+        when ($_ ~~ Positional:D || $_ ~~ Seq:D) && ([&&] |$_.map(*.&is-positional-of-strings-or-pairs)) {
+            if $_.elems ≤ @defaultHighlightColors.elems {
+                (@defaultHighlightColors[0..$_.elems].Array Z=> $_.Array).Hash
+            } else {
+                die "Please provide a map of color-to-highlight-group pairs.";
+            }
+        }
+
+        when $_ ~~ Hash:D && ([&&] |$_.values.map(*.&is-positional-of-strings-or-pairs)) {
+            $_
+        }
+
+        default {
+            die "The highlight spec is expected to be a list of vertexes or edges, " ~
+                    "or a list of such lists, or a Map of colors to such lists."
+        }
+    };
+
+    %spec = do if $directed-edges {
+        %spec.map({ $_.key => [|$_.value.grep({ $_ ~~ Str:D }), |$_.value.grep({ $_ ~~ Pair:D }).map({ $_.kv })] });
+    } else {
+        %spec.map({ $_.key => [|$_.value.grep({ $_ ~~ Str:D }), |$_.value.grep({ $_ ~~ Pair:D }).map({ $_.kv }), |$_.value.grep({ $_ ~~ Pair:D }).map({ $_.kv.reverse })] });
+    }
+
+    return %spec;
+}
+
+#============================================================
 # Graph
 #============================================================
 
@@ -98,8 +149,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     :$edge-thickness is copy = 1,
                     :$arrowhead-size is copy = Whatever,
                     :$arrowhead-offset is copy = Whatever,
-                    :@highlight = Empty,
-                    Str:D :$highlight-color = 'Orange',
+                    :$highlight is copy = Empty,
                     :$margins is copy = Whatever,
                     Str :$format = 'jupyter',
                     :$div-id = Whatever
@@ -245,8 +295,6 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst(:g, '$LINK_STROKE_WIDTH', $edge-thickness)
             .subst(:g, '$ARROWHEAD_SIZE', $arrowhead-size)
             .subst(:g, '$ARROWHEAD_OFFSET', $arrowhead-offset)
-            .subst(:g, '$HIGHLIGHT_STROKE_COLOR', '"' ~ $highlight-color ~ '"')
-            .subst(:g, '$HIGHLIGHT_FILL_COLOR', '"' ~ $highlight-color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -271,19 +319,11 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     if !%force<center><y>.isa(Whatever) { $res .= subst('$FORCE_CENTER_Y', %force<center><y>) }
 
     # Process highlight spec
-    if @highlight {
-        my @links = @highlight.grep({ $_ ~~ Pair:D }).map({ $_.kv.join('-') });
-        if ! $directed-edges {
-           @links = [|@links, |@highlight.grep({ $_ ~~ Pair:D }).map({ $_.kv.reverse.join('-') })];
-        }
-        if @links {
-            $res .= subst('$HIGHLIGHT_LINK_SET', "\"{ @links.join("\", \"") }\"")
-        }
-
-        my @nodes = @highlight.grep({ $_ ~~ Str:D });
-        if @nodes {
-            $res .= subst('$HIGHLIGHT_SET', "\"{ @nodes.join("\", \"") }\"")
-        }
+    $highlight = ProcessHighlightSpec($highlight);
+    if $highlight ~~ Map:D {
+        $res .= subst('$HIGHLIGHT_SPEC', to-json($highlight, :!pretty))
+    } else {
+        $res .= subst('$HIGHLIGHT_SPEC', '{}')
     }
 
     if !$directed-edges {
@@ -303,8 +343,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
             .subst('.strength($FORCE_COLLIDE_STRENGTH)')
             .subst('.radius($FORCE_COLLIDE_RADIUS)')
             .subst('.iterations($FORCE_COLLIDE_ITER)')
-            .subst('$HIGHLIGHT_LINK_SET', '')
-            .subst('$HIGHLIGHT_SET', '');
+            .subst('$HIGHLIGHT_SPEC', '');
 
     #------------------------------------------------------
     # Result

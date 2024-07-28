@@ -1513,16 +1513,13 @@ const edges = $DATA;
 
 const nodes = Array.from(new Set(edges.flatMap(e => [e.from, e.to])), id => ({id}));
 
-const highlightNodes = new Set([$HIGHLIGHT_SET]);
-
-const highlightLinkNodes = new Set([$HIGHLIGHT_LINK_SET]);
+const highlightSpecs = $HIGHLIGHT_SPEC;
 
 const links = edges.map(e => ({
   source: e.from,
   target: e.to,
   weight: e.weight,
   label: e.label,
-  highlight: highlightLinkNodes.has(e.from + "-" + e.to)
 }));
 
 //.force("link", d3.forceLink(links).id(d => d.id).distance(d => Math.max(d.weight * 20, $NODE_SIZE * 4)))
@@ -1554,7 +1551,14 @@ const link = svg.append("g")
   .data(links)
   .enter().append("line")
     .attr("class", "link")
-    .attr("stroke", d => d.highlight ? $HIGHLIGHT_STROKE_COLOR : $LINK_STROKE_COLOR)
+    .attr("stroke", d => {
+        for (const [color, items] of Object.entries(highlightSpecs)) {
+            if (items.some(item => Array.isArray(item) && item[0] === d.source.id && item[1] === d.target.id)) {
+                return color;
+            }
+        }
+        return $LINK_STROKE_COLOR;
+    })
     .attr("stroke-width", $LINK_STROKE_WIDTH)
     .attr('marker-end','url(#arrowhead)')
 
@@ -1565,8 +1569,22 @@ const node = svg.append("g")
   .enter().append("circle")
     .attr("class", "node")
     .attr("r", $NODE_SIZE)
-    .attr("stroke", d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR : $NODE_STROKE_COLOR)
-    .attr("fill", d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
+    .attr("stroke", d => {
+       for (const [color, items] of Object.entries(highlightSpecs)) {
+         if (items.includes(d.id)) {
+            return color;
+         }
+       }
+       return $NODE_STROKE_COLOR;
+    })
+    .attr("fill", d => {
+       for (const [color, items] of Object.entries(highlightSpecs)) {
+         if (items.includes(d.id)) {
+            return color;
+         }
+       }
+       return $NODE_FILL_COLOR;
+    })
     .call(drag(simulation));
 
 node.append("title")
@@ -1663,16 +1681,13 @@ const edges = $DATA;
 
 const vertexCoordinates = $VERTEX_COORDINATES;
 
-const highlightNodes = new Set([$HIGHLIGHT_SET]);
-
-const highlightLinkNodes = new Set([$HIGHLIGHT_LINK_SET]);
+const highlightSpecs = $HIGHLIGHT_SPEC;
 
 const links = edges.map(e => ({
   source: e.from,
   target: e.to,
   weight: e.weight,
-  label: e.label,
-  highlight: highlightLinkNodes.has(e.from + "-" + e.to)
+  label: e.label
 }));
 
 const nodes = Object.keys(vertexCoordinates).map(key => ({
@@ -1708,7 +1723,14 @@ const link = svg.append("g")
   .data(links)
   .enter().append("line")
     .attr("class", "link")
-    .attr("stroke", d => d.highlight ? $HIGHLIGHT_STROKE_COLOR : $LINK_STROKE_COLOR)
+    .attr("stroke", d => {
+        for (const [color, items] of Object.entries(highlightSpecs)) {
+            if (items.some(item => Array.isArray(item) && item[0] === d.source && item[1] === d.target)) {
+                return color;
+            }
+        }
+        return $LINK_STROKE_COLOR;
+    })
     .attr("stroke-width", $LINK_STROKE_WIDTH)
     .attr("x1", d => nodes.find(n => n.id === d.source).x)
     .attr("y1", d => nodes.find(n => n.id === d.source).y)
@@ -1724,8 +1746,22 @@ const node = svg.append("g")
     .attr("r", $NODE_SIZE)
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
-    .attr("stroke", d => highlightNodes.has(d.id) ? $HIGHLIGHT_STROKE_COLOR : $NODE_STROKE_COLOR)
-    .attr("fill", d => highlightNodes.has(d.id) ?  $HIGHLIGHT_FILL_COLOR : $NODE_FILL_COLOR)
+    .attr("stroke", d => {
+       for (const [color, items] of Object.entries(highlightSpecs)) {
+         if (items.includes(d.id)) {
+            return color;
+         }
+       }
+       return $NODE_STROKE_COLOR;
+    })
+    .attr("fill", d => {
+       for (const [color, items] of Object.entries(highlightSpecs)) {
+         if (items.includes(d.id)) {
+            return color;
+         }
+       }
+       return $NODE_FILL_COLOR;
+    })
     .call(d3.drag()
       .on("start", dragstarted)
       .on("drag", dragged)
