@@ -270,7 +270,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
         } elsif %vertex-coordinates.values.all ~~ Positional:D {
             to-json(%vertex-coordinates.map({ $_.key => %( x => $_.value.head, y => $_.value.tail) }).Hash, :!pretty);
         } else {
-            die 'The value of vertex-coordinats is expected to be a Map of Maps with keys <x y>, or a Map of Positionals of length two.'
+            die 'The value of vertex-coordinates is expected to be a Map of Maps with keys <x y>, or a Map of Positionals of length two.'
         }
     }
 
