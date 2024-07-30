@@ -10,7 +10,7 @@
   "depends": [
     "JSON::Fast:ver<0.17+>",
     "Hash::Merge:ver<2.0.0+>:api<2+>",
-    "Data::Generators:ver<0.1.9+>",
+    "Statistics::Distributions:ver<0.1.+>",
     "Data::TypeSystem:ver<0.1.4+>",
     "FEN::Grammar:ver<0.0.4+>"
   ],

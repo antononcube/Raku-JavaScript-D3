@@ -1,6 +1,6 @@
 unit module JavaScript::D3::Random;
 
-use Data::Generators;
+use Statistics::Distributions;
 
 #============================================================
 # Random mandala
