@@ -1,5 +1,7 @@
 use v6.d;
 
+# These functions -- maybe the whole file -- should be replaces by using "Data::TypeSystem".
+
 # Comprehensive type checking is needed in order the JavaScript::D3 functions to work well.
 # Using the type system of "Data::Reshapers",  would be ideal,
 # but I do not want to introduce such a "heavy" dependency.
