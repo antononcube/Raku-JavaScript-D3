@@ -465,13 +465,18 @@ multi sub js-d3-random-koch-curve($points, $possdist, $widthdist, $heightdist, I
     my @snowflake = JavaScript::D3::Random::KochCurve($points, $possdist, $widthdist, $heightdist, $n);
     my $width = %args<width> // 600;
     my $height = %args<height> // ($width * max(@snowflake.map(*.tail))),
-    my %args2 = %args.grep({ $_.key ∉ <width height axes> });
-    return js-d3-list-line-plot(
+    my %args2 = %args.grep({ $_.key ∉ <width height axes flip> });
+    my $res = js-d3-list-line-plot(
             @snowflake,
             :$width,
             :$height,
             axes => %args<axes> // False,
             |%args2);
+    if %args<flip> // False {
+        # Hack, but it is simple to implement and works fine
+        $res .= subst('.range([height, 0]);', '.range([0, height]);')
+    }
+    return $res;
 }
 
 multi sub js-d3-random-koch-curve(:p(:$position-spec)!, :w(:$width-spec)!, :h(:$height-spec)!, Int :$n!, *%args) {
