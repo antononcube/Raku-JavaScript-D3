@@ -1488,9 +1488,11 @@ svg.selectAll()
   .attr("text-anchor", "middle")
   .style("alignment-baseline", "middle")
   .style("fill", $PLOT_LABELS_COLOR)
+  .style("stroke", $PLOT_LABELS_COLOR)
   .style("stroke-width", "1px")
   .style("font-size", $PLOT_LABELS_FONT_SIZE)
   .attr("font-family", "$PLOT_LABELS_FONT_FAMILY")
+  .attr("font-weight", 100)
   .html(function(d){ return d.z });
 HEATMAP-PLOT-LABELS
 
