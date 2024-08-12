@@ -71,7 +71,7 @@ our multi Chessboard(Str $data, *%args) {
     return Chessboard([$data,], |%args);
 }
 
-our multi Chessboard(@data where @data.all ~~ Str, *%args) {
+our multi Chessboard(@data where (@data.elems > 0) && @data.all ~~ Str, *%args) {
 
     # Interpret into rows
     my @fenData;
@@ -112,7 +112,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
     #-------------------------------------------------------
     # Groups
     #-------------------------------------------------------
-    my Bool $hasGroups = [&&] @data.map({ so $_<group> });
+    my Bool $hasGroups = (@data.elems > 0) && ([&&] @data.map({ so $_<group> }));
 
     if $hasGroups {
 
