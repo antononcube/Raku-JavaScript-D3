@@ -182,21 +182,22 @@ multi js-d3-random-mandala(
         :$rotational-symmetry-order is copy = 6,
         :$number-of-seed-elements is copy = Whatever,
         :$connecting-function is copy = 'curveBasis',
-        Bool :$symmetric-seed = True,
+        Bool:D :$symmetric-seed = True,
         :color(:$stroke) is copy = Whatever,
         :$stroke-width is copy = Whatever,
         :$fill is copy = Whatever,
+        Str:D :$color-scheme = 'schemeSet2',
         :$background is copy = Whatever,
-        UInt :$width= 300,
-        UInt :$height= 300,
-        Str :plot-label(:$title) = '',
-        Str :x-label(:$x-axis-label) = '',
-        Str :y-label(:$y-axis-label) = '',
+        UInt:D :$width= 300,
+        UInt:D :$height= 300,
+        Str:D :plot-label(:$title) = '',
+        Str:D :x-label(:$x-axis-label) = '',
+        Str:D :y-label(:$y-axis-label) = '',
         :$grid-lines = False,
         :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
-        Bool :$axes = False,
-        UInt :$count = 1,
-        Str :$format= "jupyter",
+        Bool:D :$axes = False,
+        UInt:D :$count = 1,
+        Str:D :$format= "jupyter",
         :$div-id = Whatever) {
 
     #--------------------------------------------------------
@@ -296,6 +297,7 @@ multi js-d3-random-mandala(
     #--------------------------------------------------------
 
     $jsCode = $jsCode
+            .subst(:g, 'd3.schemeSet2', "d3.$color-scheme")
             .subst(:g, '.attr("stroke-width", 1.5)',
                     '.attr("stroke-width", ' ~ $stroke-width.Str ~ ').attr("fill", "' ~ $fill ~ '")')
             .subst(:g, '.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $stroke ~ '")')
