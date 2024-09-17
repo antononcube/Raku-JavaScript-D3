@@ -51,6 +51,8 @@ my %forceProperties =
 # Default highlight colors
 my @defaultHighlightColors =
         <#faba8c #a71c00 #f29838 #feffdb #5f885e #ddede3 #7db79f #7da9ac #9fcede #cc6f84>;
+# Of color scheme "schemeCategory10"
+# my @colors = <#1f77b4 #ff7f0e #2ca02c #d62728 #9467bd #8c564b #e377c2 #7f7f7f #bcbd22 #17becf>;
 
 sub is-positional-of-strings-or-pairs($list) {
     return False unless $list ~~ Positional:D;
