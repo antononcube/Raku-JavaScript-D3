@@ -621,3 +621,53 @@ proto js-d3-graph-plot(|) is export {*}
 multi sub js-d3-graph-plot($data, *%args) {
     return JavaScript::D3::Graph::GraphPlot($data, |%args);
 }
+
+#============================================================
+# Spirograph
+#============================================================
+
+sub SpirographZ($t, $k, $l --> Numeric:D) {
+    (1 - $k) * exp(1i * $t) + $k * $l * exp(- 1i * $t * (1 - $k) / $k)
+}
+
+#| Spirograph plot.
+#| C<:$k> - How big the inner circle Ci is compared to the outer circle Co, r/R.
+#| C<:$l> - How far is the plot point from the center Ci.
+#| C<:n(:$number-of-cycles)> - Number of cycles to produce the spirograph curve.
+#| C<:$number-of-segments> - Number of segments of the spirograph curve.
+multi sub js-d3-spirograph(|) is export {*}
+
+multi sub js-d3-spirograph($k, $l, *%args) {
+    #die 'The first and second parameters are expected to be numbers between 0 an 1.'
+    #unless 0 ≤ $k ≤ 1 && 0 ≤ $l ≤ 1;
+
+    return js-d3-spirograph(:$k, :$l, |%args);
+}
+
+multi sub js-d3-spirograph(Numeric:D :$k = 2/5,
+                           Numeric:D :$l = 4/11,
+                           Numeric:D :r(:$scale) = 1,
+                           UInt:D :n(:$number-of-cycles) = 20,
+                           UInt:D :$number-of-segments = 2000,
+                           UInt:D :$width = 400,
+                           :$height is copy = Whatever,
+                           Bool:D :$axes = False,
+                           *%args ) {
+    # Process $k and $l arguments
+    # Wrong parameters are fine
+    #die 'The parameters $k and $l is are expected to be numbers between 0 an 1.'
+    #unless 0 ≤ $k ≤ 1 && 0 ≤ $l ≤ 1;
+
+    # Process height
+    if $height.isa(Whatever) { $height = $width }
+    die 'The agument $height is expected to be a positive integer or Whatever.'
+    unless ($height ~~ Int:D) && $height > 0;
+
+    # The points
+    my $max-t = 2 * π * $number-of-cycles;
+    my $step =  $max-t / $number-of-segments;
+    my @points = (0, $step ... $max-t).map({ $scale * SpirographZ($_, $k , $l) }).map({ %( x => $_.re, y => $_.im) });
+
+    # Graph
+    return js-d3-list-line-plot(@points, :$width, :$height, :$axes, |%args);
+}
