@@ -659,7 +659,7 @@ multi sub js-d3-spirograph(Numeric:D :$k = 2/5,
     #unless 0 ≤ $k ≤ 1 && 0 ≤ $l ≤ 1;
 
     # Process height
-    if $height.isa(Whatever) { $height = $width }
+    if $height.isa(Whatever) || ($height ~~ Int:D) && $height == 0 { $height = $width }
     die 'The agument $height is expected to be a positive integer or Whatever.'
     unless ($height ~~ Int:D) && $height > 0;
 
