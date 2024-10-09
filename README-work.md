@@ -190,6 +190,8 @@ In the lists below the highest priority items are placed first.
     - [X] DONE Directed graphs
     - [X] DONE Vertex label styling
     - [X] DONE Edge label styling
+    - [X] DONE Highlight vertices and edges
+      - Multiple groups can be specified.
     - [ ] TODO Vertex shape styling
     - [ ] TODO Edge shape styling
     - [ ] TODO Curved edges
@@ -255,12 +257,11 @@ User specified or automatic:
 
 2. [ ] TODO Better, comprehensive type checking
    
-   - Using the type system of "Data::Reshapers", [AAp1], would be ideal, 
-     but I do not want to introduce such a "heavy" dependency.
-
+   - Using the type system of "Data::TypeSystem".
+     
 3. [X] DONE CLI script
 
-4. [X] TODO JavaScript code snippets management
+4. [X] DONE JavaScript code snippets management
 
    - Initially the JavaScript snippets were kept with the Raku code,
      but it seems it is better to have them in a separate file.
@@ -323,14 +324,19 @@ Writing the Python version was a good brainstorming technique to produce reasona
 ### Packages
 
 [AAp1] Anton Antonov,
-[Data::Reshapers Raku package](https://raku.land/zef:antononcube/Data::Reshapers),
-(2021-2022),
-[GitHub/antononcube](https://github.com/antononcube/Raku-Data-Reshapers).
+[Data::Reshapers Raku package](https://github.com/antononcube/Raku-Data-Reshapers),
+(2021-2024),
+[GitHub/antononcube](https://github.com/antononcube).
 
 [AAp2] Anton Antonov,
-[Text::Plot Raku package](https://raku.land/zef:antononcube/Text::Plot),
+[Text::Plot Raku package](https://github.com/antononcube/Raku-Text-Plot),
 (2022),
-[GitHub/antononcube](https://github.com/antononcube/Raku-Text-Plot).
+[GitHub/antononcube](https://github.com/antononcube).
+
+[AAp3] Anton Antonov,
+[Data::TypeSystem Raku package](https://github.com/antononcube/Raku-Data-TypeSystem),
+(2023-2024),
+[GitHub/antononcube](https://github.com/antononcube).
 
 [AAp3] Anton Antonov,
 [JavaScriptD3 Python package](https://github.com/antononcube/Python-packages/tree/main/JavaScriptD3),
