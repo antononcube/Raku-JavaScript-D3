@@ -546,3 +546,37 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
 
     return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
 }
+
+#============================================================
+# MatrixPlot
+#============================================================
+sub dense-to-triplets(@A) {
+    my @triplets;
+    for ^@A.elems -> $i {
+        for ^@A.head.elems -> $j {
+            @triplets.push: {x => $i, y => $j, z => @A[$i][$j]};
+        }
+    }
+    return @triplets.Array;
+}
+
+#| Makes a bubble chart for list of triplets..
+our proto MatrixPlot($data, |) is export {*}
+
+multi sub MatrixPlot(@data, *%args) {
+    if @data.all ~~ Seq:D {
+        return MatrixPlot(@data».Array, |%args);
+    } elsif (@data.all ~~ List:D | Array:D) && (@data».elems.all == @data.head.elems) {
+        my @res = dense-to-triplets(@data);
+        return MatrixPlot(@res, |%args);
+    } elsif @data.all ~~ Map:D {
+        my %args2 = %args.grep({ $_.key ne 'sort-tick-lables' });
+        my $res = HeatmapPlot(@data, :!sort-tick-labels, |%args2);
+        if 'y-tick-labels' ∉ %args2 {
+            $res .= subst('.range([height, 0])', '.range([0, height])', :g);
+        }
+        return $res;
+    } else {
+        die 'The first argument is expected to be a dense matrix or heatmap plot spec.';
+    }
+}

@@ -596,11 +596,19 @@ multi sub js-d3-image(
 }
 
 #============================================================
-#| Makes an image from a numerical matrix.
+#| Makes a heatmap plot from a coordinates-and-value triplets.
 proto js-d3-heatmap-plot(|) is export {*}
 
 multi sub js-d3-heatmap-plot($data, *%args) {
     return JavaScript::D3::Plots::HeatmapPlot($data, |%args);
+}
+
+#============================================================
+#| Makes an image from a numerical matrix.
+proto js-d3-matrix-plot(|) is export {*}
+
+multi sub js-d3-matrix-plot($data, *%args) {
+    return JavaScript::D3::Plots::MatrixPlot($data, |%args);
 }
 
 #============================================================
