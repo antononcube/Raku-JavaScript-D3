@@ -19,6 +19,7 @@ my %nameToFunc =
         'random-scribble' => &js-d3-random-scribble,
         'heatmap' => &js-d3-heatmap-plot,
         'heatmap-plot' => &js-d3-heatmap-plot,
+        'matrix-plot' => &js-d3-matrix-plot,
         'chessboard' => &js-d3-chessboard,
         'spirograph' => &js-d3-spirograph;
 
