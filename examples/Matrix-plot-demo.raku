@@ -1,7 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
 use JavaScript::D3;
 
 my @data = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
@@ -35,14 +34,13 @@ my @data = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0
 spurt $*CWD ~ '/matrixplot.html',
         js-d3-matrix-plot(@data,
                 width => 500,
-                height => 500,
-                title-color => 'DarkRed',
-                color-palette => 'Reds',
-                tick-labels-color => 'steelblue',
-                tick-labels-font-size => 12,
-                low-value => 0,
-                high-value => 3,
-                margins => 16,
-                mesh => 0.01,
+                #height => 500,
+                #color-palette => 'Inferno',
+                #tick-labels-color => 'steelblue',
+                #tick-labels-font-size => 10,
+                #low-value => Whatever,
+                #high-value => Whatever,
+                #margins => 20,
+                #mesh => 0.01,
                 format => 'html');
 
