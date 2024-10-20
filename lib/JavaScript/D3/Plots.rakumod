@@ -308,11 +308,11 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :y-label-color(:$y-axis-label-color) is copy = Whatever,
                       :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                       Str :$color-palette = 'Inferno',
-                      Str :$background = 'white',
-                      Str :$tick-labels-color = 'black',
+                      Str :$background = 'White',
+                      Str :$tick-labels-color = 'Black',
                       :$tick-labels-font-size is copy = Whatever,
                       Numeric :$opacity = 0.7,
-                      Str :$plot-labels-color = 'black',
+                      Str :$plot-labels-color = 'Black',
                       :$plot-labels-font-size is copy = Whatever,
                       Str :$plot-labels-font-family = 'Courier',
                       :$x-tick-labels is copy = Whatever,
@@ -406,9 +406,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     # Process $tick-labels-font-size
     #-------------------------------------------------------
     $tick-labels-font-size = do given $tick-labels-font-size {
-        when Whatever { max(10, round(max($width, $height) / 60 * 2 )) }
+        when Whatever { '"' ~ max(10, round(max($width, $height) / 60 * 2 )).Str ~ 'px"' }
         when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
-        when Str:D {}
+        when Str:D { $tick-labels-font-size }
         default {
             die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
         }
@@ -555,7 +555,7 @@ sub dense-to-triplets(@A) {
     for ^@A.elems -> $i {
         for ^@A.head.elems -> $j {
             if @A[$i][$j] ~~ Numeric:D {
-                @triplets.push: { x => $i, y => $j, z => @A[$i][$j] };
+                @triplets.push: { x => $j, y => $i, z => @A[$i][$j] };
             }
         }
     }
@@ -565,14 +565,23 @@ sub dense-to-triplets(@A) {
 #| Makes a bubble chart for list of triplets..
 our proto MatrixPlot($data, |) is export {*}
 
-multi sub MatrixPlot(@data, *%args) {
+multi sub MatrixPlot(@data,
+                     :$width is copy = Whatever,
+                     :$height is copy = Whatever,
+                     :$margins = 2,
+                     :$background = 'DimGray',
+                     *%args) {
     if @data.all ~~ Seq:D {
-        return MatrixPlot(@data».Array, |%args);
+        return MatrixPlot(@data».Array, :$width, :$height, :$margins, :$background, |%args);
     } elsif (@data.all ~~ List:D | Array:D) && (@data».elems.all == @data.head.elems) {
         my @res = dense-to-triplets(@data);
-        return MatrixPlot(@res, |%args);
+        ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => @data.elems / @data.head.elems);
+        return MatrixPlot(@res, :$width, :$height, :$margins, :$background, |%args);
     } elsif @data.all ~~ Map:D {
-        my $res = HeatmapPlot(@data, |%args);
+        my $ncol = @data.map({ $_<x> // 1 }).max;
+        my $nrow = @data.map({ $_<y> // 1 }).max;
+        ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => $ncol / $nrow);
+        my $res = HeatmapPlot(@data, :$width, :$height, :$margins, :$background, |%args);
         if 'y-tick-labels' ∉ %args {
             $res .= subst('.range([height, 0])', '.range([0, height])', :g);
         }
