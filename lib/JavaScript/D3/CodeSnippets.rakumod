@@ -1359,107 +1359,109 @@ our sub GetImagePart() {
 
 my $jsTooltipHeatmapPart = q:to/HEATMAP-PART-END/;
 // Obtain data
-var data = $DATA
+var data = $DATA;
 
-var myGroups = $X_TICK_LABELS
-var myVars = $Y_TICK_LABELS
+var myGroups = $X_TICK_LABELS;
+var myVars = $Y_TICK_LABELS;
 
-if (myGroups.length == 0) {
-    myGroups = Array.from(new Set(data.map(d => d.x)))
+if (myGroups.length === 0) {
+    myGroups = Array.from(new Set(data.map(d => d.x)));
 }
-if (myVars.length == 0) {
-    myVars = Array.from(new Set(data.map(d => d.y)))
+if (myVars.length === 0) {
+    myVars = Array.from(new Set(data.map(d => d.y)));
 }
 
-if ( $SORT_TICK_LABELS ) {
-    myGroups = myGroups.sort(d3.ascending)
-    myVars = myVars.sort(d3.ascending)
+if ($SORT_TICK_LABELS) {
+    myGroups = myGroups.sort(d3.ascending);
+    myVars = myVars.sort(d3.ascending);
 }
 
 // Build X scales and axis:
 var x = d3.scaleBand()
-.range([ 0, width ])
-.domain(myGroups)
-.padding(0.05)
+    .range([0, width])
+    .domain(myGroups)
+    .padding(0.05);
 
 svg.append("g")
-.style("font-size", $TICK_LABELS_FONT_SIZE)
-.style("stroke", $TICK_LABELS_COLOR)
-.style("stroke-width", "1px")
-.attr("font-family", "Courier")
-.attr("transform", `translate(0, ${height})`)
-.call(d3.axisBottom(x).tickSize(0))
-.select(".domain").remove()
+    .style("font-size", $TICK_LABELS_FONT_SIZE)
+    .style("stroke", $TICK_LABELS_COLOR)
+    .style("stroke-width", "1px")
+    .attr("font-family", "Courier")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).tickSize(0))
+    .select(".domain").remove();
 
 // Build Y scales and axis:
 var y = d3.scaleBand()
-.range([ height, 0 ])
-.domain(myVars)
-.padding(0.05)
+    .range([height, 0])
+    .domain(myVars)
+    .padding(0.05);
 
 svg.append("g")
-.style("font-size", $TICK_LABELS_FONT_SIZE)
-.style("stroke", $TICK_LABELS_COLOR)
-.style("stroke-width", "1px")
-.attr("font-family", "Courier")
-.call(d3.axisLeft(y).tickSize(0))
-.select(".domain").remove()
+    .style("font-size", $TICK_LABELS_FONT_SIZE)
+    .style("stroke", $TICK_LABELS_COLOR)
+    .style("stroke-width", "1px")
+    .attr("font-family", "Courier")
+    .call(d3.axisLeft(y).tickSize(0))
+    .select(".domain").remove();
 
 // Build color scale
 var myColor = d3.scaleSequential()
-.interpolator(d3.interpolate$COLOR_PALETTE)
-.domain([$LOW_VALUE,$HIGH_VALUE])
+    .interpolator(d3.interpolate$COLOR_PALETTE)
+    .domain([$LOW_VALUE, $HIGH_VALUE]);
 
 // create a tooltip
 var tooltip = d3.select("#my_dataviz")
-.append("div")
-.style("opacity", 0)
-.attr("class", "tooltip")
-.style("background-color", "white")
-.style("border", "solid")
-.style("border-width", "2px")
-.style("border-radius", "5px")
-.style("padding", "5px")
+    .append("div")
+    .style("opacity", 0)
+    .attr("class", "tooltip")
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px");
 
-// Three function that change the tooltip when user hover / move / leave a cell
-var mouseover = function(event,d) {
-tooltip
-  .style("opacity", 1)
-d3.select(this)
-  .style("stroke", "black")
-  .style("opacity", 1)
-}
-var mousemove = function(event,d) {
-tooltip
-  .html("The exact value of<br>this cell is: " + d.z)
-  .style("left", (event.x)/2 + "px")
-  .style("top", (event.y)/2 + "px")
-}
-var mouseleave = function(event,d) {
-tooltip
-  .style("opacity", 0)
-d3.select(this)
-  .style("stroke", "none")
-  .style("opacity", 0.8)
-}
+// Three functions that change the tooltip when user hover / move / leave a cell
+var mouseover = function(event, d) {
+    tooltip
+        .style("opacity", 1);
+    d3.select(this)
+        .style("stroke", "black")
+        .style("opacity", 1);
+};
+
+var mousemove = function(event, d) {
+    tooltip
+        .html((d.tooltip ? String(d.tooltip) : String(d.z)))
+        .style("left", (event.pageX) + "px")
+        .style("top", (event.pageY) + "px");
+};
+
+var mouseleave = function(event, d) {
+    tooltip
+        .style("opacity", 0);
+    d3.select(this)
+        .style("stroke", "none")
+        .style("opacity", 0.8);
+};
 
 // add the squares
 svg.selectAll()
-.data(data, function(d) {return d.x+':'+d.y;})
-.join("rect")
-  .attr("x", function(d) { return x(d.x) })
-  .attr("y", function(d) { return y(d.y) })
-  .attr("rx", 4)
-  .attr("ry", 4)
-  .attr("width", x.bandwidth() )
-  .attr("height", y.bandwidth() )
-  .style("fill", function(d) { return myColor(d.z)} )
-  .style("stroke-width", 4)
-  .style("stroke", "none")
-  .style("opacity", 0.8)
-.on("mouseover", mouseover)
-.on("mousemove", mousemove)
-.on("mouseleave", mouseleave)
+    .data(data, d => d.x + ':' + d.y)
+    .join("rect")
+    .attr("x", d => x(d.x))
+    .attr("y", d => y(d.y))
+    .attr("rx", 4)
+    .attr("ry", 4)
+    .attr("width", x.bandwidth())
+    .attr("height", y.bandwidth())
+    .style("fill", d => myColor(d.z))
+    .style("stroke-width", 4)
+    .style("stroke", "none")
+    .style("opacity", 0.8)
+    .on("mouseover", mouseover)
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave);
 HEATMAP-PART-END
 
 #============================================================
