@@ -147,7 +147,7 @@ our sub ProcessWidthAndHeight(:$width! is copy,
         }
     }
 
-    return ($width, $height);
+    return ($width.round, $height.round);
 }
 
 #============================================================
