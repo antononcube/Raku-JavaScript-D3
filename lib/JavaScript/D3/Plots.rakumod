@@ -554,7 +554,9 @@ sub dense-to-triplets(@A) {
     my @triplets;
     for ^@A.elems -> $i {
         for ^@A.head.elems -> $j {
-            @triplets.push: {x => $i, y => $j, z => @A[$i][$j]};
+            if @A[$i][$j] ~~ Numeric:D {
+                @triplets.push: { x => $i, y => $j, z => @A[$i][$j] };
+            }
         }
     }
     return @triplets.Array;
@@ -570,9 +572,8 @@ multi sub MatrixPlot(@data, *%args) {
         my @res = dense-to-triplets(@data);
         return MatrixPlot(@res, |%args);
     } elsif @data.all ~~ Map:D {
-        my %args2 = %args.grep({ $_.key ne 'sort-tick-lables' });
-        my $res = HeatmapPlot(@data, :!sort-tick-labels, |%args2);
-        if 'y-tick-labels' ∉ %args2 {
+        my $res = HeatmapPlot(@data, |%args);
+        if 'y-tick-labels' ∉ %args {
             $res .= subst('.range([height, 0])', '.range([0, height])', :g);
         }
         return $res;
