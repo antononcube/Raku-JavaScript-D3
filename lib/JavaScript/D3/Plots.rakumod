@@ -311,6 +311,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :$background = 'White',
                       Str :$tick-labels-color = 'Black',
                       :$tick-labels-font-size is copy = Whatever,
+                      Str:D :$tick-labels-font-family = 'Helvetica',
                       Numeric :$opacity = 0.7,
                       Str :$plot-labels-color = 'Black',
                       :$plot-labels-font-size is copy = Whatever,
@@ -323,6 +324,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$high-value is copy = Whatever,
                       :$margins is copy = Whatever,
                       Bool :$tooltip = True,
+                      :$tooltip-background-color is copy = Whatever,
+                      :$tooltip-color is copy = Whatever,
                       :$mesh = True,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
@@ -365,6 +368,17 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
 
     die 'All z-values of the dataset are expected to be Numeric:D.'
     unless @values.all ~~ Numeric:D;
+
+    #-------------------------------------------------------
+    # Process $tooltip-(background-)color
+    #-------------------------------------------------------
+    if $tooltip-background-color.isa(Whatever) { $$tooltip-background-color = $background }
+    die 'The value of $tooltip-background-color is expected to be a string or Whatever.'
+    unless $tooltip-background-color ~~ Str:D;
+
+    if $tooltip-color.isa(Whatever) { $$tooltip-color = $plot-labels-color }
+    die 'The value of $tooltip-color is expected to be a string or Whatever.'
+    unless $tooltip-color ~~ Str:D;
 
     #-------------------------------------------------------
     # Process $low-value
@@ -480,6 +494,9 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$SORT_TICK_LABELS', $sort-tick-labels ?? 'true' !! 'false')
                 .subst(:g, '$TICK_LABELS_COLOR', "\"$tick-labels-color\"")
                 .subst(:g, '$TICK_LABELS_FONT_SIZE', $tick-labels-font-size)
+                .subst(:g, '$TICK_LABELS_FONT_FAMILY', "\"$tick-labels-font-family\"")
+                .subst(:g, '$TOOLTIP_BACKGROUND_COLOR', "\"$tooltip-background-color\"")
+                .subst(:g, '$TOOLTIP_COLOR', "\"$tooltip-color\"")
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
                 .subst(:g, '$X_TICK_LABELS', $x-tick-labels ?? to-json($x-tick-labels.Array, :!pretty) !! '[]')
@@ -541,7 +558,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
         $resTotal = $resTotal
                 .subst('.on("mouseover", mouseover)')
                 .subst('.on("mousemove", mousemove)')
-                .subst('.on("mouseleave", mouseleave)');
+                .subst('.on("mouseleave", mouseleave)')
+                .subst(/'// tooltip-code-begin' (.*?) '// tooltip-code-end'/)
     }
 
     return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
@@ -578,8 +596,8 @@ multi sub MatrixPlot(@data,
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => @data.elems / @data.head.elems);
         return MatrixPlot(@res, :$width, :$height, :$margins, :$background, |%args);
     } elsif @data.all ~~ Map:D {
-        my $ncol = @data.map({ $_<x> // 1 }).max;
-        my $nrow = @data.map({ $_<y> // 1 }).max;
+        my $ncol = @data.map({ $_<x> }).unique.elems;
+        my $nrow = @data.map({ $_<y> }).unique.elems;
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => $ncol / $nrow);
         my $res = HeatmapPlot(@data, :$width, :$height, :$margins, :$background, |%args);
         if 'y-tick-labels' ∉ %args {

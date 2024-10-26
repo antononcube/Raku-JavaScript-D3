@@ -1386,7 +1386,7 @@ svg.append("g")
     .style("font-size", $TICK_LABELS_FONT_SIZE)
     .style("stroke", $TICK_LABELS_COLOR)
     .style("stroke-width", "1px")
-    .attr("font-family", "Courier")
+    .attr("font-family", $TICK_LABELS_FONT_FAMILY)
     .attr("transform", `translate(0, ${height})`)
     .call(d3.axisBottom(x).tickSize(0))
     .select(".domain").remove();
@@ -1401,7 +1401,7 @@ svg.append("g")
     .style("font-size", $TICK_LABELS_FONT_SIZE)
     .style("stroke", $TICK_LABELS_COLOR)
     .style("stroke-width", "1px")
-    .attr("font-family", "Courier")
+    .attr("font-family", $TICK_LABELS_FONT_FAMILY)
     .call(d3.axisLeft(y).tickSize(0))
     .select(".domain").remove();
 
@@ -1410,16 +1410,18 @@ var myColor = d3.scaleSequential()
     .interpolator(d3.interpolate$COLOR_PALETTE)
     .domain([$LOW_VALUE, $HIGH_VALUE]);
 
+// tooltip-code-begin
 // create a tooltip
-var tooltip = d3.select("#my_dataviz")
+var tooltip = d3.select(element.get(0))
     .append("div")
     .style("opacity", 0)
     .attr("class", "tooltip")
-    .style("background-color", "white")
+    .style("background-color", $TOOLTIP_BACKGROUND_COLOR)
     .style("border", "solid")
     .style("border-width", "2px")
     .style("border-radius", "5px")
-    .style("padding", "5px");
+    .style("padding", "5px")
+    .style("color", $TOOLTIP_COLOR);
 
 // Three functions that change the tooltip when user hover / move / leave a cell
 var mouseover = function(event, d) {
@@ -1444,6 +1446,7 @@ var mouseleave = function(event, d) {
         .style("stroke", "none")
         .style("opacity", 0.8);
 };
+// tooltip-code-end
 
 // add the squares
 svg.selectAll()
