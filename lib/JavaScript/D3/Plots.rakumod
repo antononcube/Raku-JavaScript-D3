@@ -307,6 +307,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       Str :y-label(:$y-axis-label) = '',
                       :y-label-color(:$y-axis-label-color) is copy = Whatever,
                       :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                      :$color = Whatever,
                       Str :$color-palette = 'Inferno',
                       Str :$background = 'White',
                       Str :$tick-labels-color = 'Black',
@@ -327,6 +328,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$tooltip-background-color is copy = Whatever,
                       :$tooltip-color is copy = Whatever,
                       :$mesh = True,
+                      :$grid-lines = Whatever,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
@@ -590,7 +592,7 @@ multi sub MatrixPlot(@data,
                      :$background = 'DimGray',
                      *%args) {
     if @data.all ~~ Seq:D {
-        return MatrixPlot(@data».Array, :$width, :$height, :$margins, :$background, |%args);
+        return MatrixPlot(@data».Array.Array, :$width, :$height, :$margins, :$background, |%args);
     } elsif (@data.all ~~ List:D | Array:D) && (@data».elems.all == @data.head.elems) {
         my @res = dense-to-triplets(@data);
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => @data.elems / @data.head.elems);
