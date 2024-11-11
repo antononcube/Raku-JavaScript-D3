@@ -335,6 +335,9 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
 
     if !$directed-edges {
         $res .= subst(".attr('marker-end','url(#arrowhead)')");
+        $res .= subst('$IS_DIRECTED', 'false');
+    } else {
+        $res .= subst('$IS_DIRECTED', 'true');
     }
 
     $res = $res

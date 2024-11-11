@@ -1686,6 +1686,8 @@ our sub GetGraphPart() {
 my $jsGraphWithCoordsPart = q:to/GRAPH-COORDS-END/;
 const edges = $DATA;
 
+const isDirected = $IS_DIRECTED;
+
 const vertexCoordinates = $VERTEX_COORDINATES;
 
 const highlightSpecs = $HIGHLIGHT_SPEC;
@@ -1744,6 +1746,21 @@ const link = svg.append("g")
     .attr("x2", d => nodes.find(n => n.id === d.target).x)
     .attr("y2", d => nodes.find(n => n.id === d.target).y);
 
+if (isDirected) {
+  link.attr("marker-end", "url(#arrow)");
+  svg.append("defs").append("marker")
+    .attr("id", "arrow")
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", $ARROWHEAD_OFFSET)
+    .attr("refY", 0)
+    .attr("markerWidth", $ARROWHEAD_SIZE)
+    .attr("markerHeight", $ARROWHEAD_SIZE)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", $LINK_STROKE_COLOR);
+}
+
 const node = svg.append("g")
     .attr("class", "nodes")
   .selectAll("circle")
@@ -1773,7 +1790,6 @@ const node = svg.append("g")
       .on("start", dragstarted)
       .on("drag", dragged)
       .on("end", dragended));
-
 
 node.append("title")
     .text(d => d.id);
