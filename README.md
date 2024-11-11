@@ -229,7 +229,7 @@ In the lists below the highest priority items are placed first.
     - [ ] TODO Curved edges
 2. [ ] TODO Graph plot using vertex coordinates
     - [X] DONE Core graph plot
-    - [ ] TODO Directed graphs
+    - [X] DONE Directed graphs
     - [X] DONE Vertex label styling
     - [X] DONE Edge label styling
     - [ ] TODO Vertex shape styling
