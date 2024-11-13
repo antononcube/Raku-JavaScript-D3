@@ -328,7 +328,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$tooltip-background-color is copy = Whatever,
                       :$tooltip-color is copy = Whatever,
                       :$mesh = True,
-                      :$grid-lines = Whatever,
+                      :$grid-lines is copy = Whatever,
+                      Bool:D :$round-corners = True,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
@@ -381,6 +382,13 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     if $tooltip-color.isa(Whatever) { $$tooltip-color = $plot-labels-color }
     die 'The value of $tooltip-color is expected to be a string or Whatever.'
     unless $tooltip-color ~~ Str:D;
+
+    #-------------------------------------------------------
+    # Process $grid-lines
+    #-------------------------------------------------------
+    if $grid-lines.isa(Whatever) { $grid-lines = False }
+    my $grid-lines-color = $grid-lines ~~ Map:D ?? $grid-lines<color> // 'Gray' !! 'Gray';
+    my $grid-lines-width = $grid-lines ~~ Map:D ?? $grid-lines<width> // 1 !! 1;
 
     #-------------------------------------------------------
     # Process $low-value
@@ -512,9 +520,19 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
                 .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
                 .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+                .subst(:g, '$GRID_LINES_COLOR', '"' ~ $grid-lines-color ~ '"')
+                .subst(:g, '$GRID_LINES_WIDTH', $grid-lines-width)
+                .subst(:g, '$GRID_LINES', $grid-lines ?? 'true' !! 'false')
+                .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
                 .subst(:g, '$MARGINS', to-json($margins):!pretty)
                 .subst(:g, '$LOW_VALUE', $low-value)
                 .subst(:g, '$HIGH_VALUE', $high-value);
+
+        unless $round-corners {
+            $res = $res
+                    .subst('.attr("rx", 4)')
+                    .subst('.attr("ry", 4)');
+        }
 
         #-------------------------------------------------------
         # Fill in plot label data
@@ -590,18 +608,20 @@ multi sub MatrixPlot(@data,
                      :$height is copy = Whatever,
                      :$margins = 2,
                      :$background = 'DimGray',
+                     :$grid-lines = True,
+                     :$round-corners = False,
                      *%args) {
     if @data.all ~~ Seq:D {
-        return MatrixPlot(@data».Array.Array, :$width, :$height, :$margins, :$background, |%args);
+        return MatrixPlot(@data».Array.Array, :$width, :$height, :$margins, :$background, :$grid-lines, :$round-corners, |%args);
     } elsif (@data.all ~~ List:D | Array:D) && (@data».elems.all == @data.head.elems) {
         my @res = dense-to-triplets(@data);
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => @data.elems / @data.head.elems);
-        return MatrixPlot(@res, :$width, :$height, :$margins, :$background, |%args);
+        return MatrixPlot(@res, :$width, :$height, :$margins, :$background, :$grid-lines, :$round-corners, |%args);
     } elsif @data.all ~~ Map:D {
         my $ncol = @data.map({ $_<x> }).unique.elems;
         my $nrow = @data.map({ $_<y> }).unique.elems;
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => $ncol / $nrow);
-        my $res = HeatmapPlot(@data, :$width, :$height, :$margins, :$background, |%args);
+        my $res = HeatmapPlot(@data, :$width, :$height, :$margins, :$background, :$grid-lines, :$round-corners, |%args);
         if 'y-tick-labels' ∉ %args {
             $res .= subst('.range([height, 0])', '.range([0, height])', :g);
         }

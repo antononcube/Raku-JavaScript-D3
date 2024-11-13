@@ -1448,6 +1448,23 @@ var mouseleave = function(event, d) {
 };
 // tooltip-code-end
 
+// add the grid
+if ( $GRID_LINES) {
+    svg.selectAll()
+        .data(data, d => d.x + ':' + d.y)
+        .join("rect")
+        .attr("x", d => x(d.x))
+        .attr("y", d => y(d.y))
+        .attr("rx", 0)
+        .attr("ry", 0)
+        .attr("width", x.bandwidth())
+        .attr("height", y.bandwidth())
+        .style("fill", "none")
+        .style("stroke-width", $GRID_LINES_WIDTH)
+        .style("stroke", $GRID_LINES_COLOR)
+        .style("opacity", 1)
+}
+
 // add the squares
 svg.selectAll()
     .data(data, d => d.x + ':' + d.y)
