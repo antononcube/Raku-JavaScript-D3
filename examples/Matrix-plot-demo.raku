@@ -34,6 +34,8 @@ my @data = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0
 spurt $*CWD ~ '/matrixplot.html',
         js-d3-matrix-plot(@data,
                 width => 500,
+                background => 'White',
+                :grid-lines,
                 #height => 500,
                 #color-palette => 'Inferno',
                 #tick-labels-color => 'steelblue',
