@@ -329,7 +329,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                       :$tooltip-color is copy = Whatever,
                       :$mesh = True,
                       :$grid-lines is copy = Whatever,
-                      Bool:D :$round-corners = True,
+                      :$round-corners is copy = Whatever,
                       Str :$format = 'jupyter',
                       :$div-id = Whatever
                       ) {
@@ -389,6 +389,11 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     if $grid-lines.isa(Whatever) { $grid-lines = False }
     my $grid-lines-color = $grid-lines ~~ Map:D ?? $grid-lines<color> // 'Gray' !! 'Gray';
     my $grid-lines-width = $grid-lines ~~ Map:D ?? $grid-lines<width> // 1 !! 1;
+
+    #-------------------------------------------------------
+    # Process $round-corners
+    #-------------------------------------------------------
+    if $round-corners.isa(Whatever) { $round-corners = True }
 
     #-------------------------------------------------------
     # Process $low-value
@@ -608,14 +613,16 @@ multi sub MatrixPlot(@data,
                      :$height is copy = Whatever,
                      :$margins = 2,
                      :$background = 'DimGray',
-                     :$grid-lines = True,
-                     :$round-corners = False,
+                     :$grid-lines is copy = Whatever,
+                     :$round-corners is copy = Whatever,
                      *%args) {
     if @data.all ~~ Seq:D {
         return MatrixPlot(@data».Array.Array, :$width, :$height, :$margins, :$background, :$grid-lines, :$round-corners, |%args);
     } elsif (@data.all ~~ List:D | Array:D) && (@data».elems.all == @data.head.elems) {
         my @res = dense-to-triplets(@data);
         ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, aspect-ratio => @data.elems / @data.head.elems);
+        if $grid-lines.isa(Whatever) { $grid-lines = True }
+        if $round-corners.isa(Whatever) { $round-corners = False }
         return MatrixPlot(@res, :$width, :$height, :$margins, :$background, :$grid-lines, :$round-corners, |%args);
     } elsif @data.all ~~ Map:D {
         my $ncol = @data.map({ $_<x> }).unique.elems;
