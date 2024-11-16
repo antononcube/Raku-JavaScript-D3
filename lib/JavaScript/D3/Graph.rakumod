@@ -105,12 +105,12 @@ sub ProcessHighlightSpec($highlight, Bool :$directed-edges = False) {
 #| Makes a bubble chart for list of triplets..
 our proto GraphPlot(|) is export {*}
 
-our multi GraphPlot($data where $data ~~ Seq, *%args) {
+our multi GraphPlot($data where $data ~~ Seq:D, *%args) {
     return GraphPlot($data.List, |%args);
 }
 
 our multi GraphPlot(@data where @data.all ~~ Pair:D, *%args) {
-
+    return '' unless @data;
     return GraphPlot(@data>>.kv>>.List.List, |%args);
 }
 
@@ -157,6 +157,8 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Str :$format = 'jupyter',
                     :$div-id = Whatever
                     ) {
+    # No need to go further
+    return '' unless @data;
 
     #======================================================
     # Arguments
