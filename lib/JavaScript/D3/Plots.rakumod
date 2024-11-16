@@ -435,11 +435,11 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     # Process $tick-labels-font-size
     #-------------------------------------------------------
     $tick-labels-font-size = do given $tick-labels-font-size {
-        when Whatever { '"' ~ max(10, round(max($width, $height) / 60 * 2 )).Str ~ 'px"' }
+        when Whatever { '"' ~ max(10, round(min($width, $height) / 60 * 2 )).Str ~ 'px"' }
         when $_ ~~ Int:D && $_ ≥ 0 { "\"{$_.Str}px\"" }
         when Str:D { $tick-labels-font-size }
         default {
-            die 'The argument $plot-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
+            die 'The argument $tick-labels-font-size is expected to be a string, a non-negative integer, or Whatever.';
         }
     }
 
@@ -612,7 +612,7 @@ multi sub MatrixPlot(@data,
                      :$width is copy = Whatever,
                      :$height is copy = Whatever,
                      :$margins = 2,
-                     :$background = 'DimGray',
+                     :$background = 'none',
                      :$grid-lines is copy = Whatever,
                      :$round-corners is copy = Whatever,
                      *%args) {
