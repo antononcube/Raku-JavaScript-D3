@@ -101,12 +101,16 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Numeric :$black-square-value = 0.5,
                      Numeric :$white-square-value = 0.15,
                      Str :$whites-stroke-color = 'darkslategray',
+                     Str :whites-color(:$whites-fill-color) = 'white',
+                     Str :$blacks-stroke-color = 'black',
+                     Str :blacks-color(:$blacks-fill-color) = 'black',
                      Str :$tick-labels-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
                      :$margins is copy = Whatever,
                      Str :$format = 'jupyter',
-                     :$div-id = Whatever
+                     :$div-id = Whatever,
+                     *%args
                      ) {
 
     #-------------------------------------------------------
@@ -123,7 +127,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                             :$width, :$height,
                             :$background,
                             :$color-palette, :$black-square-value, :$white-square-value, :$whites-stroke-color,
-                            :$tick-labels-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis');
+                            :$tick-labels-color, :$opacity, :$title, :$margins, :$div-id, format => 'asis', |%args);
         }
 
         return JavaScript::D3::CodeSnippets::WrapIt($resTotal, :$format, :$div-id);
@@ -148,7 +152,8 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                                                :$margins,
                                                :!tooltip,
                                                :!mesh,
-                                               format => 'asis');
+                                               format => 'asis',
+                                               |%args);
 
     # No round corners for the squares
     $res =
@@ -172,7 +177,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
 
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
-                    .subst(:g, '$PLOT_LABELS_COLOR', '"white"')
+                    .subst(:g, '$PLOT_LABELS_COLOR', "\"$whites-fill-color\"")
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
                     .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
@@ -203,7 +208,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
 
             $res = $res
                     .subst('$PLOT_LABELS_DATA', $jsData)
-                    .subst(:g, '$PLOT_LABELS_COLOR', '"black"')
+                    .subst(:g, '$PLOT_LABELS_COLOR', "\"$blacks-fill-color\"")
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
                     .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
