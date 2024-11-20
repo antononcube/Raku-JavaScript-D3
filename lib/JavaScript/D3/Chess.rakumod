@@ -102,8 +102,10 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                      Numeric :$white-square-value = 0.15,
                      Str :$whites-stroke-color = 'darkslategray',
                      Str :whites-color(:$whites-fill-color) = 'white',
+                     Str :$whites-font-family = 'Courier',
                      Str :$blacks-stroke-color = 'black',
                      Str :blacks-color(:$blacks-fill-color) = 'black',
+                     Str :$blacks-font-family = 'Courier',
                      Str :$tick-labels-color = 'black',
                      Numeric :$opacity = 1.0,
                      Str :plot-label(:$title) = '',
@@ -192,7 +194,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABELS_COLOR', "\"$whites-stroke-color\"")
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
-                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', $whites-font-family)
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
         }
 
@@ -210,7 +212,7 @@ our multi Chessboard(@data is copy where @data.all ~~ Map,
                     .subst('$PLOT_LABELS_DATA', $jsData)
                     .subst(:g, '$PLOT_LABELS_COLOR', "\"$blacks-fill-color\"")
                     .subst('$PLOT_LABELS_FONT_SIZE', 'function(d) { return (height / 7) + "px" }')
-                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', 'Courier')
+                    .subst(:g, '$PLOT_LABELS_FONT_FAMILY', $blacks-font-family)
                     .subst('$PLOT_LABELS_Y_OFFSET', 'hy*0.1');
         }
     }
