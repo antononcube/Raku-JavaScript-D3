@@ -42,6 +42,8 @@ spurt $*CWD ~ '/chessboards.html',
                 white-square-value => 0.25,
                 whites-stroke-color => 'darkslategrey',
                 tick-labels-color => 'grey',
+                whites-font-family => 'Ariel',
+                blacks-font-family => 'Pecita',
                 width => 450,
                 format => 'html');
 
