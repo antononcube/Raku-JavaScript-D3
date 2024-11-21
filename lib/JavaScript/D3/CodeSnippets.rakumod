@@ -1461,7 +1461,7 @@ svg.selectAll()
     .style("fill", d => myColor(d.z))
     .style("stroke-width", 4)
     .style("stroke", "none")
-    .style("opacity", 0.8)
+    .style("opacity", $OPACITY)
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);

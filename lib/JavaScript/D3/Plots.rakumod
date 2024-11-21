@@ -506,6 +506,7 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst('$DATA', $jsData)
                 .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
                 .subst('$COLOR_PALETTE', $color-palette)
+                .subst(:g, '$OPACITY', $opacity)
                 .subst(:g, '$SORT_TICK_LABELS', $sort-tick-labels ?? 'true' !! 'false')
                 .subst(:g, '$TICK_LABELS_COLOR', "\"$tick-labels-color\"")
                 .subst(:g, '$TICK_LABELS_FONT_SIZE', $tick-labels-font-size)
