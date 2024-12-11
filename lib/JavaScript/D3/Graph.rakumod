@@ -131,7 +131,7 @@ our multi GraphPlot($data where is-positional-of-lists($data, 4), *%args) {
 
 our multi GraphPlot(@data is copy where @data.all ~~ Map,
                     Bool:D :d(:directed(:$directed-edges)) = False,
-                    :%vertex-coordinates = %(),
+                    :$vertex-coordinates is copy = Whatever,
                     :$width is copy = 400,
                     :$height is copy = Whatever,
                     Str :plot-label(:$title) = '',
@@ -267,12 +267,17 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Convert to JSON data
     my $jsData = to-json(@data.map({ merge-hash( %(weight => 1, label => ''), $_ ) }).Array, :!pretty);
 
+    # Process vertex coordinates
+    if $vertex-coordinates.isa(Whatever) { $vertex-coordinates = %() }
+    die 'The value of $vertex-coordinates is expected to be a map or Whatever.'
+    unless $vertex-coordinates ~~ Map:D;
+
     my $jsVertexCoords = [];
-    if %vertex-coordinates {
-        $jsVertexCoords = do if %vertex-coordinates.values.all ~~ Map:D {
-            to-json(%vertex-coordinates, :!pretty);
-        } elsif %vertex-coordinates.values.all ~~ Positional:D {
-            to-json(%vertex-coordinates.map({ $_.key => %( x => $_.value.head, y => $_.value.tail) }).Hash, :!pretty);
+    if $vertex-coordinates {
+        $jsVertexCoords = do if $vertex-coordinates.values.all ~~ Map:D {
+            to-json($vertex-coordinates, :!pretty);
+        } elsif $vertex-coordinates.values.all ~~ Positional:D {
+            to-json($vertex-coordinates.map({ $_.key => %( x => $_.value.head, y => $_.value.tail) }).Hash, :!pretty);
         } else {
             die 'The value of vertex-coordinates is expected to be a Map of Maps with keys <x y>, or a Map of Positionals of length two.'
         }
@@ -282,7 +287,7 @@ our multi GraphPlot(@data is copy where @data.all ~~ Map,
     # Stencil code
     my $jsChart = [
         JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-        %vertex-coordinates ??  JavaScript::D3::CodeSnippets::GetGraphWithCoordsPart() !! JavaScript::D3::CodeSnippets::GetGraphPart()
+        $vertex-coordinates ?? JavaScript::D3::CodeSnippets::GetGraphWithCoordsPart() !! JavaScript::D3::CodeSnippets::GetGraphPart()
     ].join("\n");
 
     #------------------------------------------------------
