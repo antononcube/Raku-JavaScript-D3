@@ -1,7 +1,7 @@
 {
   "name": "JavaScript::D3",
   "description": "Generation of JavaScript's D3 code for plots and charts.",
-  "version": "0.2.28",
+  "version": "0.2.29",
   "perl": "6.d",
   "authors": [
     "Anton Antonov"
@@ -21,6 +21,7 @@
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
     "JavaScript::D3::Chess": "lib/JavaScript/D3/Chess.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
+    "JavaScript::D3::Gauge": "lib/JavaScript/D3/Gauge.rakumod",
     "JavaScript::D3::Graph": "lib/JavaScript/D3/Graph.rakumod",
     "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
@@ -34,6 +35,8 @@
     "chart",
     "chessboard",
     "cli",
+    "clock",
+    "clock gauge",
     "code",
     "d3",
     "d3.js",
