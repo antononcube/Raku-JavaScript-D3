@@ -27,7 +27,9 @@ our multi Clock(:$hour is copy = Whatever,
                 UInt :plot-label-font-size(:$title-font-size) = 16,
                 Str :plot-label-color(:$title-color) = 'Black',
                 Str:D :$background = 'White',
+                UInt:D :bazel-width(:$stroke-width) = 2,
                 Str:D :color(:$stroke-color) = 'Black',
+                Str:D :fill(:$fill-color) = 'none',
                 :$hour-hand-color is copy = Whatever,
                 :$minute-hand-color is copy = Whatever,
                 :$second-hand-color = 'Gray',
@@ -121,7 +123,9 @@ our multi Clock(:$hour is copy = Whatever,
     # Concrete values
     my $res = $jsChart
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst(:g, '$STROKE_WIDTH', $stroke-width)
             .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
             .subst(:g, '$TICK_LABELS_FONT_SIZE', '"' ~ $tick-labels-font-size ~ 'px"')
             .subst(:g, '$TICK_LABELS_COLOR', '"' ~ $tick-labels-color ~ '"')
             .subst(:g, '$TICK_LABELS_FONT_FAMILY', '"' ~ $tick-labels-font-family ~ '"')

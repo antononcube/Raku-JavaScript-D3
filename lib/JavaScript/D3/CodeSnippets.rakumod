@@ -1992,8 +1992,9 @@ function drawClock(hour, minute, second) {
 
     svg.append("circle")
         .attr("r", radius)
-        .attr("fill", "none")
-        .attr("stroke", $STROKE_COLOR);
+        .attr("fill", $FILL_COLOR)
+        .attr("stroke", $STROKE_COLOR)
+        .attr("stroke-width", $STROKE_WIDTH);
 
     if (scaleRanges.length) {
         const arc = d3.arc()
