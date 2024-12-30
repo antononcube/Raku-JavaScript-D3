@@ -1966,7 +1966,7 @@ function drawClock(hour, minute, second) {
     svg.append("circle")
         .attr("r", radius)
         .attr("fill", "none")
-        .attr("stroke", "#333");
+        .attr("stroke", $STROKE_COLOR);
 
     // Draw ticks
     const ticks = svg.append("g").selectAll("line")
@@ -1976,7 +1976,7 @@ function drawClock(hour, minute, second) {
         .attr("y1", d => d % 5 === 0 ? -radius + 15 : -radius + 10)
         .attr("x2", 0)
         .attr("y2", -radius + 5)
-        .attr("stroke", "black")
+        .attr("stroke", $STROKE_COLOR)
         .attr("stroke-width", d => d % 5 === 0 ? 2 : 1)
         .attr("transform", d => `rotate(${d * 6})`);
 

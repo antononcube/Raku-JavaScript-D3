@@ -27,14 +27,15 @@ our multi Clock(:$hour is copy = Whatever,
                 UInt :plot-label-font-size(:$title-font-size) = 16,
                 Str :plot-label-color(:$title-color) = 'Black',
                 Str:D :$background = 'White',
+                Str:D :color(:$stroke-color) = 'Black',
                 Str:D :$hour-hand-color = 'Black',
                 Str:D :$minute-hand-color = 'Black',
                 Str:D :$second-hand-color = 'Red',
-                Str:D :$tick-labels-color = 'Black',
+                :$tick-labels-color is copy = Whatever,
                 Numeric:D :$tick-labels-font-size  = 20,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
                 Numeric:D :$update-interval = 1000,
-                :$margins is copy = Whatever,
+                :$margins is copy = 5,
                 Str:D :$format = 'jupyter',
                 :$div-id = Whatever,
                 *%args
@@ -44,6 +45,12 @@ our multi Clock(:$hour is copy = Whatever,
     #------------------------------------------------------
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    #------------------------------------------------------
+    # Process ticks color
+    if $tick-labels-color.isa(Whatever) { $tick-labels-color = $stroke-color; }
+    die 'The value of $tick-labels-color is expected to be a string or Whatever.'
+    unless $tick-labels-color ~~ Str:D;
 
     #======================================================
     # Plot creation
@@ -60,6 +67,7 @@ our multi Clock(:$hour is copy = Whatever,
     # Concrete values
     my $res = $jsChart
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
             .subst(:g, '$TICK_LABELS_FONT_SIZE', '"' ~ $tick-labels-font-size ~ 'px"')
             .subst(:g, '$TICK_LABELS_COLOR', '"' ~ $tick-labels-color ~ '"')
             .subst(:g, '$TICK_LABELS_FONT_FAMILY', '"' ~ $tick-labels-font-family ~ '"')
