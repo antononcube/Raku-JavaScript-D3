@@ -1960,6 +1960,33 @@ const minute = $MINUTE; //new Date().getMinutes();
 const second = $SECOND; //new Date().getSeconds();
 const updateInterval = $UPDATE_INTERVAL; // Update every second
 
+
+
+//const scaleRanges = [[[20, 30], [0, 0.05]], [[30, 45], [0, 0.25]], [[45, 55], [0, 0.25]], [[55, 60], [0, 0.05]]];
+const scaleRanges = $SCALE_RANGES;
+
+const colorScheme = $COLOR_SCHEME; //"Tableau10";
+const colorScale = createColorScale(colorScheme, scaleRanges.length);
+
+function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLATION_START, end = $COLOR_SCHEME_INTERPOLATION_END) {
+    const sequentialSchemes = [
+        "Blues", "Greens", "Greys", "Oranges", "Purples", "Reds",
+        "BuGn", "BuPu", "GnBu", "OrRd", "PuBuGn", "PuBu", "PuRd", "RdPu", "YlGnBu", "YlGn", "YlOrBr", "YlOrRd",
+        "Cividis", "Viridis", "Inferno", "Magma", "Plasma", "Warm", "Cool", "CubehelixDefault", "Turbo",
+        "Rainbow", "Sinebow"];
+    const categoricalSchemes = ["Observable10", "Category10", "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3", "Tableau10"];
+
+    if (sequentialSchemes.includes(scheme)) {
+        //return d3.scaleSequential(d3[`interpolate${scheme}`]).domain([0, numCategories - 1]);
+        const scale = d3.scaleSequential(d3[`interpolate${scheme}`]).domain([0, 1]);
+        return function(i) { return scale(start + (end - start) * i / (numCategories - 1)) };
+    } else if (categoricalSchemes.includes(scheme)) {
+        return d3.scaleOrdinal(d3[`scheme${scheme}`]);
+    } else {
+        throw new Error("Unknown color scheme.");
+    }
+}
+
 function drawClock(hour, minute, second) {
     svg.selectAll("*").remove();
 
@@ -1967,6 +1994,21 @@ function drawClock(hour, minute, second) {
         .attr("r", radius)
         .attr("fill", "none")
         .attr("stroke", $STROKE_COLOR);
+
+    if (scaleRanges.length) {
+        const arc = d3.arc()
+            .innerRadius(d => radius - radius * d[1][0])
+            .outerRadius(d => radius - radius * d[1][1])
+            .startAngle(d => (d[0][0] * 2 * Math.PI) / 60)
+            .endAngle(d => (d[0][1] * 2 * Math.PI) / 60);
+
+        svg.selectAll("path")
+            .data(scaleRanges)
+            .enter()
+            .append("path")
+            .attr("d", arc)
+            .attr("fill", (d, i) => colorScale(i));
+    }
 
     // Draw ticks
     const ticks = svg.append("g").selectAll("line")

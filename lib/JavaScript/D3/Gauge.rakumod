@@ -32,9 +32,12 @@ our multi Clock(:$hour is copy = Whatever,
                 :$minute-hand-color is copy = Whatever,
                 :$second-hand-color = 'Gray',
                 :$tick-labels-color is copy = Whatever,
+                :$scale-ranges is copy = Whatever,
+                :color-palette(:$color-scheme) is copy = Whatever,
                 Numeric:D :$tick-labels-font-size  = 16,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
                 Numeric:D :$update-interval = 1000,
+                :$color-scheme-interpolation-range = Whatever,
                 :$margins is copy = 5,
                 Str:D :$format = 'jupyter',
                 :$div-id = Whatever,
@@ -70,6 +73,39 @@ our multi Clock(:$hour is copy = Whatever,
     die 'The value of $second-hand-color is expected to be a string or Whatever.'
     unless $second-hand-color ~~ Str:D;
 
+    #------------------------------------------------------
+    # Process scale ranges
+    if $scale-ranges.isa(Whatever) { $scale-ranges = []; }
+    if $scale-ranges ~~ Seq:D { $scale-ranges = $scale-ranges.Array; }
+    die 'The value of $scale-ranges is expected to be Whatever or a list of lists.'
+    unless $scale-ranges ~~ (Array:D | List:D) && $scale-ranges.all ~~ (Array:D | List:D | Seq:D);
+
+    my $err-message = 'If the value of $scale-ranges a list then each element is expected to be list of two numbers or a list of two lists each with tow numbers.';
+    $scale-ranges = do for |$scale-ranges -> @r {
+        do given @r {
+           when $_.all ~~ Numeric:D { [$_, [0, 0.1]] }
+           when $_.all ~~ (List:D | Array:D | Seq:D) && $_.elems ≥ 2 {
+               if @r.head.all ~~ Numeric:D && @r.tail.all ~~ Numeric:D { @r }
+               else { die $err-message }
+           }
+           default { die $err-message }
+        }
+    }
+
+    #------------------------------------------------------
+    # Process color-scheme
+    if $color-scheme.isa(Whatever) { $color-scheme = 'Reds'; }
+    die 'The value of $color-scheme is expected to be a string or Whatever.'
+    unless $color-scheme ~~ Str:D;
+
+    #------------------------------------------------------
+    # Process color-scheme
+    if $color-scheme-interpolation-range.isa(Whatever) { $color-scheme-interpolation-range = [0.2, 0.8]; }
+    die 'The value of $color-scheme-interpolation-range is expected to be Whatever or a list of two numbers.'
+    unless $color-scheme-interpolation-range ~~ (Array:D | List:D | Seq:D)
+            && $color-scheme-interpolation-range.elems ≥ 2
+            && $color-scheme-interpolation-range.head(2).all ~~ Numeric:D;
+
     #======================================================
     # Plot creation
     #======================================================
@@ -93,6 +129,10 @@ our multi Clock(:$hour is copy = Whatever,
             .subst(:g, '$MINUTE_HAND_COLOR', '"' ~ $minute-hand-color ~ '"')
             .subst(:g, '$SECOND_HAND_COLOR', '"' ~ $second-hand-color ~ '"')
             .subst(:g, '$UPDATE_INTERVAL', $update-interval)
+            .subst(:g, '$COLOR_SCHEME_INTERPOLATION_START', $color-scheme-interpolation-range[0])
+            .subst(:g, '$COLOR_SCHEME_INTERPOLATION_END', $color-scheme-interpolation-range[1])
+            .subst(:g, '$SCALE_RANGES', to-json($scale-ranges, :!pretty))
+            .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
             .subst(:g, '$HOUR', $hour ~~ UInt:D ?? $hour !! 'new Date().getHours()')
             .subst(:g, '$MINUTE', $minute ~~ UInt:D ?? $minute !! 'new Date().getMinutes()')
             .subst(:g, '$SECOND', $second ~~ UInt:D ?? $second !! 'new Date().getSeconds()')
