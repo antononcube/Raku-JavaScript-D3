@@ -2007,7 +2007,7 @@ function drawClock(hour, minute, second) {
         .attr("x1", 0)
         .attr("y1", 0)
         .attr("x2", 0)
-        .attr("y2", -radius + 5 / 15 * radius)
+        .attr("y2", -radius + 4 / 15 * radius)
         .attr("stroke", $MINUTE_HAND_COLOR)
         .attr("stroke-width", 2)
         .attr("transform", `rotate(${minute * 6 + second / 10})`);

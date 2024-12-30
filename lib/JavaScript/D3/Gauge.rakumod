@@ -28,11 +28,11 @@ our multi Clock(:$hour is copy = Whatever,
                 Str :plot-label-color(:$title-color) = 'Black',
                 Str:D :$background = 'White',
                 Str:D :color(:$stroke-color) = 'Black',
-                Str:D :$hour-hand-color = 'Black',
-                Str:D :$minute-hand-color = 'Black',
-                Str:D :$second-hand-color = 'Red',
+                :$hour-hand-color = Whatever,
+                :$minute-hand-color = Whatever,
+                :$second-hand-color = 'Gray',
                 :$tick-labels-color is copy = Whatever,
-                Numeric:D :$tick-labels-font-size  = 20,
+                Numeric:D :$tick-labels-font-size  = 16,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
                 Numeric:D :$update-interval = 1000,
                 :$margins is copy = 5,
@@ -51,6 +51,24 @@ our multi Clock(:$hour is copy = Whatever,
     if $tick-labels-color.isa(Whatever) { $tick-labels-color = $stroke-color; }
     die 'The value of $tick-labels-color is expected to be a string or Whatever.'
     unless $tick-labels-color ~~ Str:D;
+
+    #------------------------------------------------------
+    # Process hour-hand color
+    if $hour-hand-color.isa(Whatever) { $hour-hand-color = $stroke-color; }
+    die 'The value of $hour-hand-color is expected to be a string or Whatever.'
+    unless $hour-hand-color ~~ Str:D;
+
+    #------------------------------------------------------
+    # Process minute-hand color
+    if $minute-hand-color.isa(Whatever) { $minute-hand-color = $hour-hand-color; }
+    die 'The value of $munute-hand-color is expected to be a string or Whatever.'
+    unless $minute-hand-color ~~ Str:D;
+
+    #------------------------------------------------------
+    # Process second-hand color
+    if $second-hand-color.isa(Whatever) { $second-hand-color = $stroke-color; }
+    die 'The value of $second-hand-color is expected to be a string or Whatever.'
+    unless $second-hand-color ~~ Str:D;
 
     #======================================================
     # Plot creation
