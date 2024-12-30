@@ -13,5 +13,8 @@ spurt $*CWD ~ '/clock-gauge.html',
                 tick-labels-font-size => 16,
                 title => 'Clock gauge',
                 title-color => 'Blue',
+                scale-ranges => [[0, 30], [30, 45], [[45, 55], [0, 0.15]], [[55, 60], [0.1, 0.2]]],
+                color-scheme => 'Reds',
+                color-scheme-interpolation-range => [0.1, 0.5],
                 margins => 25,
                 format => 'html');
