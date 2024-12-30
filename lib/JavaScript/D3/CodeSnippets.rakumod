@@ -1972,6 +1972,7 @@ function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLA
     const sequentialSchemes = [
         "Blues", "Greens", "Greys", "Oranges", "Purples", "Reds",
         "BuGn", "BuPu", "GnBu", "OrRd", "PuBuGn", "PuBu", "PuRd", "RdPu", "YlGnBu", "YlGn", "YlOrBr", "YlOrRd",
+        "BrBG", "PRGn", "PiYG", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", "Spectral",
         "Cividis", "Viridis", "Inferno", "Magma", "Plasma", "Warm", "Cool", "CubehelixDefault", "Turbo",
         "Rainbow", "Sinebow"];
     const categoricalSchemes = ["Observable10", "Category10", "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3", "Tableau10"];
