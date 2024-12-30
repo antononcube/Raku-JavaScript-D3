@@ -37,7 +37,7 @@ our multi Clock(:$hour is copy = Whatever,
                 Numeric:D :$tick-labels-font-size  = 16,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
                 Numeric:D :$update-interval = 1000,
-                :$color-scheme-interpolation-range = Whatever,
+                :$color-scheme-interpolation-range is copy = Whatever,
                 :$margins is copy = 5,
                 Str:D :$format = 'jupyter',
                 :$div-id = Whatever,
@@ -133,9 +133,9 @@ our multi Clock(:$hour is copy = Whatever,
             .subst(:g, '$COLOR_SCHEME_INTERPOLATION_END', $color-scheme-interpolation-range[1])
             .subst(:g, '$SCALE_RANGES', to-json($scale-ranges, :!pretty))
             .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
-            .subst(:g, '$HOUR', $hour ~~ UInt:D ?? $hour !! 'new Date().getHours()')
-            .subst(:g, '$MINUTE', $minute ~~ UInt:D ?? $minute !! 'new Date().getMinutes()')
-            .subst(:g, '$SECOND', $second ~~ UInt:D ?? $second !! 'new Date().getSeconds()')
+            .subst(:g, '$HOUR', $hour ~~ (Int:D | Str:D) ?? $hour !! 'new Date().getHours()')
+            .subst(:g, '$MINUTE', $minute ~~ (Int:D | Str:D) ?? $minute !! 'new Date().getMinutes()')
+            .subst(:g, '$SECOND', $second ~~ (Int:D | Str:D) ?? $second !! 'new Date().getSeconds()')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
