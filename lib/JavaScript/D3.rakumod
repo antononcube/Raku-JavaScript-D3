@@ -5,6 +5,7 @@ use JavaScript::D3::Plots;
 use JavaScript::D3::Random;
 use JavaScript::D3::Images;
 use JavaScript::D3::Chess;
+use JavaScript::D3::Gauge;
 use JavaScript::D3::Graph;
 use Hash::Merge;
 use JSON::Fast;
@@ -630,6 +631,15 @@ multi sub js-d3-graph-plot($data, *%args) {
     return JavaScript::D3::Graph::GraphPlot($data, |%args);
 }
 
+
+#============================================================
+#| Makes a clock gauge for given C<:$hour>, C<:$minute>, C<:$second>.
+proto js-d3-clock-gauge(|) is export {*}
+
+multi sub js-d3-clock-gauge(*@rgs, *%args) {
+    return JavaScript::D3::Gauge::Clock(|@rgs, |%args);
+}
+
 #============================================================
 # Spirograph
 #============================================================
@@ -673,8 +683,8 @@ multi sub js-d3-spirograph(Numeric:D :$k = 2/5,
 
     # The points
     my $max-t = 2 * π * $number-of-cycles;
-    my $step =  $max-t / $number-of-segments;
-    my @points = (0, $step ... $max-t).map({ $scale * SpirographZ($_, $k , $l) }).map({ %( x => $_.re, y => $_.im) });
+    my $step = $max-t / $number-of-segments;
+    my @points = (0, $step ... $max-t).map({ $scale * SpirographZ($_, $k, $l) }).map({ %( x => $_.re, y => $_.im) });
 
     # Graph
     return js-d3-list-line-plot(@points, :$width, :$height, :$axes, |%args);

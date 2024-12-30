@@ -1941,3 +1941,102 @@ MONDRIAN-END
 our sub GetMondrianPart() {
     return $jsMondrianPart;
 }
+
+#============================================================
+# Clock Gauge snippet
+#============================================================
+
+my $jsClockGauge = q:to/GAUGE-CLOCK/;
+const radius = Math.min(width, height) / 2;
+
+// Rescaling
+svg = svg
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .append("g")
+    .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+const hour   = $HOUR;   //new Date().getHours();
+const minute = $MINUTE; //new Date().getMinutes();
+const second = $SECOND; //new Date().getSeconds();
+const updateInterval = $UPDATE_INTERVAL; // Update every second
+
+function drawClock(hour, minute, second) {
+    svg.selectAll("*").remove();
+
+    svg.append("circle")
+        .attr("r", radius)
+        .attr("fill", "none")
+        .attr("stroke", "#333");
+
+    // Draw ticks
+    const ticks = svg.append("g").selectAll("line")
+        .data(d3.range(0, 60)).enter()
+        .append("line")
+        .attr("x1", 0)
+        .attr("y1", d => d % 5 === 0 ? -radius + 15 : -radius + 10)
+        .attr("x2", 0)
+        .attr("y2", -radius + 5)
+        .attr("stroke", "black")
+        .attr("stroke-width", d => d % 5 === 0 ? 2 : 1)
+        .attr("transform", d => `rotate(${d * 6})`);
+
+    // Draw numbers
+    const numbers = svg.append("g").selectAll("text")
+        .data(d3.range(1, 13)).enter()
+        .append("text")
+        .attr("x", d => Math.sin(d * Math.PI / 6) * (radius - 30))
+        .attr("y", d => -Math.cos(d * Math.PI / 6) * (radius - 30) + 5)
+        .attr("text-anchor", "middle")
+        .attr("font-size", $TICK_LABELS_FONT_SIZE)
+        .attr("fill", $TICK_LABELS_COLOR)
+        .attr("font-family", $TICK_LABELS_FONT_FAMILY)
+        .text(d => d);
+
+    // Draw hour hand
+    svg.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", -radius + 8 / 15 * radius)
+        .attr("stroke", $HOUR_HAND_COLOR)
+        .attr("stroke-width", 4)
+        .attr("transform", `rotate(${(hour % 12) * 30 + minute / 2})`);
+
+    // Draw minute hand
+    svg.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", -radius + 5 / 15 * radius)
+        .attr("stroke", $MINUTE_HAND_COLOR)
+        .attr("stroke-width", 2)
+        .attr("transform", `rotate(${minute * 6 + second / 10})`);
+
+    // Draw second hand
+    svg.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", -radius + 2 / 15 * radius)
+        .attr("stroke", $SECOND_HAND_COLOR)
+        .attr("stroke-width", 1)
+        .attr("transform", `rotate(${second * 6})`);
+}
+
+function updateClock() {
+    const now = new Date();
+    //drawClock(now.getHours(), now.getMinutes(), now.getSeconds());
+    drawClock($HOUR, $MINUTE, $SECOND);
+}
+
+drawClock(hour, minute, second);
+setInterval(updateClock, updateInterval);
+GAUGE-CLOCK
+
+#============================================================
+# Clock Gauge code snippet accessor
+#============================================================
+
+our sub GetClockGauge() {
+    return $jsClockGauge;
+}
