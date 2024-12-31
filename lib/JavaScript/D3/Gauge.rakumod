@@ -14,6 +14,14 @@ use JSON::Fast;
 #| Makes a bubble chart for list of triplets..
 our proto Clock(|) is export {*}
 
+our multi Clock(DateTime:D $date-time, *%args) {
+    return Clock(:$date-time, |%args);
+}
+
+our multi Clock(DateTime:D :time(:date(:$date-time)), *%args) {
+    return Clock(hour => $date-time.hour, minute => $date-time.minute, second => $date-time.minute, |%args);
+}
+
 our multi Clock($hour = Whatever, $minute = Whatever, $second = Whatever, *%args) {
     return Clock(:$hour, :$minute, :$second, |%args);
 }
