@@ -26,9 +26,9 @@ our multi Clock($hour = Whatever, $minute = Whatever, $second = Whatever, *%args
     return Clock(:$hour, :$minute, :$second, |%args);
 }
 
-our multi Clock(:$hour is copy = Whatever,
-                :$minute is copy = Whatever,
-                :$second is copy = Whatever,
+our multi Clock(:h(:$hour) is copy = Whatever,
+                :m(:$minute) is copy = Whatever,
+                :s(:$second) is copy = Whatever,
                 :$width is copy = Whatever,
                 :$height is copy = Whatever,
                 Str :plot-label(:$title) = '',
@@ -149,9 +149,9 @@ our multi Clock(:$hour is copy = Whatever,
             .subst(:g, '$COLOR_SCHEME_INTERPOLATION_END', $color-scheme-interpolation-range[1])
             .subst(:g, '$SCALE_RANGES', to-json($scale-ranges, :!pretty))
             .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
-            .subst(:g, '$HOUR', $hour ~~ (Int:D | Str:D) ?? $hour !! 'new Date().getHours()')
-            .subst(:g, '$MINUTE', $minute ~~ (Int:D | Str:D) ?? $minute !! 'new Date().getMinutes()')
-            .subst(:g, '$SECOND', $second ~~ (Int:D | Str:D) ?? $second !! 'new Date().getSeconds()')
+            .subst(:g, '$HOUR', $hour ~~ (Numeric:D | Str:D) ?? $hour !! 'new Date().getHours()')
+            .subst(:g, '$MINUTE', $minute ~~ (Numeric:D | Str:D) ?? $minute !! 'new Date().getMinutes()')
+            .subst(:g, '$SECOND', $second ~~ (Numeric:D | Str:D) ?? $second !! 'new Date().getSeconds()')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
