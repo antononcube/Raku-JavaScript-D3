@@ -1,0 +1,27 @@
+use v6.d;
+
+use lib '.';
+use lib './lib';
+
+use JavaScript::D3;
+
+use Test;
+
+plan *;
+
+## 1
+ok js-d3-clock-gauge();
+
+## 2
+ok js-d3-clock-gauge(:1hour, :12minute, :46seconds, color-palette=>'Greens', tick-labels-color=>'red', width=>400, format=>'jupyter');
+
+## 3
+ok js-d3-clock-gauge(1, 12, 36, color-palette=>'Greens', tick-labels-color=>'red', width=>400, format=>'jupyter');
+
+## 4
+ok js-d3-clock-gauge(date-time => now);
+
+## 5
+ok js-d3-clock-gauge(DateTime.now);
+
+done-testing
