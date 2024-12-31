@@ -21,8 +21,8 @@ our multi Clock($hour = Whatever, $minute = Whatever, $second = Whatever, *%args
 our multi Clock(:$hour is copy = Whatever,
                 :$minute is copy = Whatever,
                 :$second is copy = Whatever,
-                :$width = 200,
-                :$height = 200,
+                :$width is copy = Whatever,
+                :$height is copy = Whatever,
                 Str :plot-label(:$title) = '',
                 UInt :plot-label-font-size(:$title-font-size) = 16,
                 Str :plot-label-color(:$title-color) = 'Black',
@@ -46,6 +46,10 @@ our multi Clock(:$hour is copy = Whatever,
                 *%args
                 ) {
 
+
+    #------------------------------------------------------
+    # Process image sizes
+    ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height, :1aspect-ratio, :200default);
 
     #------------------------------------------------------
     # Process margins
