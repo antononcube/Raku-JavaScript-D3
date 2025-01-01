@@ -43,6 +43,7 @@ our multi Clock(:h(:$hour) is copy = Whatever,
                 :$second-hand-color = 'Gray',
                 :$tick-labels-color is copy = Whatever,
                 :$scale-ranges is copy = Whatever,
+                :$gauge-labels is copy = {},
                 :color-palette(:$color-scheme) is copy = Whatever,
                 Numeric:D :$tick-labels-font-size  = 16,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
@@ -107,6 +108,13 @@ our multi Clock(:h(:$hour) is copy = Whatever,
     }
 
     #------------------------------------------------------
+    # Process gauge labels
+    if $gauge-labels.isa(Whatever) { $gauge-labels = { Value => [0.5, 0.35] } }
+    if $gauge-labels ~~ Str:D { $gauge-labels = ($gauge-labels => [0.5, 0.35]).Hash }
+    die 'The value of $gauge-labels is expected to be a string, a map, or Whatever.'
+    unless $gauge-labels ~~ Map:D;
+
+    #------------------------------------------------------
     # Process color-scheme
     if $color-scheme.isa(Whatever) { $color-scheme = 'Reds'; }
     die 'The value of $color-scheme is expected to be a string or Whatever.'
@@ -147,6 +155,7 @@ our multi Clock(:h(:$hour) is copy = Whatever,
             .subst(:g, '$UPDATE_INTERVAL', $update-interval)
             .subst(:g, '$COLOR_SCHEME_INTERPOLATION_START', $color-scheme-interpolation-range[0])
             .subst(:g, '$COLOR_SCHEME_INTERPOLATION_END', $color-scheme-interpolation-range[1])
+            .subst(:g, '$GAUGE_LABELS', to-json($gauge-labels, :!pretty))
             .subst(:g, '$SCALE_RANGES', to-json($scale-ranges, :!pretty))
             .subst(:g, '$COLOR_SCHEME', '"' ~ $color-scheme ~ '"')
             .subst(:g, '$HOUR', $hour ~~ (Numeric:D | Str:D) ?? $hour !! 'new Date().getHours()')

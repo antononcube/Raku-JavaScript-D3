@@ -1958,9 +1958,7 @@ svg = svg
 const hour   = $HOUR;   //new Date().getHours();
 const minute = $MINUTE; //new Date().getMinutes();
 const second = $SECOND; //new Date().getSeconds();
-const updateInterval = $UPDATE_INTERVAL; // Update every second
-
-
+const updateInterval = $UPDATE_INTERVAL; // Update, say, every second
 
 //const scaleRanges = [[[20, 30], [0, 0.05]], [[30, 45], [0, 0.25]], [[45, 55], [0, 0.25]], [[55, 60], [0, 0.05]]];
 const scaleRanges = $SCALE_RANGES;
@@ -1988,7 +1986,9 @@ function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLA
     }
 }
 
-function drawClock(hour, minute, second) {
+var gaugeLabels = $GAUGE_LABELS;
+
+function drawClock(hour, minute, second, gaugeLabels) {
     svg.selectAll("*").remove();
 
     svg.append("circle")
@@ -2065,15 +2065,27 @@ function drawClock(hour, minute, second) {
         .attr("stroke", $SECOND_HAND_COLOR)
         .attr("stroke-width", 1)
         .attr("transform", `rotate(${second * 6})`);
+
+    // Draw gauge labels
+    const labelElements = svg.append("g").selectAll("text")
+        .data(Object.entries(gaugeLabels)).enter()
+        .append("text")
+        .attr("x", d => typeof d[1] === 'object' ? d[1][0] * 2 * radius - radius : Math.sin(d[1] * Math.PI / 6) * (radius - 40))
+        .attr("y", d => typeof d[1] === 'object' ? - d[1][1] * 2 * radius + radius : -Math.cos(d[1] * Math.PI / 6) * (radius - 40))
+        .attr("text-anchor", "middle")
+        .attr("font-size", $TICK_LABELS_FONT_SIZE)
+        .attr("fill", $TICK_LABELS_COLOR)
+        .attr("font-family", $TICK_LABELS_FONT_FAMILY)
+        .text(d => d[0] === 'Value' ? `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}` : d[0]);
 }
 
 function updateClock() {
     //const now = new Date();
     //drawClock(now.getHours(), now.getMinutes(), now.getSeconds());
-    drawClock($HOUR, $MINUTE, $SECOND);
+    drawClock($HOUR, $MINUTE, $SECOND, gaugeLabels);
 }
 
-drawClock(hour, minute, second);
+drawClock(hour, minute, second, gaugeLabels);
 setInterval(updateClock, updateInterval);
 GAUGE-CLOCK
 
