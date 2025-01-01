@@ -2068,7 +2068,7 @@ function drawClock(hour, minute, second) {
 }
 
 function updateClock() {
-    const now = new Date();
+    //const now = new Date();
     //drawClock(now.getHours(), now.getMinutes(), now.getSeconds());
     drawClock($HOUR, $MINUTE, $SECOND);
 }
