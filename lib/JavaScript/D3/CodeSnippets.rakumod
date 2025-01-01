@@ -2043,9 +2043,9 @@ function drawClock(hour, minute, second, gaugeLabels) {
         .attr("x", d => typeof d[1] === 'object' ? d[1][0] * 2 * radius - radius : Math.sin(d[1] * Math.PI / 6) * (radius - 40))
         .attr("y", d => typeof d[1] === 'object' ? - d[1][1] * 2 * radius + radius : -Math.cos(d[1] * Math.PI / 6) * (radius - 40))
         .attr("text-anchor", "middle")
-        .attr("font-size", $TICK_LABELS_FONT_SIZE)
-        .attr("fill", $TICK_LABELS_COLOR)
-        .attr("font-family", $TICK_LABELS_FONT_FAMILY)
+        .attr("font-size", $GAUGE_LABELS_FONT_SIZE)
+        .attr("fill", $GAUGE_LABELS_COLOR)
+        .attr("font-family", $GAUGE_LABELS_FONT_FAMILY)
         .text(d => d[0] === 'Value' ? `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}` : d[0]);
 
     // Draw hour hand

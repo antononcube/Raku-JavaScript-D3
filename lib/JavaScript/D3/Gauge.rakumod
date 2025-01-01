@@ -41,12 +41,15 @@ our multi Clock(:h(:$hour) is copy = Whatever,
                 :$hour-hand-color is copy = Whatever,
                 :$minute-hand-color is copy = Whatever,
                 :$second-hand-color = 'Gray',
-                :$tick-labels-color is copy = Whatever,
                 :$scale-ranges is copy = Whatever,
                 :$gauge-labels is copy = {},
                 :color-palette(:$color-scheme) is copy = Whatever,
+                :$tick-labels-color is copy = Whatever,
                 Numeric:D :$tick-labels-font-size  = 16,
                 Str:D :$tick-labels-font-family is copy = 'Ariel',
+                :$gauge-labels-color is copy = Whatever,
+                Numeric:D :$gauge-labels-font-size  = 16,
+                Str:D :$gauge-labels-font-family is copy = 'Ariel',
                 Numeric:D :$update-interval = 1000,
                 :$color-scheme-interpolation-range is copy = Whatever,
                 :$margins is copy = 5,
@@ -65,10 +68,16 @@ our multi Clock(:h(:$hour) is copy = Whatever,
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     #------------------------------------------------------
-    # Process ticks color
+    # Process tick labels color
     if $tick-labels-color.isa(Whatever) { $tick-labels-color = $stroke-color; }
     die 'The value of $tick-labels-color is expected to be a string or Whatever.'
     unless $tick-labels-color ~~ Str:D;
+
+    #------------------------------------------------------
+    # Process gauge labels color
+    if $gauge-labels-color.isa(Whatever) { $gauge-labels-color = $title-color; }
+    die 'The value of $gauge-labels-color is expected to be a string or Whatever.'
+    unless $gauge-labels-color ~~ Str:D;
 
     #------------------------------------------------------
     # Process hour-hand color
@@ -149,6 +158,9 @@ our multi Clock(:h(:$hour) is copy = Whatever,
             .subst(:g, '$TICK_LABELS_FONT_SIZE', '"' ~ $tick-labels-font-size ~ 'px"')
             .subst(:g, '$TICK_LABELS_COLOR', '"' ~ $tick-labels-color ~ '"')
             .subst(:g, '$TICK_LABELS_FONT_FAMILY', '"' ~ $tick-labels-font-family ~ '"')
+            .subst(:g, '$GAUGE_LABELS_FONT_SIZE', '"' ~ $gauge-labels-font-size ~ 'px"')
+            .subst(:g, '$GAUGE_LABELS_COLOR', '"' ~ $gauge-labels-color ~ '"')
+            .subst(:g, '$GAUGE_LABELS_FONT_FAMILY', '"' ~ $gauge-labels-font-family ~ '"')
             .subst(:g, '$HOUR_HAND_COLOR', '"' ~ $hour-hand-color ~ '"')
             .subst(:g, '$MINUTE_HAND_COLOR', '"' ~ $minute-hand-color ~ '"')
             .subst(:g, '$SECOND_HAND_COLOR', '"' ~ $second-hand-color ~ '"')
