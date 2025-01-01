@@ -2036,6 +2036,18 @@ function drawClock(hour, minute, second, gaugeLabels) {
         .attr("font-family", $TICK_LABELS_FONT_FAMILY)
         .text(d => d);
 
+    // Draw gauge labels (before the clock hands)
+    const labelElements = svg.append("g").selectAll("text")
+        .data(Object.entries(gaugeLabels)).enter()
+        .append("text")
+        .attr("x", d => typeof d[1] === 'object' ? d[1][0] * 2 * radius - radius : Math.sin(d[1] * Math.PI / 6) * (radius - 40))
+        .attr("y", d => typeof d[1] === 'object' ? - d[1][1] * 2 * radius + radius : -Math.cos(d[1] * Math.PI / 6) * (radius - 40))
+        .attr("text-anchor", "middle")
+        .attr("font-size", $TICK_LABELS_FONT_SIZE)
+        .attr("fill", $TICK_LABELS_COLOR)
+        .attr("font-family", $TICK_LABELS_FONT_FAMILY)
+        .text(d => d[0] === 'Value' ? `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}` : d[0]);
+
     // Draw hour hand
     svg.append("line")
         .attr("x1", 0)
@@ -2065,18 +2077,6 @@ function drawClock(hour, minute, second, gaugeLabels) {
         .attr("stroke", $SECOND_HAND_COLOR)
         .attr("stroke-width", 1)
         .attr("transform", `rotate(${second * 6})`);
-
-    // Draw gauge labels
-    const labelElements = svg.append("g").selectAll("text")
-        .data(Object.entries(gaugeLabels)).enter()
-        .append("text")
-        .attr("x", d => typeof d[1] === 'object' ? d[1][0] * 2 * radius - radius : Math.sin(d[1] * Math.PI / 6) * (radius - 40))
-        .attr("y", d => typeof d[1] === 'object' ? - d[1][1] * 2 * radius + radius : -Math.cos(d[1] * Math.PI / 6) * (radius - 40))
-        .attr("text-anchor", "middle")
-        .attr("font-size", $TICK_LABELS_FONT_SIZE)
-        .attr("fill", $TICK_LABELS_COLOR)
-        .attr("font-family", $TICK_LABELS_FONT_FAMILY)
-        .text(d => d[0] === 'Value' ? `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}` : d[0]);
 }
 
 function updateClock() {
