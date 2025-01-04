@@ -102,14 +102,16 @@ our multi Clock(:h(:$hour) is copy = Whatever,
     if $scale-ranges.isa(Whatever) { $scale-ranges = []; }
     if $scale-ranges ~~ Seq:D { $scale-ranges = $scale-ranges.Array; }
     die 'The value of $scale-ranges is expected to be Whatever or a list of lists.'
-    unless $scale-ranges ~~ (Array:D | List:D) && $scale-ranges.all ~~ (Array:D | List:D | Seq:D);
+    unless $scale-ranges ~~ (Array:D | List:D) && $scale-ranges.all ~~ (Array:D | List:D | Seq:D | Str:D);
 
-    my $err-message = 'If the value of $scale-ranges a list then each element is expected to be list of two numbers or a list of two lists each with tow numbers.';
+    my $err-message =
+            'If the value of $scale-ranges a list then each element is expected to be list of two numbers or a list of lists.' ~
+            'The first two list elements of each list should be lists with tow numbers. The third, optional element can be string or a list two strings.';
     $scale-ranges = do for |$scale-ranges -> @r {
         do given @r {
            when $_.all ~~ Numeric:D { [$_, [0, 0.1]] }
-           when $_.all ~~ (List:D | Array:D | Seq:D) && $_.elems ≥ 2 {
-               if @r.head.all ~~ Numeric:D && @r.tail.all ~~ Numeric:D { @r }
+           when $_.all ~~ (List:D | Array:D | Seq:D | Str:D) && $_.elems ≥ 2 {
+               if @r[0].all ~~ Numeric:D && @r[1].all ~~ Numeric:D { @r }
                else { die $err-message }
            }
            default { die $err-message }

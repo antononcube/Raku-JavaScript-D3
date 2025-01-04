@@ -1986,6 +1986,16 @@ function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLA
     }
 }
 
+function isString(obj) {
+  return typeof obj === 'string' || obj instanceof String;
+}
+
+function isListOfTwoStrings(obj) {
+  return Array.isArray(obj) &&
+         obj.length === 2 &&
+         obj.every(item => isString(item));
+}
+
 var gaugeLabels = $GAUGE_LABELS;
 
 function drawClock(hour, minute, second, gaugeLabels) {
@@ -1999,8 +2009,8 @@ function drawClock(hour, minute, second, gaugeLabels) {
 
     if (scaleRanges.length) {
         const arc = d3.arc()
-            .innerRadius(d => radius - radius * d[1][0])
-            .outerRadius(d => radius - radius * d[1][1])
+            .innerRadius(d => radius - radius * Math.min(...d[1]))
+            .outerRadius(d => radius - radius * Math.max(...d[1]))
             .startAngle(d => (d[0][0] * 2 * Math.PI) / 60)
             .endAngle(d => (d[0][1] * 2 * Math.PI) / 60);
 
@@ -2009,7 +2019,59 @@ function drawClock(hour, minute, second, gaugeLabels) {
             .enter()
             .append("path")
             .attr("d", arc)
-            .attr("fill", (d, i) => colorScale(i));
+            .each(function(d, i) {
+                // Create a radial gradient for each arc
+                var gradient = svg.append("defs")
+                    .append("radialGradient")
+                    .attr("id", "gradient" + i)
+                    .attr("gradientUnits", "userSpaceOnUse")
+                    .attr("cx", 0)
+                    .attr("cy", 0)
+                    .attr("r", radius);
+
+                // Define the gradient stops along the radius
+                if (isString(d[2])) {
+                    const cf = createColorScale(d[2], 100);
+                    const minRad = Math.min(...d[1]);
+                    const maxRad = Math.max(...d[1]);
+                    for (var j = 0; j <= 100; j++) {
+                        const j2 = Math.round((minRad + j / 100 * (maxRad - minRad)) * 100);
+                        if (d[1][0] < d[1][1]) {
+                            gradient.append("stop")
+                                .attr("offset", j + "%")
+                                .attr("stop-color", cf(j2))
+                                .attr("stop-opacity", 1);
+                        } else {
+                            gradient.append("stop")
+                                .attr("offset", j + "%")
+                                .attr("stop-color", cf(100-j2))
+                                .attr("stop-opacity", 1);
+                        }
+                    }
+
+                    // Apply the gradient to the current arc
+                    d3.select(this)
+                        .style("fill", "url(#gradient" + i + ")");
+
+                } else if (isListOfTwoStrings(d[2])) {
+                    gradient.append("stop")
+                        .attr("offset",  Math.round((1-d[1][1]) * 100) + "%")
+                        .attr("stop-color", d[2][1])
+                        .attr("stop-opacity", 1);
+
+                    gradient.append("stop")
+                        .attr("offset", Math.round((1-d[1][0]) * 100) + "%")
+                        .attr("stop-color", d[2][0])
+                        .attr("stop-opacity", 1);
+
+                    // Apply the gradient to the current arc
+                    d3.select(this)
+                        .style("fill", "url(#gradient" + i + ")");
+
+                } else {
+                    d3.select(this).attr("fill", colorScale(i));
+                }
+            });
     }
 
     // Draw ticks
