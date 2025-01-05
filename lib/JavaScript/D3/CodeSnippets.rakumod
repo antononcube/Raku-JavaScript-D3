@@ -2049,12 +2049,12 @@ function drawClock(hour, minute, second, gaugeLabels) {
                         if (d[1][0] < d[1][1]) {
                             gradient.append("stop")
                                 .attr("offset", j + "%")
-                                .attr("stop-color", cf(j2))
+                                .attr("stop-color", cf(100-j2))
                                 .attr("stop-opacity", 1);
                         } else {
                             gradient.append("stop")
                                 .attr("offset", j + "%")
-                                .attr("stop-color", cf(100-j2))
+                                .attr("stop-color", cf(j2))
                                 .attr("stop-opacity", 1);
                         }
                     }
