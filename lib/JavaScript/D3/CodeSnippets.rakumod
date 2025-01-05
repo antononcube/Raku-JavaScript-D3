@@ -1966,20 +1966,30 @@ const scaleRanges = $SCALE_RANGES;
 const colorScheme = $COLOR_SCHEME; //"Tableau10";
 const colorScale = createColorScale(colorScheme, scaleRanges.length);
 
-function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLATION_START, end = $COLOR_SCHEME_INTERPOLATION_END) {
+function isSequentialScheme(schemeName) {
     const sequentialSchemes = [
         "Blues", "Greens", "Greys", "Oranges", "Purples", "Reds",
         "BuGn", "BuPu", "GnBu", "OrRd", "PuBuGn", "PuBu", "PuRd", "RdPu", "YlGnBu", "YlGn", "YlOrBr", "YlOrRd",
         "BrBG", "PRGn", "PiYG", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", "Spectral",
         "Cividis", "Viridis", "Inferno", "Magma", "Plasma", "Warm", "Cool", "CubehelixDefault", "Turbo",
-        "Rainbow", "Sinebow"];
-    const categoricalSchemes = ["Observable10", "Category10", "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3", "Tableau10"];
+        "Rainbow", "Sinebow"
+    ];
+    return sequentialSchemes.includes(schemeName);
+}
 
-    if (sequentialSchemes.includes(scheme)) {
+function isCategoricalScheme(schemeName) {
+    const categoricalSchemes = [
+        "Observable10", "Category10", "Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3", "Tableau10"
+    ];
+    return categoricalSchemes.includes(schemeName);
+}
+
+function createColorScale(scheme, numCategories, start = $COLOR_SCHEME_INTERPOLATION_START, end = $COLOR_SCHEME_INTERPOLATION_END) {
+    if (isSequentialScheme(scheme)) {
         //return d3.scaleSequential(d3[`interpolate${scheme}`]).domain([0, numCategories - 1]);
         const scale = d3.scaleSequential(d3[`interpolate${scheme}`]).domain([0, 1]);
         return function(i) { return scale(start + (end - start) * i / (numCategories - 1)) };
-    } else if (categoricalSchemes.includes(scheme)) {
+    } else if (isCategoricalScheme(scheme)) {
         return d3.scaleOrdinal(d3[`scheme${scheme}`]);
     } else {
         throw new Error("Unknown color scheme.");
@@ -2030,8 +2040,8 @@ function drawClock(hour, minute, second, gaugeLabels) {
                     .attr("r", radius);
 
                 // Define the gradient stops along the radius
-                if (isString(d[2])) {
-                    const cf = createColorScale(d[2], 100);
+                if (isString(d[2]) && (isSequentialScheme(d[2]) || isCategoricalScheme(d[2])) ) {
+                    var cf = createColorScale(d[2], 100);
                     const minRad = Math.min(...d[1]);
                     const maxRad = Math.max(...d[1]);
                     for (var j = 0; j <= 100; j++) {
@@ -2067,7 +2077,8 @@ function drawClock(hour, minute, second, gaugeLabels) {
                     // Apply the gradient to the current arc
                     d3.select(this)
                         .style("fill", "url(#gradient" + i + ")");
-
+                } else if (isString(d[2])) {
+                    d3.select(this).attr("fill", d[2]);
                 } else {
                     d3.select(this).attr("fill", colorScale(i));
                 }

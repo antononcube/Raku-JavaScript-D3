@@ -127,7 +127,7 @@ our multi Clock(:h(:$hour) is copy = Whatever,
 
     #------------------------------------------------------
     # Process color-scheme
-    if $color-scheme.isa(Whatever) { $color-scheme = 'Reds'; }
+    if $color-scheme.isa(Whatever) { $color-scheme = 'Pastel1'; }
     die 'The value of $color-scheme is expected to be a string or Whatever.'
     unless $color-scheme ~~ Str:D;
 
