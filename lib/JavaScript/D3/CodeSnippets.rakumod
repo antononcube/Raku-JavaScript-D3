@@ -2006,6 +2006,15 @@ function isListOfTwoStrings(obj) {
          obj.every(item => isString(item));
 }
 
+function generateRandomIdentifier() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let identifier = '';
+  for (let i = 0; i < 6; i++) {
+    identifier += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return identifier;
+}
+
 var gaugeLabels = $GAUGE_LABELS;
 
 function drawClock(hour, minute, second, gaugeLabels) {
@@ -2024,6 +2033,8 @@ function drawClock(hour, minute, second, gaugeLabels) {
             .startAngle(d => (d[0][0] * 2 * Math.PI) / 60)
             .endAngle(d => (d[0][1] * 2 * Math.PI) / 60);
 
+        var uniqueId = generateRandomIdentifier();
+
         svg.selectAll("path")
             .data(scaleRanges)
             .enter()
@@ -2033,7 +2044,7 @@ function drawClock(hour, minute, second, gaugeLabels) {
                 // Create a radial gradient for each arc
                 var gradient = svg.append("defs")
                     .append("radialGradient")
-                    .attr("id", "gradient" + i)
+                    .attr("id", "gradient_" + uniqueId + '_' + i)
                     .attr("gradientUnits", "userSpaceOnUse")
                     .attr("cx", 0)
                     .attr("cy", 0)
@@ -2061,7 +2072,7 @@ function drawClock(hour, minute, second, gaugeLabels) {
 
                     // Apply the gradient to the current arc
                     d3.select(this)
-                        .style("fill", "url(#gradient" + i + ")");
+                        .style("fill", "url(#gradient_" + uniqueId + '_' + i + ")");
 
                 } else if (isListOfTwoStrings(d[2])) {
                     gradient.append("stop")
@@ -2076,7 +2087,7 @@ function drawClock(hour, minute, second, gaugeLabels) {
 
                     // Apply the gradient to the current arc
                     d3.select(this)
-                        .style("fill", "url(#gradient" + i + ")");
+                        .style("fill", "url(#gradient_" + uniqueId + '_' + i + ")");
                 } else if (isString(d[2])) {
                     d3.select(this).attr("fill", d[2]);
                 } else {
