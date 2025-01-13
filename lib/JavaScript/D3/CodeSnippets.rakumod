@@ -55,9 +55,11 @@ our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
 
 # See : https://d3js.org/d3-scale-chromatic/sequential
 my @knownSequentialSchemes =
-        <Blues BuGn BuPu Cividis Cool CubehelixDefault GnBu Greens Greys Inferno Magma
-Oranges OrRd Plasma PuBu PuBuGn PuRd Purples RdPu Reds Turbo Viridis Warm
-YlGn YlGnBu YlOrBr YlOrRd>;
+        "Blues", "Greens", "Greys", "Oranges", "Purples", "Reds",
+        "BuGn", "BuPu", "GnBu", "OrRd", "PuBuGn", "PuBu", "PuRd", "RdPu", "YlGnBu", "YlGn", "YlOrBr", "YlOrRd",
+        "BrBG", "PRGn", "PiYG", "PuOr", "RdBu", "RdGy", "RdYlBu", "RdYlGn", "Spectral",
+        "Cividis", "Viridis", "Inferno", "Magma", "Plasma", "Warm", "Cool", "CubehelixDefault", "Turbo",
+        "Rainbow", "Sinebow";
 
 our sub known-sequential-schemes() { return @knownSequentialSchemes; }
 
