@@ -36,7 +36,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
                           Str :$background = 'white',
                           Str :color(:$stroke-color) = 'steelblue',
                           :$fill-color is copy = Whatever,
-                          Str :$color-scheme = 'schemeSet2',
+                          Str :color-palette(:$color-scheme) = 'Set2',
                           :$width = 600,
                           :$height = 400,
                           Str :plot-label(:$title) = '',
@@ -131,7 +131,7 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
             .subst('$POINT_COLOR', '"' ~ $stroke-color ~ '"')
             .subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"')
             .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
-            .subst(:g, '$COLOR_SCHEME', $color-scheme)
+            .subst(:g, '$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc )
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
             .subst(:g, '$WIDTH', $width.Str)
