@@ -467,7 +467,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :$background = 'White',
                       Str :color(:$fill-color) = 'SteelBlue',
                       Str :stroke(:$stroke-color) = 'Gray',
-                      Str :$color-scheme = 'schemeSet2',
+                      Str :color-palette(:$color-scheme) = 'Set2',
                       Numeric :$opacity = 0.7,
                       :$width = 600,
                       :$height = 600,
@@ -480,6 +480,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
                       Str :y-label(:$y-axis-label) = '',
                       :y-label-color(:$y-axis-label-color) is copy = Whatever,
                       :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                      Bool :$axes = True,
                       :$grid-lines is copy = False,
                       :$margins is copy = Whatever,
                       :$tooltip = Whatever,
@@ -534,7 +535,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
         }
     }
 
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines),
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
                    $jsChartMiddle].join("\n");
 
     my $jsData = to-json(@data, :!pretty);
@@ -544,7 +545,7 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst(:g, '$FILL_COLOR', '"' ~ $fill-color ~ '"')
             .subst(:g, '$STROKE_COLOR', '"' ~ $stroke-color ~ '"')
-            .subst(:g, '$COLOR_SCHEME', $color-scheme)
+            .subst(:g, '$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc )
             .subst(:g, '$OPACITY', '"' ~ $opacity ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
