@@ -606,7 +606,7 @@ sub dense-to-triplets(@A) {
     return @triplets.Array;
 }
 
-#| Makes a bubble chart for list of triplets..
+#| Makes a matrix plot for a dense matrix or a dataset with columns "x", "y", "z".
 our proto MatrixPlot($data, |) is export {*}
 
 multi sub MatrixPlot(@data,
