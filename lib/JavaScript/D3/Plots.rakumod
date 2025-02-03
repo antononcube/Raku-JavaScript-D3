@@ -449,11 +449,11 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     if $x-tick-labels.isa(Whatever) {
         $x-tick-labels = []
     }
-    die "The argument \$x-tick-labels is expected Whatever or a Iterable."
-    unless $x-tick-labels ~~ Iterable;
+    die 'The argument $x-tick-labels is expected to be a list or Whatever.'
+    unless $x-tick-labels ~~ (List:D | Array:D | Seq:D);
 
     if $x-tick-labels && ! ($x-tick-labels (&) @data.map(*<x>)) {
-        note "None of the given x tick labels are found in the data.";
+        note "None of the given x-tick labels is found in the data.";
     }
 
     #-------------------------------------------------------
@@ -462,11 +462,11 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
     if $y-tick-labels.isa(Whatever) {
         $y-tick-labels = []
     }
-    die "The argument \$y-tick-labels is expected Whatever or a Iterable."
-    unless $y-tick-labels ~~ Iterable;
+    die 'The argument $y-tick-labels is expected to be a list or Whatever.'
+    unless $y-tick-labels ~~ (List:D | Array:D | Seq:D);
 
     if $y-tick-labels && ! ($y-tick-labels (&) @data.map(*<y>)) {
-        note "None of the given y tick labels are found in the data.";
+        note "None of the given y-tick labels is found in the data.";
     }
 
     #-------------------------------------------------------
@@ -515,8 +515,8 @@ our multi HeatmapPlot(@data is copy where @data.all ~~ Map,
                 .subst(:g, '$TOOLTIP_COLOR', "\"$tooltip-color\"")
                 .subst(:g, '$WIDTH', $width.Str)
                 .subst(:g, '$HEIGHT', $height.Str)
-                .subst(:g, '$X_TICK_LABELS', $x-tick-labels ?? to-json($x-tick-labels.Array, :!pretty) !! '[]')
-                .subst(:g, '$Y_TICK_LABELS', $y-tick-labels ?? to-json($y-tick-labels.Array, :!pretty) !! '[]')
+                .subst(:g, '$X_TICK_LABELS', $x-tick-labels.elems ?? to-json($x-tick-labels.Array, :!pretty) !! '[]')
+                .subst(:g, '$Y_TICK_LABELS', $y-tick-labels.elems ?? to-json($y-tick-labels.Array, :!pretty) !! '[]')
                 .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
                 .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
                 .subst(:g, '$TITLE', '"' ~ ($show-groups ?? $g !! '') ~ '"')
