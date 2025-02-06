@@ -3,7 +3,12 @@ unit module JavaScript::D3::Utilities;
 use Data::TypeSystem;
 use Data::TypeSystem::Predicates;
 use Hash::Merge;
+use JSON::Fast;
 
+#============================================================
+# Really flat
+#============================================================
+# This is obsolete with the new .flat functionalities.
 our sub reallyflat (+@list) {
     gather @list.deepmap: *.take
 }
