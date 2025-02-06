@@ -1,35 +1,24 @@
 use v6.d;
 
 #use lib <. lib>;
-
 use JavaScript::D3;
-use JavaScript::D3::Utilities;
 
 use Test;
 
 plan *;
 
 ## 1
-ok JavaScript::D3::Utilities::named-colors();
-
-## 2
-isa-ok JavaScript::D3::Utilities::named-colors(), Map:D;
-
-## 3
-is JavaScript::D3::Utilities::named-colors().elems, 148;
-
-## 4
 isa-ok js-d3-named-colors(), Map:D;
 
-## 5
+## 2
 isa-ok js-d3-named-colors('black', 'red'), List:D;
 
-## 6
+## 3
 isa-ok js-d3-named-colors(<black red pink>), List:D;
 
 #note js-d3-named-colors(<black red pink>).map({ $_.subst('#', '0x').Int });
 
-## 7
+## 4
 is js-d3-named-colors(<black red pink>, :pairs).all ~~ Pair:D, True;
 
 done-testing

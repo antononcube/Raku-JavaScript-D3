@@ -10,6 +10,11 @@ use JavaScript::D3::Graph;
 use Hash::Merge;
 use JSON::Fast;
 
+#============================================================
+#| Resources access
+our sub resources {
+    %?RESOURCES
+}
 
 #============================================================
 my $jsD3ConfigCode = q:to/END/;
@@ -33,6 +38,34 @@ multi js-d3-config(:$v = 7, Bool :$direct = True) is export {
                 JavaScript::D3::Plots::GetPlotEndingCode(),
         ).join("\n");
     }
+}
+
+#============================================================
+# Get/ingest named colors
+#============================================================
+
+# From https://htmlcolorcodes.com/color-names/ :
+#   Modern browsers support 140 named colors, which are listed below.
+#   Use them in your HTML and CSS by name, Hex color code or RGB value.
+
+my %namedColors;
+sub get-named-colors() {
+    if %namedColors.elems == 0 {
+        %namedColors = from-json(slurp(%?RESOURCES<named-colors.json>.IO))
+    }
+    return %namedColors.clone;
+}
+
+#============================================================
+#| Named HTML and CSS colors, names to hex-codes.
+proto sub js-d3-named-colors(|) is export {*}
+
+multi sub js-d3-named-colors() {
+    return get-named-colors();
+}
+
+multi sub js-d3-named-colors(*@names, Bool:D :p(:$pairs) = False) {
+    return $pairs ?? (@names Z=> get-named-colors(){@names}).List !! get-named-colors(){@names};
 }
 
 #============================================================
@@ -689,3 +722,8 @@ multi sub js-d3-spirograph(Numeric:D :$k = 2/5,
     # Graph
     return js-d3-list-line-plot(@points, :$width, :$height, :$axes, |%args);
 }
+
+#============================================================
+# Optimization
+#============================================================
+BEGIN { get-named-colors() }
