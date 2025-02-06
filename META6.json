@@ -29,7 +29,9 @@
     "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod",
     "JavaScript::D3::Utilities": "lib/JavaScript/D3/Utilities.rakumod"
   },
-  "resources": [],
+  "resources": [
+    "named-colors.json"
+  ],
   "license": "Artistic-2.0",
   "tags": [
     "chart",
