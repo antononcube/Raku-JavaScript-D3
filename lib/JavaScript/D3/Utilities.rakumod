@@ -14,6 +14,22 @@ our sub reallyflat (+@list) {
 }
 
 #============================================================
+# Get/ingest named colors
+#============================================================
+
+# From https://htmlcolorcodes.com/color-names/ :
+#   Modern browsers support 140 named colors, which are listed below.
+#   Use them in your HTML and CSS by name, Hex color code or RGB value.
+
+my %namedColors;
+our sub get-named-colors() {
+    if %namedColors.elems == 0 {
+        %namedColors = from-json(slurp(%?RESOURCES<named-colors.json>.IO))
+    }
+    return %namedColors.clone;
+}
+
+#============================================================
 # Process margins
 #============================================================
 
@@ -247,5 +263,10 @@ multi sub NormalizeData(@data where @data.all ~~ Map,
 
     return @data.map({ ($columns-to.Array Z=> $_{|$columns-from}.Array).Hash }).Array;
 }
+
+#============================================================
+# Optimization
+#============================================================
+BEGIN { get-named-colors() }
 
 
