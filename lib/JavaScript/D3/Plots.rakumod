@@ -158,6 +158,12 @@ our multi ListPlotGeneric(@data where @data.all ~~ Map,
         $res .= subst($marker, $marker ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipMousePart);
     }
 
+    # Somewhat of a hack. That is why the of additional $hasGroups check.
+    if $hasGroups && ($color-scheme.starts-with('#') || JavaScript::D3::Utilities::get-named-colors(){$color-scheme.lc} // False) {
+        $res .= subst('.attr("stroke", function(d){ return myColor(d[0]) })', '.attr("stroke", "' ~ $color-scheme.lc ~ '")');
+        $res .= subst(".range(d3.scheme$color-scheme", '.range(d3.schemeSet1')
+    }
+
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
