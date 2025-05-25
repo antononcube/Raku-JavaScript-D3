@@ -978,7 +978,7 @@ svg.append("g")
     .attr("fill", d => myColor(d.group));
 
 svg.append("g")
-    .call(d3.axisLeft(y).ticks(null, "s"));
+    .call(d3.axisLeft(y));
 
 svg.append("g")
     .attr("transform", `translate(0,${height})`)
