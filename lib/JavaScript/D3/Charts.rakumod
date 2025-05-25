@@ -136,7 +136,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
-            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode().subst('return o.group;', "return o.x;");
+            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode() ##.subst('return o.group;', "return o.x;");
         }
     }
 

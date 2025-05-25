@@ -942,81 +942,53 @@ my $jsMultiBarChartPart = q:to/END/;
 // Obtain data
 var data = $DATA
 
-var valueMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
-var valueMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
-var absMax = Math.max.apply(Math, data.map(function(o) { return Math.abs(o.y); }))
+svg = svg.attr("transform", `translate(${margin.left},${margin.top})`);
 
-var zeroLocation = height
-zeroLocation = height * Math.abs(valueMax / (valueMax - valueMin))
+const x0 = d3.scaleBand()
+    .domain(data.map(d => d.x))
+    .range([0, width])
+    .paddingInner(0.1);
 
-// List of subgroups
-var subgroups = d3.map(data, function(d){return(d.x)}).values()
-subgroups = [...new Set(subgroups)];
+const x1 = d3.scaleBand()
+    .domain(data.map(d => d.group))
+    .range([0, x0.bandwidth()])
+    .padding(0.05);
 
-// List of groups
-var groups = d3.map(data, function(d){return(d.group)}).values()
+const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.y)])
+    .nice()
+    .range([height, 0]);
 
-// Add X axis
-var x = d3.scaleBand()
-  .domain(groups)
-  .range([0, width])
-  .padding([0.2]);
+const myColor = d3.scaleOrdinal()
+    .domain(data.map(d => d.group))
+    .range(d3.schemeCategory10);
 
-svg.append("g")
-.attr("transform", "translate(0," + zeroLocation + ")")
-.call(d3.axisBottom(x).tickSize(0));
-
-// Add Y axis
-//    .domain([-absMax, absMax]).nice()
-var y = d3.scaleLinear()
-    .domain([valueMin, valueMax])
-    .range([ height, 0 ]);
-
-svg.append("g")
-    .call(d3.axisLeft(y));
-
-// Another scale for subgroup position?
-var xSubgroup = d3.scaleBand()
-    .domain(subgroups)
-    .range([0, x.bandwidth()])
-    .padding([0.05])
-
-// Color palette = one color per subgroup
-var myColor = d3.scaleOrdinal()
-    .domain(subgroups)
-    .range(d3.$COLOR_SCHEME);
-
-// Show the bars positive values
 svg.append("g")
     .selectAll("g")
-    // Enter in data = loop group per group
-    .data(data.map(d => d.y > 0 ? d : {y: 0}))
+    .data(d3.group(data, d => d.x))
     .join("g")
-      .attr("transform", d => `translate(${x(d.group)}, 0)`)
+    .attr("transform", d => `translate(${x0(d[0])},0)`)
     .selectAll("rect")
-    .data(function(d) { return data.filter(function(x){ return x.group == d.group }) })
+    .data(d => d[1])
     .join("rect")
-      .attr("x", d => xSubgroup(d.x))
-      .attr("y", d => y(d.y))
-      .attr("width", xSubgroup.bandwidth())
-      .attr("height", d => y(0) - y(d.y))
-      .attr("fill", d => myColor(d.x));
+    .attr("x", d => x1(d.group))
+    .attr("y", d => y(d.y))
+    .attr("width", x1.bandwidth())
+    .attr("height", d => height - y(d.y))
+    .attr("fill", d => myColor(d.group));
 
-// Show the bars negative values
 svg.append("g")
-    .selectAll("g")
-    // Enter in data = loop group per group
-    .data(data.map(d => d.y < 0 ? d : {y: 0}))
-    .join("g")
-      .attr("transform", d => `translate(${x(d.group)}, 0)`)
-    .selectAll("rect")
-    .data(function(d) { return data.filter(function(x){ return x.group == d.group }) })
-    .join("rect")
-      .attr("x", d => xSubgroup(d.x))
-      .attr("y", d => y(0))
-      .attr("width", xSubgroup.bandwidth())
-      .attr("height", d => y(0) - y(-d.y))
-      .attr("fill", d => myColor(d.x));
+    .call(d3.axisLeft(y).ticks(null, "s"));
+
+svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x0).tickSizeOuter(0))
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", margin.bottom - 10)
+    .attr("fill", "#000")
+    .attr("text-anchor", "middle")
+    //.text("X Axis");
 END
 
 my $jsBarChartLabelsPart = q:to/BARCHART-PLOT-LABELS/;
