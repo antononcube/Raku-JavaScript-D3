@@ -17,10 +17,14 @@ our multi BarChart($data where $data ~~ Seq, *%args) {
     return BarChart($data.List, |%args);
 }
 
-our multi BarChart($data where $data ~~ Positional && $data.all ~~ Numeric, *%args) {
-    my $k = 1;
-    my @dataPairs = |$data.map({ <variable value> Z=> ($k++, $_) })>>.Hash;
-    return BarChart(@dataPairs, |%args);
+our multi BarChart($data where $data ~~ (Array | List | Seq) && $data.all ~~ Numeric, *%args) {
+    my @records = |$data.kv.map( -> $k, $v { <variable value> Z=> ($k, $v) })>>.Hash;
+    return BarChart(@records, |%args);
+}
+
+our multi BarChart($data where $data ~~ (Array | List | Seq) && $data.all ~~ Pair:D, *%args) {
+    my @records = |$data.map({ <variable value> Z=> ($_.key, $_.value) })>>.Hash;
+    return BarChart(@records, |%args);
 }
 
 our multi BarChart(%data, *%args) {
