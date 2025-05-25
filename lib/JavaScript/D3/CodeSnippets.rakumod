@@ -964,6 +964,9 @@ const myColor = d3.scaleOrdinal()
     .range(d3.$COLOR_SCHEME);
 
 svg.append("g")
+    .call(d3.axisLeft(y));
+
+svg.append("g")
     .selectAll("g")
     .data(d3.group(data, d => d.x))
     .join("g")
@@ -976,9 +979,6 @@ svg.append("g")
     .attr("width", x1.bandwidth())
     .attr("height", d => height - y(d.y))
     .attr("fill", d => myColor(d.group));
-
-svg.append("g")
-    .call(d3.axisLeft(y));
 
 svg.append("g")
     .attr("transform", `translate(0,${height})`)
