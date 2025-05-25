@@ -7,9 +7,11 @@ use Data::Reshapers;
 use Data::Generators;
 
 my $n = 5;
-my @data = random-real([80,120], $n).kv.map(-> $k, $v { %(y => $v.round(0.01), x => $k, group => 'a') });
-@data.append: random-real([50,60], $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'b') });
-@data.append: random-real([10,70], $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'c') });
+my $scale = 1;
+my @data;
+@data.append: random-real([80,120] <<*>> $scale, $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'a') });
+@data.append: random-real([50, 60] <<*>> $scale, $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'b') });
+@data.append: random-real([10, 70] <<*>> $scale, $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'c') });
 
 say dimensions(@data);
 
