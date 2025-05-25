@@ -961,7 +961,7 @@ const y = d3.scaleLinear()
 
 const myColor = d3.scaleOrdinal()
     .domain(data.map(d => d.group))
-    .range(d3.schemeCategory10);
+    .range(d3.$COLOR_SCHEME);
 
 svg.append("g")
     .selectAll("g")
