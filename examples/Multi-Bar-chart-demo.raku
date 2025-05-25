@@ -6,10 +6,10 @@ use Data::Summarizers;
 use Data::Reshapers;
 use Data::Generators;
 
-my $k = 0;
-my @data = random-real([80,120],5).map({ %(y => $_, x => $k++, group => 'a') });
-$k = 0;
-@data.append: random-real([50,60],5).map({ %(y => $_, x => $k++, group => 'b') });
+my $n = 5;
+my @data = random-real([80,120], $n).kv.map(-> $k, $v { %(y => $v.round(0.01), x => $k, group => 'a') });
+@data.append: random-real([50,60], $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'b') });
+@data.append: random-real([10,70], $n).kv.map( -> $k, $v { %(y => $v.round(0.01), x => $k, group => 'c') });
 
 say dimensions(@data);
 
@@ -24,6 +24,7 @@ spurt $*CWD ~ '/multi-bar-chart.html',
                 width => 600,
                 :grid-lines,
                 title-color => 'Blue',
+                x-label => 'Indexes',
                 margins => %(left => 120, bottom => 40),
                 title => 'Random numbers',
                 format => 'html');
