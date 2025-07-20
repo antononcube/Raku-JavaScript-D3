@@ -1,0 +1,14 @@
+use v6.d;
+use Test;
+
+use JavaScript::D3::Utilities;
+
+## 1
+ok angle-path(π/2 xx 3);
+
+## 2
+is-deeply
+        angle-path(π/2 xx 3).deepmap(*.round(10e-10)),
+        [[0,0], [0,1], [-1,1], [-1,0]].deepmap(*.Num);
+
+done-testing;

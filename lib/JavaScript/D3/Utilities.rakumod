@@ -265,6 +265,69 @@ multi sub NormalizeData(@data where @data.all ~~ Map,
 }
 
 #============================================================
+# AnglePath
+#============================================================
+
+#| Gives the list of 2D coordinates corresponding to a path that starts at [0,0],
+#| then takes a series of steps of unit length at successive relative angles.
+proto sub angle-path($angles, |) is export {*}
+multi sub angle-path(@angles) {
+    my $x = 0;
+    my $y = 0;
+    my $angle = 0;
+    my @path = [$x, $y], ;
+    for @angles -> $th {
+        $angle += $th;
+        $x += cos($angle);
+        $y += sin($angle);
+        @path.push([$x, $y]);
+    }
+    return @path;
+}
+
+multi sub angle-path(@steps where all(@steps) ~~ Positional) {
+    my $x = 0;
+    my $y = 0;
+    my $angle = 0;
+    my @path = [$x, $y], ;
+    for @steps -> ($r, $th) {
+        $angle += $th;
+        $x += $r * cos($angle);
+        $y += $r * sin($angle);
+        @path.push([$x, $y]);
+    }
+    return @path;
+}
+
+multi sub angle-path($th0, @steps) {
+    my $x = 0;
+    my $y = 0;
+    my $angle = $th0;
+    my @path = [$x, $y], ;
+    for @steps -> $th {
+        $angle += $th;
+        $x += cos($angle);
+        $y += sin($angle);
+        @path.push([$x, $y]);
+    }
+    return @path;
+}
+
+multi sub angle-path(($x0, $y0), @steps) {
+    my $x = $x0;
+    my $y = $y0;
+    my $angle = 0;
+    my @path = [$x, $y], ;
+    for @steps -> $th {
+        $angle += $th;
+        $x += cos($angle);
+        $y += sin($angle);
+        @path.push([$x, $y]);
+    }
+    return @path;
+}
+
+#============================================================
 # Optimization
 #============================================================
 BEGIN { get-named-colors() }
