@@ -299,7 +299,7 @@ multi sub angle-path(@steps where all(@steps) ~~ Positional) {
     return @path;
 }
 
-multi sub angle-path($th0, @steps) {
+multi sub angle-path(Numeric:D $th0, @steps) {
     my $x = 0;
     my $y = 0;
     my $angle = $th0;

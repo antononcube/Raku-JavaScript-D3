@@ -4,11 +4,32 @@ use Test;
 use JavaScript::D3::Utilities;
 
 ## 1
-ok angle-path(π/2 xx 3);
+ok angle-path(π / 2 xx 3);
 
 ## 2
 is-deeply
-        angle-path(π/2 xx 3).deepmap(*.round(10e-10)),
-        [[0,0], [0,1], [-1,1], [-1,0]].deepmap(*.Num);
+        angle-path(π / 2 xx 3).deepmap(*.round(10e-10)),
+        [[0, 0], [0, 1], [-1, 1], [-1, 0]].deepmap(*.Num);
+
+## 3
+my @coords3 = [0, 0], [-1.24844, 2.72789], [-5.20841, 3.29237], [-3.7901, -1.50225];
+
+is-deeply
+        angle-path([[3, 2], [4, 1], [5, 2]]).deepmap(*.round(10e-6)),
+        @coords3.deepmap(*.round(10e-6));
+
+## 4
+my @coords4 = [0, 0], [-0.799817, -0.600243], [-0.731288, 0.397406], [0.244822, 0.614686], [1.24276, 0.550572];
+
+is-deeply
+        angle-path(π / 4, 3 .. 6).deepmap(*.round(10e-6)),
+        @coords4.deepmap(*.round(10e-6));
+
+## 5
+my @coords5 = [3, 3], [2.01001, 3.14112], [2.76391, 3.79811], [3.60776, 3.26153], [4.26808, 2.51055];
+
+is-deeply
+        angle-path([3, 3], 3 .. 6).deepmap(*.round(10e-6)),
+        @coords5.deepmap(*.round(10e-6));
 
 done-testing;
