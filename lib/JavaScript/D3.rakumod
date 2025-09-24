@@ -513,24 +513,22 @@ multi sub js-d3-random-koch-curve(UInt:D $n = 4, *%args) {
 }
 
 #============================================================
-#| Makes a random Mondrian.
-proto sub js-d3-random-mondrian(|) is export {*}
-
-multi sub js-d3-random-mondrian(:$width is copy = 800,
-                                :$height is copy = Whatever,
-                                UInt:D :n(:$max-iterations) = 7,
-                                Numeric:D :$jitter = 0,
-                                :d(:dist(:$distribution)) = Whatever,
-                                :$color-scheme is copy = Whatever,
-                                Str:D :stroke(:$stroke-color) = 'Black',
-                                Numeric:D :$stroke-width = 4,
-                                :fill-color(:$color-palette) is copy = Whatever,
-                                Str:D :$background = 'White',
-                                :$margins is copy = Whatever,
-                                Str:D :$format= "jupyter",
-                                :$div-id = Whatever,
-                                *%args
-                                ) {
+#| Gives D3.js code for a random Mondrian plot.
+sub js-d3-random-mondrian(:$width is copy = 800,                           #= Width of the plot
+                          :$height is copy = Whatever,                     #= Height of the plot
+                          UInt:D :n(:$max-iterations) = 7,                 #= Max number of iterations
+                          Numeric:D :$jitter = 0,                          #= Jitter value
+                          :d(:dist(:$distribution)) = Whatever,            #= What distribution to use for the splitting of the rectangles
+                          :$color-scheme is copy = Whatever,               #= Color scheme for the Mondrian
+                          Str:D :stroke(:$stroke-color) = 'Black',         #= Stroke color for the rectangle edges
+                          Numeric:D :$stroke-width = 4,                    #= Stroke width
+                          :fill-color(:$color-palette) is copy = Whatever, #= Fill colors for the rectangles or color palette
+                          Str:D :$background = 'White',                    #= Color background of the plot
+                          :$margins is copy = Whatever,                    #= Plot margins, number or hashmap with keys <top bottom left right>
+                          Str:D :$format= "jupyter",                       #= Format of the JavaScript code
+                          :$div-id = Whatever,                             #= Div-id for the plot
+                          *%args                                           #= Additional D3.js arguments
+                          ) is export {
 
     # Process width and height
     ($width, $height) = JavaScript::D3::Utilities::ProcessWidthAndHeight(:$width, :$height);
@@ -680,15 +678,16 @@ multi sub js-d3-spirograph($k, $l, *%args) {
     return js-d3-spirograph(:$k, :$l, |%args);
 }
 
-multi sub js-d3-spirograph(Numeric:D :$k = 2/5,
-                           Numeric:D :$l = 4/11,
-                           Numeric:D :r(:$scale) = 1,
-                           UInt:D :n(:$number-of-cycles) = 20,
-                           UInt:D :$number-of-segments = 2000,
-                           UInt:D :$width = 400,
-                           :$height is copy = Whatever,
-                           Bool:D :$axes = False,
-                           *%args ) {
+multi sub js-d3-spirograph(Numeric:D :$k = 2/5,                #= How big the inner circle Ci is compared to the outer circle Co, r/R.
+                           Numeric:D :$l = 4/11,               #= How far is the plot point from the center Ci.
+                           Numeric:D :r(:$scale) = 1,          #= Scale factor for the graph
+                           UInt:D :n(:$number-of-cycles) = 20, #= Number of cycles to produce the spirograph curve.
+                           UInt:D :$number-of-segments = 2000, #= Number of segments of obtained curve
+                           UInt:D :$width = 400,               #= Width of the plot
+                           :$height is copy = Whatever,        #= Height of the plot
+                           Bool:D :$axes = False,              #= Whether to plot axes or not
+                           *%args                              #= Additional D3.hs plotting parameters (stroke, fill, etc.)
+                           ) {
     # Process $k and $l arguments
     # Wrong parameters are fine
     #die 'The parameters $k and $l is are expected to be numbers between 0 an 1.'
