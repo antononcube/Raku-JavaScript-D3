@@ -522,11 +522,11 @@ sub js-d3-random-mondrian(:$width is copy = 800,                           #= Wi
                           :$color-scheme is copy = Whatever,               #= Color scheme for the Mondrian
                           Str:D :stroke(:$stroke-color) = 'Black',         #= Stroke color for the rectangle edges
                           Numeric:D :$stroke-width = 4,                    #= Stroke width
-                          :fill-color(:$color-palette) is copy = Whatever, #= Fill colors for the rectangles or color palette
+                          :fill-color(:$color-palette) is copy = Whatever, #= Color appearances weights (Map or Whatever)
                           Str:D :$background = 'White',                    #= Color background of the plot
                           :$margins is copy = Whatever,                    #= Plot margins, number or hashmap with keys <top bottom left right>
                           Str:D :$format= "jupyter",                       #= Format of the JavaScript code
-                          :$div-id = Whatever,                             #= Div-id for the plot
+                          :$div-id = Whatever,                             #= Div-id for the plot (string or Whatever)
                           *%args                                           #= Additional D3.js arguments
                           ) is export {
 
@@ -550,7 +550,7 @@ sub js-d3-random-mondrian(:$width is copy = 800,                           #= Wi
     #-------------------------------------------------------
     # Process $color-palette
     #-------------------------------------------------------
-    if $color-palette.isa(Whatever) {
+    if $color-palette.isa(Whatever) || $color-palette ~ Str:D && $color-palette.lc ∈ <whatever auto automatic> {
         $color-palette = {'#000000' => 1, '#878787' => 1, '#194F9A' => 4, '#BC0118' => 4, '#FACA02' => 4, '#FDFDFD' => 16};
     }
     die 'The argument $color-palette is expected to be a Map or Whatever.'
