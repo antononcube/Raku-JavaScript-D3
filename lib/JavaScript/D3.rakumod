@@ -162,62 +162,45 @@ sub replicate-to-list(Str $param, $element-type, @whatever-to-roll, $count, $val
 }
 
 #============================================================
-#| Makes a random mandala.
-#| C<$data> Positional argument to pass to C<:count>.
-#| C<:$radius> Radius of the mandala.
-#| C<:$rotational-symmetry-order> Rotational symmetry order.
-#| C<:$number-of-seed-element> Number of seed elements.
-#| C<:$connecting-function> Connecting function.
-#| C<:$symmetric-seed> Should the seed be symmetric or not?
-#| C<:color(:$stroke)> Color of the stroke.
-#| C<:$stroke-width> Width of the stroke.
-#| C<:$fill> Filling color.
-#| C<:$background> Background color.
-#| C<:$width> Width of a single mandala plot.
-#| C<:$height> Height of a single mandala plot.
-#| C<:plot-label(:$title)> Plot title.
-#| C<:x-label(:$x-axis-label)> X-axis label.
-#| C<:y-label(:$y-axis-label)> Y-axis label.
-#| C<:$grid-lines> Should grid lines be placed or not?
-#| C<:$margins> A hash with the keys top, bottom, left right, for the margins of a single plot.
-#| C<:$axes> Should axes be placed or not?
-#| C<:$count> Number of mandalas.
-#| C<:$format> Format of the generated code, one of "asis", "html", "html-md", or "jupyter".
-#| C<:$div-id> Div identifier tag.
-proto js-d3-random-mandala(|) is export {*}
+#| Makes random mandalas.
+sub js-d3-random-mandala(
+        $data = Whatever,                                               #= Number of mandalas (if defined overrides :$count).
+        :$radius is copy = 1,                                           #= Radius of the mandala.
+        :$rotational-symmetry-order is copy = 6,                        #= Rotational symmetry order.
+        :$number-of-seed-elements is copy = Whatever,                   #= Number of seed elements.
+        :$connecting-function is copy = 'curveBasis',                   #= Connecting function.
+        Bool:D :$symmetric-seed = True,                                 #= Should the seed be symmetric or not?
+        :color(:$stroke) is copy = Whatever,                            #= Color of the stroke.
+        :$stroke-width is copy = Whatever,                              #= Width of the stroke.
+        :$fill is copy = Whatever,                                      #= Filling color.
+        Str:D :$color-scheme = 'schemeSet2',                            #= Background color.
+        :$background is copy = Whatever,                                #= Color-scheme to use.
+        UInt:D :$width= 300,                                            #= Width of a single mandala plot.
+        UInt:D :$height= 300,                                           #= Height of a single mandala plot.
+        Str:D :plot-label(:$title) = '',                                #= Plot title.
+        Str:D :x-label(:$x-axis-label) = '',                            #= X-axis label.
+        Str:D :y-label(:$y-axis-label) = '',                            #= Y-axis label.
+        :$grid-lines = False,                                           #= Should grid lines be placed or not?
+        :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),    #= A hash with the keys top, bottom, left right, for the margins of a single plot.
+        Bool:D :$axes = False,                                          #= Should axes be placed or not?
+        UInt:D :$count is copy = 1,                                     #= Number of mandalas.
+        Str:D :$format= "jupyter",                                      #= Format of the generated code, one of "asis", "html", "html-md", or "jupyter".
+        :$div-id = Whatever,                                            #= Div identifier tag.
+                         ) is export {
 
-multi js-d3-random-mandala($data, *%args) {
-    my $count = do given $data {
-        when Positional { $data[0] }
-        when UInt { $data }
-        default { 1 }
+    #--------------------------------------------------------
+    # Process first argument and :$count
+    #--------------------------------------------------------
+    given $data {
+        when $_.isa(Whatever) {
+            # do nothing
+        }
+        when Positional:D { $count = $data[0] }
+        when $_ ~~ Int:D && $_ > 0 { $count = $data }
+        default {
+            die 'The first arugment is expected to be a positive integer or Whatever.'
+        }
     };
-
-    return js-d3-random-mandala(|merge-hash(%(:$count), %args));
-}
-
-multi js-d3-random-mandala(
-        :$radius is copy = 1,
-        :$rotational-symmetry-order is copy = 6,
-        :$number-of-seed-elements is copy = Whatever,
-        :$connecting-function is copy = 'curveBasis',
-        Bool:D :$symmetric-seed = True,
-        :color(:$stroke) is copy = Whatever,
-        :$stroke-width is copy = Whatever,
-        :$fill is copy = Whatever,
-        Str:D :$color-scheme = 'schemeSet2',
-        :$background is copy = Whatever,
-        UInt:D :$width= 300,
-        UInt:D :$height= 300,
-        Str:D :plot-label(:$title) = '',
-        Str:D :x-label(:$x-axis-label) = '',
-        Str:D :y-label(:$y-axis-label) = '',
-        :$grid-lines = False,
-        :$margins = %(:top(10), :bottom(10), :left(10), :right(10)),
-        Bool:D :$axes = False,
-        UInt:D :$count = 1,
-        Str:D :$format= "jupyter",
-        :$div-id = Whatever) {
 
     #--------------------------------------------------------
     # Process options
