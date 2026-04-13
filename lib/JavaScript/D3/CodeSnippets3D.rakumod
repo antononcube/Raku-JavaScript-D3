@@ -1,0 +1,320 @@
+use v6.d;
+
+unit module JavaScript::D3::CodeSnippets3D;
+
+use JavaScript::D3::Utilities;
+
+#============================================================
+# ListPlot3D code snippets
+#============================================================
+my $jsMultiTrajectoryPlotPart = q:to/END/;
+function render3DTrajectory(d33dModule, width, height) {
+  var d33d = d33dModule || window.d33d || {};
+  var lineStrips3D = d33d.lineStrips3D;
+  var points3D = d33d.points3D;
+  var lines3D = d33d.lines3D;
+
+  if (!lineStrips3D || !points3D || !lines3D) {
+    d3.select(element.get(0))
+      .append("div")
+      .style("color", "#b00020")
+      .style("font-family", "sans-serif")
+      .style("padding", "8px")
+      .text("d3-3d is not loaded. Prime notebook first with require.config for d3_3d.");
+    return;
+  }
+
+  var host = d3.select(element.get(0));
+  host.html("");
+
+
+  var origin = { x: width / 2, y: height / 2 };
+  var scale = Math.min(width, height) * 0.14;
+  var angleX = -0.55;
+  var angleY = 0.75;
+  var angleZ = 0;
+
+  // Toggle point projection mode:
+  // true  -> manual projection (rotates points correctly)
+  // false -> library points3D() projection
+  var USE_MANUAL_POINT_PROJECTION = true;
+
+  host
+    .append("div")
+    .style("font-family", "Arial, sans-serif")
+    .style("font-size", "14px")
+    .style("line-height", "1.35")
+    .style("margin-bottom", "8px")
+    .html("<strong>" + $TITLE + "</strong><br/>Drag to rotate, wheel to zoom");
+
+  var svg = host
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("display", "block")
+    .style("background", "$BACKGROUND_COLOR")
+    .style("cursor", "grab");
+
+  // Replace this with your own input array of dicts.
+  // Assume all dictionaries within a group share the same `type`.
+  var data = $DATA;
+
+  function makeAxes(L) {
+    return [
+      [{ x: -L, y: 0, z: 0 }, { x: L, y: 0, z: 0 }],
+      [{ x: 0, y: -L, z: 0 }, { x: 0, y: L, z: 0 }],
+      [{ x: 0, y: 0, z: -L }, { x: 0, y: 0, z: L }]
+    ];
+  }
+
+  var axes = makeAxes(10);
+
+  // Compatibility grouping (avoids d3.group/Array.prototype.flatMap requirements)
+  var groupsByName = {};
+  var groupOrder = [];
+  for (var p = 0; p < data.length; p++) {
+    var item = data[p];
+    var gname = item.group;
+    if (!groupsByName[gname]) {
+      groupsByName[gname] = { group: gname, values: [], type: String(item.type || "line").toLowerCase() };
+      groupOrder.push(gname);
+    }
+    groupsByName[gname].values.push(item);
+  }
+
+  var grouped = [];
+  for (var gi = 0; gi < groupOrder.length; gi++) {
+    grouped.push(groupsByName[groupOrder[gi]]);
+  }
+
+  var palette = (d3.schemeTableau10 || d3.schemeSet2 || d3.schemeCategory10 || [
+    "#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f",
+    "#edc948", "#b07aa1", "#ff9da7", "#9c755f", "#bab0ab"
+  ]);
+  var color = d3.scaleOrdinal().domain(groupOrder).range(palette);
+
+  var lineGroups = [];
+  var pointGroups = [];
+  for (var g = 0; g < grouped.length; g++) {
+    if (grouped[g].type === "point") {
+      pointGroups.push(grouped[g]);
+    } else {
+      lineGroups.push(grouped[g]);
+    }
+  }
+
+  var pointData = [];
+  for (var pg = 0; pg < pointGroups.length; pg++) {
+    for (var pv = 0; pv < pointGroups[pg].values.length; pv++) {
+      var pointItem = pointGroups[pg].values[pv];
+      pointData.push({
+        x: pointItem.x,
+        y: pointItem.y,
+        z: pointItem.z,
+        group: pointGroups[pg].group,
+        type: pointGroups[pg].type
+      });
+    }
+  }
+
+  var strip3d = lineStrips3D()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .z(function(d) { return d.z; })
+    .origin(origin)
+    .scale(scale)
+    .rotateX(angleX)
+    .rotateY(angleY);
+
+  var pts3d = points3D()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .z(function(d) { return d.z; })
+    .origin(origin)
+    .scale(scale)
+    .rotateX(angleX)
+    .rotateY(angleY);
+
+  var ax3d = lines3D()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .z(function(d) { return d.z; })
+    .origin(origin)
+    .scale(scale)
+    .rotateX(angleX)
+    .rotateY(angleY);
+
+  function syncProjectors() {
+    strip3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
+    pts3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
+    ax3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
+  }
+
+  function rotateX3d(p, a) {
+    var s = Math.sin(a);
+    var c = Math.cos(a);
+    return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
+  }
+
+  function rotateY3d(p, a) {
+    var s = Math.sin(a);
+    var c = Math.cos(a);
+    return { x: p.z * s + p.x * c, y: p.y, z: p.z * c - p.x * s };
+  }
+
+  function rotateZ3d(p, a) {
+    var s = Math.sin(a);
+    var c = Math.cos(a);
+    return { x: p.x * c - p.y * s, y: p.x * s + p.y * c, z: p.z };
+  }
+
+  function manualProjectPoint(d) {
+    var afterZ = rotateZ3d({ x: d.x, y: d.y, z: d.z }, angleZ);
+    var afterY = rotateY3d(afterZ, angleY);
+    var rotated = rotateX3d(afterY, angleX);
+
+    return {
+      x: d.x,
+      y: d.y,
+      z: d.z,
+      group: d.group,
+      type: d.type,
+      rotated: rotated,
+      projected: {
+        x: origin.x + scale * rotated.x,
+        y: origin.y + scale * rotated.y
+      }
+    };
+  }
+
+  function draw() {
+    syncProjectors();
+
+    var transformedAxes = ax3d.data(axes);
+
+    svg.selectAll("line.axis")
+      .data(transformedAxes)
+      .join("line")
+      .attr("class", "axis")
+      .attr("stroke-width", 2)
+      .attr("fill", "none")
+      .attr("stroke", "#888")
+      .attr("x1", function(d) { return d[0].projected.x; })
+      .attr("y1", function(d) { return d[0].projected.y; })
+      .attr("x2", function(d) { return d[1].projected.x; })
+      .attr("y2", function(d) { return d[1].projected.y; });
+
+    var axisLabels = [
+      { text: "X", x: transformedAxes[0][1].projected.x, y: transformedAxes[0][1].projected.y },
+      { text: "Y", x: transformedAxes[1][1].projected.x, y: transformedAxes[1][1].projected.y },
+      { text: "Z", x: transformedAxes[2][1].projected.x, y: transformedAxes[2][1].projected.y }
+    ];
+
+    svg.selectAll("text.axis-label")
+      .data(axisLabels)
+      .join("text")
+      .attr("class", "axis-label")
+      .attr("font-size", 14)
+      .attr("font-weight", "bold")
+      .attr("fill", "#666")
+      .attr("x", function(d) { return d.x + 8; })
+      .attr("y", function(d) { return d.y - 8; })
+      .text(function(d) { return d.text; });
+
+    var lineInput = [];
+    for (var li = 0; li < lineGroups.length; li++) {
+      lineInput.push(lineGroups[li].values);
+    }
+    var transformedLineStrips = strip3d.data(lineInput);
+
+    var lineRenderData = [];
+    for (var lr = 0; lr < transformedLineStrips.length; lr++) {
+      lineRenderData.push({ strip: transformedLineStrips[lr], group: lineGroups[lr].group });
+    }
+
+    svg.selectAll("path.trajectory")
+      .data(lineRenderData)
+      .join("path")
+      .attr("class", "trajectory")
+      .attr("fill", "none")
+      .attr("stroke", function(d) { return color(d.group); })
+      .attr("stroke-width", 3)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("d", function(d) { return strip3d.draw(d.strip); });
+
+    var transformedPoints = USE_MANUAL_POINT_PROJECTION
+      ? pointData.map(function(d) { return manualProjectPoint(d); })
+      : pts3d.data(pointData);
+
+    svg.selectAll("circle.point")
+      .data(transformedPoints)
+      .join("circle")
+      .attr("class", "point")
+      .attr("fill", function(d) { return color(d.group); })
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.4)
+      .attr("cx", function(d) { return d.projected.x; })
+      .attr("cy", function(d) { return d.projected.y; })
+      .attr("r", function(d) { return Math.max(1.8, 3.4 + 0.02 * d.rotated.z); });
+
+    svg.selectAll("text.legend")
+      .data(grouped)
+      .join("text")
+      .attr("class", "legend")
+      .attr("x", 12)
+      .attr("y", function(d, i) { return 20 + i * 18; })
+      .attr("font-size", 12)
+      .attr("fill", function(d) { return color(d.group); })
+      .text(function(d) { return d.group + " (" + d.type + ")"; });
+  }
+
+  draw();
+
+  var startX = 0;
+  var startY = 0;
+  var startAngleX = angleX;
+  var startAngleY = angleY;
+
+  svg.call(
+    d3.drag()
+      .on("start", function(event) {
+        svg.style("cursor", "grabbing");
+        startX = event.x;
+        startY = event.y;
+        startAngleX = angleX;
+        startAngleY = angleY;
+      })
+      .on("drag", function(event) {
+        var dx = event.x - startX;
+        var dy = event.y - startY;
+        angleY = startAngleY + dx * 0.01;
+        angleX = startAngleX - dy * 0.01;
+        draw();
+      })
+      .on("end", function() {
+        svg.style("cursor", "grab");
+      })
+  );
+
+  svg.on("wheel", function(event) {
+    event.preventDefault();
+    var factor = event.deltaY > 0 ? 0.92 : 1.08;
+    scale = Math.max(30, Math.min(500, scale * factor));
+    draw();
+  });
+}
+
+if (window.d33d && window.d33d.lineStrips3D) {
+  render3DTrajectory(window.d33d, $WIDTH, $HEIGHT);
+  return;
+}
+END
+
+#============================================================
+# ListPlot3D code snippets accessors
+#============================================================
+
+our sub GetMultiTrajectoryPlotPart() {
+    return $jsMultiTrajectoryPlotPart;
+}

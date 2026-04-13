@@ -2,6 +2,7 @@ unit module JavaScript::D3;
 
 use JavaScript::D3::Charts;
 use JavaScript::D3::Plots;
+use JavaScript::D3::Plots3D;
 use JavaScript::D3::Random;
 use JavaScript::D3::Images;
 use JavaScript::D3::Chess;
@@ -29,13 +30,30 @@ require(['d3'], function(d3) {
 });
 END
 
+my $jsD3ConfigCode3D = q:to/END/;
+require.config({
+  paths: {
+    d3: "https://d3js.org/d3.v$VER.min",
+    d3_3d: "https://unpkg.com/d3-3d@$VER_D33D/build/d3-3d"
+  }
+});
+
+require(["d3", "d3_3d"], function(d3) {
+  // expose for later JS cells
+  window.d3 = d3;
+  window.d33d = window.d33d || {};
+  console.log("d3:", d3.version, "d3-3d:", Object.keys(window.d33d));
+});
+END
+
 #| Configuration JavaScript code to be executed in %%javascript magic cell in a Jupyter notebook.
-multi js-d3-config(:$v = 7, Bool :$direct = True) is export {
+multi js-d3-config(:v(:$d3-version) = 7, :v3d(:$d33d-version) = '2.0.2', Bool:D :$direct = True, Bool:D :$with-d33d = True) is export {
+    my $jsCode = $with-d33d ?? $jsD3ConfigCode3D !! $jsD3ConfigCode;
     if $direct {
-        return $jsD3ConfigCode.subst('$VER', $v);
+        return $jsCode.subst('$VER', $d3-version).substs('$VER_D33D', $d33d-version);
     } else {
         return (JavaScript::D3::Plots::GetPlotStartingCode(),
-                $jsD3ConfigCode.subst('$VER', $v),
+                $jsD3ConfigCode.subst('$VER', $d3-version).substs('$VER3D', $d33d-version),
                 JavaScript::D3::Plots::GetPlotEndingCode(),
         ).join("\n");
     }
@@ -67,6 +85,17 @@ proto js-d3-list-line-plot($data, |) is export {*}
 
 multi js-d3-list-line-plot($data, *%args) {
     return JavaScript::D3::Plots::ListLinePlot($data, |%args);
+}
+
+#============================================================
+#| Makes a list line plot for a list of numbers or a list of x-y-z coordinates.
+#| Multiple lines and/or sets of points can be specified as a list of dictionaries.
+#| Each with has the keys "x", "y", "z", "group", and "type".
+#| The values of "type" are expected to be one of "line" or "point".
+proto js-d3-list-line-plot3d($data, |) is export {*}
+
+multi js-d3-list-line-plot3d($data, *%args) {
+    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args);
 }
 
 #============================================================

@@ -21,10 +21,12 @@
     "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
     "JavaScript::D3::Chess": "lib/JavaScript/D3/Chess.rakumod",
     "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
+    "JavaScript::D3::CodeSnippets3D": "lib/JavaScript/D3/CodeSnippets3D.rakumod",
     "JavaScript::D3::Gauge": "lib/JavaScript/D3/Gauge.rakumod",
     "JavaScript::D3::Graph": "lib/JavaScript/D3/Graph.rakumod",
     "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
     "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
+    "JavaScript::D3::Plots3D": "lib/JavaScript/D3/Plots3D.rakumod",
     "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
     "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod",
     "JavaScript::D3::Utilities": "lib/JavaScript/D3/Utilities.rakumod"
