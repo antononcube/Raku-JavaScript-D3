@@ -8,7 +8,7 @@
   ],
   "auth": "zef:antononcube",
   "depends": [
-    "JSON::Fast:ver<0.17+>",
+    "JSON::Fast:ver<0.19+>",
     "Hash::Merge:ver<2.0.0+>:api<2+>",
     "Statistics::Distributions:ver<0.1.+>",
     "Data::TypeSystem:ver<0.1.4+>",
