@@ -1,7 +1,5 @@
 # JavaScript::D3 Raku package
 
-[![SparrowCI](https://ci.sparrowhub.io/project/gh-antononcube-Raku-JavaScript-D3/badge)](https://ci.sparrowhub.io)
-
 This repository has the Raku package for generation of 
 [JavaScript's D3](https://d3js.org/what-is-d3) 
 code for making plots and charts.
@@ -312,6 +310,8 @@ User specified or automatic:
 4. [X] Random Scribble, single plot 
 
 5. [X] Random Scribbles row 
+
+6. [ ] 3D list plot and 3D list line plot
 
 --------
 
