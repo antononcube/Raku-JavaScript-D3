@@ -83,7 +83,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             );
 
     # Process margins
-#    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
     # Grid lines
 #    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
