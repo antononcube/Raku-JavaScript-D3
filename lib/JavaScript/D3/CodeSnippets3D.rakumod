@@ -30,8 +30,8 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var origin = { x: width / 2, y: height / 2 };
   var scale = Math.min(width, height) * 0.14;
-  var angleX = -0.55;
-  var angleY = 0.75;
+  var angleX = 1.35;
+  var angleY = 0.15;
   var angleZ = 0;
 
   // Toggle point projection mode:
@@ -58,6 +58,13 @@ function render3DTrajectory(d33dModule, width, height) {
   // Replace this with your own input array of dicts.
   // Assume all dictionaries within a group share the same `type`.
   var data = $DATA;
+
+  var xMin = Math.min.apply(Math, data.map(function(o) { return o.x; }))
+  var xMax = Math.max.apply(Math, data.map(function(o) { return o.x; }))
+  var yMin = Math.min.apply(Math, data.map(function(o) { return o.y; }))
+  var yMax = Math.max.apply(Math, data.map(function(o) { return o.y; }))
+  var zMin = Math.min.apply(Math, data.map(function(o) { return o.z; }))
+  var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
 
   function makeAxes(L) {
     return [

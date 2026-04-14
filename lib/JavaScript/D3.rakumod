@@ -88,14 +88,25 @@ multi js-d3-list-line-plot($data, *%args) {
 }
 
 #============================================================
-#| Makes a list line plot for a list of numbers or a list of x-y-z coordinates.
-#| Multiple lines and/or sets of points can be specified as a list of dictionaries.
+#| Makes a list point plot for a list of x-y-z coordinates.
+#| Multiple sets of points (or lines) can be specified as a list of dictionaries.
+#| Each with has the keys "x", "y", "z", "group", and "type".
+#| The values of "type" are expected to be one of "line" or "point".
+proto js-d3-list-plot3d($data, |) is export {*}
+
+multi js-d3-list-plot3d($data, *%args) {
+    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'point');
+}
+
+#============================================================
+#| Makes a list line plot for a list of x-y-z coordinates.
+#| Multiple lines (or sets of points) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".
 #| The values of "type" are expected to be one of "line" or "point".
 proto js-d3-list-line-plot3d($data, |) is export {*}
 
 multi js-d3-list-line-plot3d($data, *%args) {
-    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args);
+    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'line');
 }
 
 #============================================================

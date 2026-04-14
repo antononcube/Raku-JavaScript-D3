@@ -99,7 +99,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     my Bool:D $hasTypes = [&&] @data.map({ so $_<type> });
 
     if !$hasTypes {
-        @data = @data.map({ merge-hash($_, {type => 'line'}) })
+        @data = @data.map({ merge-hash($_, {type => $default-type}) })
     }
 
     # Tooltips
