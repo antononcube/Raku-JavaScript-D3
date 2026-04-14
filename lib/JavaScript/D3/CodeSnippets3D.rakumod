@@ -42,10 +42,10 @@ function render3DTrajectory(d33dModule, width, height) {
   host
     .append("div")
     .style("font-family", "Arial, sans-serif")
-    .style("font-size", "14px")
+    .style("font-size", "$TITLE_FONT_SIZEpx")
     .style("line-height", "1.35")
     .style("margin-bottom", "8px")
-    .html("<strong>" + $TITLE + "</strong><br/>Drag to rotate, wheel to zoom");
+    .html($TITLE);
 
   var svg = host
     .append("svg")
