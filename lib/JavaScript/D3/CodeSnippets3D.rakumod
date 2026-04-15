@@ -522,10 +522,10 @@ function render3DTrajectory(d33dModule, width, height) {
           .data(axisLabels)
           .join("text")
           .attr("class", "axis-label")
-          .style("font-size", function(d) { return d.fontSize.toString() + "px"; })
-          .style("fill", function(d) { return d.fill; })
           .attr("x", function(d) { return d.x + 8; })
           .attr("y", function(d) { return d.y - 8; })
+          .style("font-size", function(d) { return d.fontSize.toString() + "px"; })
+          .style("fill", function(d) { return d.fill; })
           .text(function(d) { return d.text; });
 
         var projectedTickSegments = axisTicks.segments.map(function(s) {
