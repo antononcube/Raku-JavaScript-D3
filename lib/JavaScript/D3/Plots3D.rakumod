@@ -89,13 +89,13 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
 
     # Process box ratios
     if $box-ratios.isa(Whatever) {
-        my $xSpan = @data.map(*<x>); $xSpan = $xSpan.max - $xSpan.min;
-        my $ySpan = @data.map(*<y>); $ySpan = $ySpan.max - $ySpan.min;
-        my $zSpan = @data.map(*<z>); $zSpan = $zSpan.max - $zSpan.min;
+        my $xSpan = @data.map(*<x>).List; $xSpan = $xSpan.max - $xSpan.min;
+        my $ySpan = @data.map(*<y>).List; $ySpan = $ySpan.max - $ySpan.min;
+        my $zSpan = @data.map(*<z>).List; $zSpan = $zSpan.max - $zSpan.min;
 
         $box-ratios = [$xSpan, $ySpan, $zSpan];
         if $box-ratios.max > 0 {
-            $box-ratios = $box-ratios <</>> $box-ratios.max
+            $box-ratios = ($box-ratios <</>> $box-ratios.max).List
         }
     }
     die 'The value of $box-ratios is expected a list of three numbers or Whatever.'
