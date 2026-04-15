@@ -112,36 +112,39 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     # Face grids
     # TBD...
 
+    # Clone the data
+    my @dataLocal = @data».clone.Array;
+
     # Groups
-    my Bool:D $hasGroups = [&&] @data.map({ so $_<group> });
+    my Bool:D $hasGroups = [&&] @dataLocal.map({ so $_<group> });
 
     if !$hasGroups {
-        @data = @data.map({ merge-hash($_, {group => ''}) })
+        @dataLocal = @dataLocal.map({ merge-hash($_, {group => ''}) })
     }
 
     # Types
-    my Bool:D $hasTypes = [&&] @data.map({ so $_<type> });
+    my Bool:D $hasTypes = [&&] @dataLocal.map({ so $_<type> });
 
     if !$hasTypes {
-        @data = @data.map({ merge-hash($_, {type => $default-type}) })
+        @dataLocal = @dataLocal.map({ merge-hash($_, {type => $default-type}) })
     }
 
     # Tooltips
-#    my Bool $hasTooltips = [||] @data.map({ so $_<tooltip> });
+#    my Bool $hasTooltips = [||] @dataLocal.map({ so $_<tooltip> });
 
 #    if $tooltip ~~ Bool:D && $tooltip && !$hasTooltips {
-#        @data = @data.map({ $_<tooltip> = "({$_<x>}, {$_<y>})"; $_ });
+#        @dataLocal = @dataLocal.map({ $_<tooltip> = "({$_<x>}, {$_<y>})"; $_ });
 #        $hasTooltips = True;
 #    }
 
     # Process data
-    my $jsData = to-json(@data, :!pretty);
+    my $jsData = to-json(@dataLocal, :!pretty);
 
     # Select code fragment to splice in
     my $jsPlotMiddle = JavaScript::D3::CodeSnippets3D::GetMultiTrajectoryPlotPart();
 
     # Chose to add legend code fragment or not
-    my $maxGroupChars = $hasGroups ?? @data.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    my $maxGroupChars = $hasGroups ?? @dataLocal.map(*<group>).unique>>.chars.max !! 'all'.chars;
     given $legends {
         when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
