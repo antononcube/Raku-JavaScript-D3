@@ -51,7 +51,9 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          :$tooltip = Whatever,
                          Str :$tooltip-background-color = 'Black',
                          Str :$tooltip-color = 'White',
-                         :$grid-lines is copy = False,
+                         :$box-ratios is copy = Whatever, #= The value [x, y, z] gives the side-length ratios of the corresponding axes.
+                         :$view-point is copy = Whatever, #= The value [x,y,z] gives the position of the view point relative to the center of the three-dimensional box that contains the objects.
+                         :$view-vertical is copy = Whatever, #= Specifies what direction in scaled coordinates should be vertical in the final image.
                          :$margins is copy = Whatever,
                          :$legends = Whatever,
                          Bool:D :$axes = True,
@@ -85,8 +87,30 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
-    # Grid lines
-#    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
+    # Process box ratios
+    if $box-ratios.isa(Whatever) {
+        $box-ratios = [1, 1, 0.4]
+    }
+    die 'The value of $box-ratios is expected a list of three numbers or Whatever.'
+    unless $box-ratios ~~ Positional:D && $box-ratios.all ~~ Numeric:D;
+
+    # Process view point
+    if $view-point.isa(Whatever) {
+        $view-point = [1.3, -2.4, 2.0]
+    }
+    die 'The value of $view-point is expected a list of three numbers or Whatever.'
+    unless $view-point ~~ Positional:D && $view-point.all ~~ Numeric:D;
+
+    # Process view vertical
+    # The setting is view-vertical => [0,0,1] specifies that the z axis in your original coordinate system should end up vertical in the final image.
+    if $view-vertical.isa(Whatever) {
+        $view-vertical = [0, 0, 1]
+    }
+    die 'The value of $view-vertical is expected a list of three numbers or Whatever.'
+    unless $view-vertical ~~ Positional:D && $view-vertical.all ~~ Numeric:D;
+
+    # Face grids
+    # TBD...
 
     # Groups
     my Bool:D $hasGroups = [&&] @data.map({ so $_<group> });
