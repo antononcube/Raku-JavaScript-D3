@@ -55,6 +55,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          :$legends = Whatever,
                          Bool:D :$axes = True,
                          Bool:D :$boxed = False,
+                         Bool:D :$ticks = True,
                          Numeric :$point-size = 6,
                          Numeric :$stroke-width = 1.5,
                          Str:D :$default-type = 'line',
@@ -190,6 +191,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$BOX_RATIOS', to-json($box-ratios):!pretty)
             .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
             .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false')
+            .subst(:g, '$TICKS', $ticks ?? 'true' !! 'false')
             .subst(:g, '$VIEW_POINT', to-json($view-point):!pretty)
             .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical):!pretty)
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
