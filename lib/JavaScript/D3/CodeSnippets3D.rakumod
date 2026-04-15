@@ -609,7 +609,6 @@ function render3DTrajectory(d33dModule, width, height) {
         .join("text")
         .attr("class", "box-axis-label")
         .style("font-size", function(d) { return d.fontSize + "px"; })
-        .style("font-weight", "bold")
         .style("fill", function(d) { return d.fill; })
         .attr("x", function(d) { return d.projected.x; })
         .attr("y", function(d) { return d.projected.y; })
