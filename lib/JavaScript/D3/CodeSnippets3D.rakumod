@@ -44,6 +44,7 @@ function render3DTrajectory(d33dModule, width, height) {
   });
 
   var origin = { x: width / 2, y: height / 2 };
+  var showAxes = $AXES;
   var minScale = 1;
   var maxScale = 1;
   var scale = 1;
@@ -323,72 +324,79 @@ function render3DTrajectory(d33dModule, width, height) {
   function draw() {
     syncProjectors();
 
-    var transformedAxes = ax3d.data(axes);
+    if (showAxes) {
+      var transformedAxes = ax3d.data(axes);
 
-    svg.selectAll("line.axis")
-      .data(transformedAxes)
-      .join("line")
-      .attr("class", "axis")
-      .attr("stroke-width", 2)
-      .attr("fill", "none")
-      .attr("stroke", "#888")
-      .attr("x1", function(d) { return d[0].projected.x; })
-      .attr("y1", function(d) { return d[0].projected.y; })
-      .attr("x2", function(d) { return d[1].projected.x; })
-      .attr("y2", function(d) { return d[1].projected.y; });
+      svg.selectAll("line.axis")
+        .data(transformedAxes)
+        .join("line")
+        .attr("class", "axis")
+        .attr("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("stroke", "#888")
+        .attr("x1", function(d) { return d[0].projected.x; })
+        .attr("y1", function(d) { return d[0].projected.y; })
+        .attr("x2", function(d) { return d[1].projected.x; })
+        .attr("y2", function(d) { return d[1].projected.y; });
 
-    var axisLabels = [
-      { text: "X", x: transformedAxes[0][1].projected.x, y: transformedAxes[0][1].projected.y },
-      { text: "Y", x: transformedAxes[1][1].projected.x, y: transformedAxes[1][1].projected.y },
-      { text: "Z", x: transformedAxes[2][1].projected.x, y: transformedAxes[2][1].projected.y }
-    ];
+      var axisLabels = [
+        { text: "X", x: transformedAxes[0][1].projected.x, y: transformedAxes[0][1].projected.y },
+        { text: "Y", x: transformedAxes[1][1].projected.x, y: transformedAxes[1][1].projected.y },
+        { text: "Z", x: transformedAxes[2][1].projected.x, y: transformedAxes[2][1].projected.y }
+      ];
 
-    svg.selectAll("text.axis-label")
-      .data(axisLabels)
-      .join("text")
-      .attr("class", "axis-label")
-      .attr("font-size", 14)
-      .attr("font-weight", "bold")
-      .attr("fill", "#666")
-      .attr("x", function(d) { return d.x + 8; })
-      .attr("y", function(d) { return d.y - 8; })
-      .text(function(d) { return d.text; });
+      svg.selectAll("text.axis-label")
+        .data(axisLabels)
+        .join("text")
+        .attr("class", "axis-label")
+        .attr("font-size", 14)
+        .attr("font-weight", "bold")
+        .attr("fill", "#666")
+        .attr("x", function(d) { return d.x + 8; })
+        .attr("y", function(d) { return d.y - 8; })
+        .text(function(d) { return d.text; });
 
-    var projectedTickSegments = axisTicks.segments.map(function(s) {
-      return {
-        a: manualProjectPoint(s.a).projected,
-        b: manualProjectPoint(s.b).projected
-      };
-    });
+      var projectedTickSegments = axisTicks.segments.map(function(s) {
+        return {
+          a: manualProjectPoint(s.a).projected,
+          b: manualProjectPoint(s.b).projected
+        };
+      });
 
-    svg.selectAll("line.axis-tick")
-      .data(projectedTickSegments)
-      .join("line")
-      .attr("class", "axis-tick")
-      .attr("stroke-width", 1)
-      .attr("stroke", "#777")
-      .attr("x1", function(d) { return d.a.x; })
-      .attr("y1", function(d) { return d.a.y; })
-      .attr("x2", function(d) { return d.b.x; })
-      .attr("y2", function(d) { return d.b.y; });
+      svg.selectAll("line.axis-tick")
+        .data(projectedTickSegments)
+        .join("line")
+        .attr("class", "axis-tick")
+        .attr("stroke-width", 1)
+        .attr("stroke", "#777")
+        .attr("x1", function(d) { return d.a.x; })
+        .attr("y1", function(d) { return d.a.y; })
+        .attr("x2", function(d) { return d.b.x; })
+        .attr("y2", function(d) { return d.b.y; });
 
-    var projectedTickLabels = axisTicks.labels.map(function(l) {
-      return {
-        text: l.text,
-        projected: manualProjectPoint(l.p).projected
-      };
-    });
+      var projectedTickLabels = axisTicks.labels.map(function(l) {
+        return {
+          text: l.text,
+          projected: manualProjectPoint(l.p).projected
+        };
+      });
 
-    svg.selectAll("text.axis-tick-label")
-      .data(projectedTickLabels)
-      .join("text")
-      .attr("class", "axis-tick-label")
-      .attr("font-size", 10)
-      .attr("fill", "#777")
-      .attr("x", function(d) { return d.projected.x; })
-      .attr("y", function(d) { return d.projected.y; })
-      .attr("text-anchor", "middle")
-      .text(function(d) { return d.text; });
+      svg.selectAll("text.axis-tick-label")
+        .data(projectedTickLabels)
+        .join("text")
+        .attr("class", "axis-tick-label")
+        .attr("font-size", 10)
+        .attr("fill", "#777")
+        .attr("x", function(d) { return d.projected.x; })
+        .attr("y", function(d) { return d.projected.y; })
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d.text; });
+    } else {
+      svg.selectAll("line.axis").remove();
+      svg.selectAll("text.axis-label").remove();
+      svg.selectAll("line.axis-tick").remove();
+      svg.selectAll("text.axis-tick-label").remove();
+    }
 
     var lineInput = [];
     for (var li = 0; li < lineGroups.length; li++) {

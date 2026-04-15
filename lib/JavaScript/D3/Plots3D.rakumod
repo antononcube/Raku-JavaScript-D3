@@ -39,15 +39,12 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          Str:D :x-label(:$x-axis-label) = '',
                          :x-label-color(:$x-axis-label-color) is copy = Whatever,
                          :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
-                         :$x-axis-scale = Whatever,
                          Str:D :y-label(:$y-axis-label) = '',
                          :y-label-color(:$y-axis-label-color) is copy = Whatever,
                          :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
-                         :$y-axis-scale = Whatever,
                          Str:D :z-label(:$z-axis-label) = '',
                          :z-label-color(:$z-axis-label-color) is copy = Whatever,
                          :z-label-font-size(:$z-axis-label-font-size) is copy = Whatever,
-                         :$z-axis-scale = Whatever,
                          :$tooltip = Whatever,
                          Str :$tooltip-background-color = 'Black',
                          Str :$tooltip-color = 'White',
@@ -190,6 +187,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$TOOLTIP_COLOR', '"' ~ $tooltip-color ~ '"')
             .subst(:g, '$TOOLTIP_BACKGROUND_COLOR', '"' ~ $tooltip-background-color ~ '"')
             .subst(:g, '$BOX_RATIOS', to-json($box-ratios):!pretty)
+            .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
             .subst(:g, '$VIEW_POINT', to-json($view-point):!pretty)
             .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical):!pretty)
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
