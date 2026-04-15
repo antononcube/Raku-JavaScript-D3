@@ -348,7 +348,7 @@ function render3DTrajectory(d33dModule, width, height) {
   var fitScale = availableRadiusPx / sceneRadius;
 
   // Rotation-safe fit: at this scale (or smaller), all points remain in view.
-  maxScale = fitScale;
+  maxScale = 20 * fitScale;
   minScale = fitScale * 0.2;
   scale = fitScale;
 
