@@ -44,10 +44,9 @@ function render3DTrajectory(d33dModule, width, height) {
   });
 
   var origin = { x: width / 2, y: height / 2 };
-  var maxBoxRatio = Math.max(boxRatios[0], boxRatios[1], boxRatios[2]);
-  var minScale = Math.min(width, height) * 0.06 / maxBoxRatio;
-  var maxScale = Math.min(width, height) * 0.8 / maxBoxRatio;
-  var scale = minScale;
+  var minScale = 1;
+  var maxScale = 1;
+  var scale = 1;
   var angleX = 1.35;
   var angleY = 0.15;
   var angleZ = 0;
@@ -177,6 +176,19 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var axes = makeAxes(boxRatios);
   var axisTicks = makeAxisTicks(boxRatios);
+  var sceneRadiusSq = 0;
+
+  function includeRadiusPoint(p) {
+    var r2 = p.x * p.x + p.y * p.y + p.z * p.z;
+    if (r2 > sceneRadiusSq) {
+      sceneRadiusSq = r2;
+    }
+  }
+
+  for (var a = 0; a < axes.length; a++) {
+    includeRadiusPoint(axes[a][0]);
+    includeRadiusPoint(axes[a][1]);
+  }
 
   // Compatibility grouping (avoids d3.group/Array.prototype.flatMap requirements)
   var groupsByName = {};
@@ -188,8 +200,20 @@ function render3DTrajectory(d33dModule, width, height) {
       groupsByName[gname] = { group: gname, values: [], type: String(item.type || "line").toLowerCase() };
       groupOrder.push(gname);
     }
-    groupsByName[gname].values.push(applyBoxRatios(item));
+    var scenePoint = applyBoxRatios(item);
+    includeRadiusPoint(scenePoint);
+    groupsByName[gname].values.push(scenePoint);
   }
+
+  var sceneRadius = Math.max(1e-9, Math.sqrt(sceneRadiusSq));
+  var paddingPx = 24;
+  var availableRadiusPx = Math.max(8, 0.5 * Math.min(width, height) - paddingPx);
+  var fitScale = availableRadiusPx / sceneRadius;
+
+  // Rotation-safe fit: at this scale (or smaller), all points remain in view.
+  maxScale = fitScale;
+  minScale = fitScale * 0.2;
+  scale = fitScale;
 
   var grouped = [];
   for (var gi = 0; gi < groupOrder.length; gi++) {
