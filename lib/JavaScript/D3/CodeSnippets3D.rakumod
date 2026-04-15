@@ -75,6 +75,16 @@ function render3DTrajectory(d33dModule, width, height) {
     .style("background", $BACKGROUND_COLOR)
     .style("cursor", "grab");
 
+  var xAxisLabelText = $X_AXIS_LABEL;
+  var yAxisLabelText = $Y_AXIS_LABEL;
+  var zAxisLabelText = $Z_AXIS_LABEL;
+  var xAxisLabelFontSize = $X_AXIS_LABEL_FONT_SIZE;
+  var yAxisLabelFontSize = $Y_AXIS_LABEL_FONT_SIZE;
+  var zAxisLabelFontSize = $Z_AXIS_LABEL_FONT_SIZE;
+  var xAxisLabelFill = $X_AXIS_LABEL_FILL;
+  var yAxisLabelFill = $Y_AXIS_LABEL_FILL;
+  var zAxisLabelFill = $Z_AXIS_LABEL_FILL;
+
   // Replace this with your own input array of dicts.
   // Assume all dictionaries within a group share the same `type`.
   var data = $DATA;
@@ -453,18 +463,36 @@ function render3DTrajectory(d33dModule, width, height) {
 
       if (showTicks) {
         var axisLabels = [
-          { text: "X", x: transformedAxes[0][1].projected.x, y: transformedAxes[0][1].projected.y },
-          { text: "Y", x: transformedAxes[1][1].projected.x, y: transformedAxes[1][1].projected.y },
-          { text: "Z", x: transformedAxes[2][1].projected.x, y: transformedAxes[2][1].projected.y }
-        ];
+          {
+            text: xAxisLabelText,
+            x: transformedAxes[0][1].projected.x,
+            y: transformedAxes[0][1].projected.y,
+            fontSize: xAxisLabelFontSize,
+            fill: xAxisLabelFill
+          },
+          {
+            text: yAxisLabelText,
+            x: transformedAxes[1][1].projected.x,
+            y: transformedAxes[1][1].projected.y,
+            fontSize: yAxisLabelFontSize,
+            fill: yAxisLabelFill
+          },
+          {
+            text: zAxisLabelText,
+            x: transformedAxes[2][1].projected.x,
+            y: transformedAxes[2][1].projected.y,
+            fontSize: zAxisLabelFontSize,
+            fill: zAxisLabelFill
+          }
+        ].filter(function(d) { return (d.text || "").length > 0; });
 
         svg.selectAll("text.axis-label")
           .data(axisLabels)
           .join("text")
           .attr("class", "axis-label")
-          .attr("font-size", 14)
-          .attr("font-weight", "bold")
-          .attr("fill", "#666")
+          .style("font-size", function(d) { return d.fontSize + "px"; })
+          .style("font-weight", "bold")
+          .style("fill", function(d) { return d.fill; })
           .attr("x", function(d) { return d.x + 8; })
           .attr("y", function(d) { return d.y - 8; })
           .text(function(d) { return d.text; });
