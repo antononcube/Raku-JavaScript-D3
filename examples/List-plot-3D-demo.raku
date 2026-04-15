@@ -1,8 +1,6 @@
 #!/usr/bin/env raku
 use v6.d;
 
-use lib <. lib>;
-
 use JavaScript::D3;
 use Data::Summarizers;
 use Data::Generators;
@@ -15,13 +13,12 @@ records-summary(@data1);
 my $k = 0;
 
 spurt $*CWD ~ '/list-plot-3D.html',
-        js-d3-list-line-plot3d(@data1,
+        js-d3-list-point-plot3d(@data1,
                 point-size => 12,
                 color => 'steelblue',
-                background => 'ivory',
+                background => 'gray',
                 height => 600,
                 width => 800,
-                y-axis-scale => 'line', # 'log'
                 title-color => 'Blue',
                 margins => %(left => 120, bottom => 40),
                 title => 'Random pets',
