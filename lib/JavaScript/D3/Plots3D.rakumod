@@ -151,11 +151,16 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     my $jsPlotMiddle = JavaScript::D3::CodeSnippets3D::GetMultiTrajectoryPlotPart();
 
     # Chose to add legend code fragment or not
-    my $maxGroupChars = $hasGroups ?? @dataLocal.map(*<group>).unique>>.chars.max !! 'all'.chars;
+    my @groups = @dataLocal.map(*<group>).unique;
+    my $maxGroupChars = @groups.elems > 1 ?? @groups>>.chars.max !! 'all'.chars;
+    my Bool:D $show-legends = do given $legends {
+        when $_ ~~ Bool:D { $_ }
+        when $_.isa(Whatever) { @groups.elems > 1 }
+        default { so $_ }
+    };
     given $legends {
-        when $_ ~~ Bool && $_ || $_.isa(Whatever) && $hasGroups {
+        when $_ ~~ Bool && $_ || $_.isa(Whatever) && @groups.elems > 1 {
             $margins<right> = max($margins<right>, ($maxGroupChars + 4) * 12);
-            $jsPlotMiddle ~=  "\n" ~ JavaScript::D3::CodeSnippets::GetLegendCode();
         }
     }
 
@@ -194,6 +199,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false')
             .subst(:g, '$TICKS', $ticks ?? 'true' !! 'false')
             .subst(:g, '$ZOOMING_ENABLED', $zooming-enabled ?? 'true' !! 'false')
+            .subst(:g, '$SHOW_LEGENDS', $show-legends ?? 'true' !! 'false')
             .subst(:g, '$VIEW_POINT', to-json($view-point):!pretty)
             .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical):!pretty)
             .subst(:g, '$MARGINS', to-json($margins):!pretty)

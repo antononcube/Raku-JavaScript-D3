@@ -48,6 +48,7 @@ function render3DTrajectory(d33dModule, width, height) {
   var showBoxed = $BOXED;
   var showTicks = $TICKS;
   var zoomingEnabled = $ZOOMING_ENABLED;
+  var showLegends = $SHOW_LEGENDS;
   var minScale = 1;
   var maxScale = 1;
   var scale = 1;
@@ -699,15 +700,19 @@ function render3DTrajectory(d33dModule, width, height) {
       .attr("cy", function(d) { return d.projected.y; })
       .attr("r", function(d) { return Math.max(1.8, 3.4 + 0.02 * d.rotated.z); });
 
-    svg.selectAll("text.legend")
-      .data(grouped)
-      .join("text")
-      .attr("class", "legend")
-      .attr("x", 12)
-      .attr("y", function(d, i) { return 20 + i * 18; })
-      .attr("font-size", 12)
-      .attr("fill", function(d) { return color(d.group); })
-      .text(function(d) { return d.group + " (" + d.type + ")"; });
+    if (showLegends) {
+      svg.selectAll("text.legend")
+        .data(grouped)
+        .join("text")
+        .attr("class", "legend")
+        .attr("x", 12)
+        .attr("y", function(d, i) { return 20 + i * 18; })
+        .attr("font-size", 12)
+        .attr("fill", function(d) { return color(d.group); })
+        .text(function(d) { return (d.legend || d.group || ""); });
+    } else {
+      svg.selectAll("text.legend").remove();
+    }
   }
 
   draw();
