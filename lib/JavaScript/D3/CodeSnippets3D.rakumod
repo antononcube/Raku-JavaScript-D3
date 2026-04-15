@@ -45,7 +45,9 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var origin = { x: width / 2, y: height / 2 };
   var maxBoxRatio = Math.max(boxRatios[0], boxRatios[1], boxRatios[2]);
-  var scale = Math.min(width, height) * 0.14 / maxBoxRatio;
+  var minScale = Math.min(width, height) * 0.06 / maxBoxRatio;
+  var maxScale = Math.min(width, height) * 0.8 / maxBoxRatio;
+  var scale = minScale;
   var angleX = 1.35;
   var angleY = 0.15;
   var angleZ = 0;
@@ -97,6 +99,18 @@ function render3DTrajectory(d33dModule, width, height) {
     };
   }
 
+  function mapXValueToScene(v) {
+    return ((v - xMid) / xHalfSpan) * 10 * boxRatios[0];
+  }
+
+  function mapYValueToScene(v) {
+    return ((v - yMid) / yHalfSpan) * 10 * boxRatios[1];
+  }
+
+  function mapZValueToScene(v) {
+    return ((v - zMid) / zHalfSpan) * 10 * boxRatios[2];
+  }
+
   function makeAxes(ratios) {
     return [
       [{ x: -10 * ratios[0], y: 0, z: 0 }, { x: 10 * ratios[0], y: 0, z: 0 }],
@@ -105,7 +119,64 @@ function render3DTrajectory(d33dModule, width, height) {
     ];
   }
 
+  function makeAxisTicks(ratios) {
+    var xValues = d3.ticks(xMin, xMax, 4);
+    var yValues = d3.ticks(yMin, yMax, 4);
+    var zValues = d3.ticks(zMin, zMax, 4);
+    if (!xValues.length) { xValues = [xMin]; }
+    if (!yValues.length) { yValues = [yMin]; }
+    if (!zValues.length) { zValues = [zMin]; }
+
+    var tickSize = 0.35;
+    var labelOffset = 1.1;
+    var tickFormat = d3.format(".4~g");
+    var segments = [];
+    var labels = [];
+
+    for (var i = 0; i < xValues.length; i++) {
+      var xValue = xValues[i];
+      var x = mapXValueToScene(xValue);
+      segments.push({
+        a: { x: x, y: -tickSize, z: 0 },
+        b: { x: x, y: tickSize, z: 0 }
+      });
+      labels.push({
+        p: { x: x, y: -labelOffset, z: 0 },
+        text: tickFormat(xValue)
+      });
+    }
+
+    for (var j = 0; j < yValues.length; j++) {
+      var yValue = yValues[j];
+      var y = mapYValueToScene(yValue);
+      segments.push({
+        a: { x: -tickSize, y: y, z: 0 },
+        b: { x: tickSize, y: y, z: 0 }
+      });
+      labels.push({
+        p: { x: labelOffset, y: y, z: 0 },
+        text: tickFormat(yValue)
+      });
+    }
+
+    for (var k = 0; k < zValues.length; k++) {
+      var zValue = zValues[k];
+      var z = mapZValueToScene(zValue);
+      segments.push({
+        a: { x: -tickSize, y: 0, z: z },
+        b: { x: tickSize, y: 0, z: z }
+      });
+      labels.push({
+        p: { x: labelOffset, y: 0, z: z },
+        text: tickFormat(zValue)
+      });
+    }
+
+    return { segments: segments, labels: labels };
+  }
+
   var axes = makeAxes(boxRatios);
+  var axisTicks = makeAxisTicks(boxRatios);
 
   // Compatibility grouping (avoids d3.group/Array.prototype.flatMap requirements)
   var groupsByName = {};
@@ -259,6 +330,42 @@ function render3DTrajectory(d33dModule, width, height) {
       .attr("y", function(d) { return d.y - 8; })
       .text(function(d) { return d.text; });
 
+    var projectedTickSegments = axisTicks.segments.map(function(s) {
+      return {
+        a: manualProjectPoint(s.a).projected,
+        b: manualProjectPoint(s.b).projected
+      };
+    });
+
+    svg.selectAll("line.axis-tick")
+      .data(projectedTickSegments)
+      .join("line")
+      .attr("class", "axis-tick")
+      .attr("stroke-width", 1)
+      .attr("stroke", "#777")
+      .attr("x1", function(d) { return d.a.x; })
+      .attr("y1", function(d) { return d.a.y; })
+      .attr("x2", function(d) { return d.b.x; })
+      .attr("y2", function(d) { return d.b.y; });
+
+    var projectedTickLabels = axisTicks.labels.map(function(l) {
+      return {
+        text: l.text,
+        projected: manualProjectPoint(l.p).projected
+      };
+    });
+
+    svg.selectAll("text.axis-tick-label")
+      .data(projectedTickLabels)
+      .join("text")
+      .attr("class", "axis-tick-label")
+      .attr("font-size", 10)
+      .attr("fill", "#777")
+      .attr("x", function(d) { return d.projected.x; })
+      .attr("y", function(d) { return d.projected.y; })
+      .attr("text-anchor", "middle")
+      .text(function(d) { return d.text; });
+
     var lineInput = [];
     for (var li = 0; li < lineGroups.length; li++) {
       lineInput.push(lineGroups[li].values);
@@ -338,7 +445,7 @@ function render3DTrajectory(d33dModule, width, height) {
   svg.on("wheel", function(event) {
     event.preventDefault();
     var factor = event.deltaY > 0 ? 0.92 : 1.08;
-    scale = Math.max(30, Math.min(500, scale * factor));
+    scale = Math.max(minScale, Math.min(maxScale, scale * factor));
     draw();
   });
 }
