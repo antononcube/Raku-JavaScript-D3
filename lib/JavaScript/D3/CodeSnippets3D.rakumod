@@ -52,7 +52,7 @@ function render3DTrajectory(d33dModule, width, height) {
     .attr("width", width)
     .attr("height", height)
     .style("display", "block")
-    .style("background", "$BACKGROUND_COLOR")
+    .style("background", $BACKGROUND_COLOR)
     .style("cursor", "grab");
 
   // Replace this with your own input array of dicts.
