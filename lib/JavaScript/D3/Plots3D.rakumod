@@ -160,7 +160,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
+    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
                          $jsPlotMiddle]
             .join("\n");
 
