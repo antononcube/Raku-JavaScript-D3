@@ -107,7 +107,7 @@ function render3DTrajectory(d33dModule, width, height) {
   function applyBoxRatios(o) {
     return {
       x: ((o.x - xMid) / xHalfSpan) * 10 * boxRatios[0],
-      y: ((o.y - yMid) / yHalfSpan) * 10 * boxRatios[1],
+      y: -((o.y - yMid) / yHalfSpan) * 10 * boxRatios[1],
       z: ((o.z - zMid) / zHalfSpan) * 10 * boxRatios[2]
     };
   }
@@ -117,7 +117,7 @@ function render3DTrajectory(d33dModule, width, height) {
   }
 
   function mapYValueToScene(v) {
-    return ((v - yMid) / yHalfSpan) * 10 * boxRatios[1];
+    return -((v - yMid) / yHalfSpan) * 10 * boxRatios[1];
   }
 
   function mapZValueToScene(v) {
