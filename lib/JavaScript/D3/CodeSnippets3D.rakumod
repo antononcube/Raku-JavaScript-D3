@@ -27,9 +27,25 @@ function render3DTrajectory(d33dModule, width, height) {
   var host = d3.select(element.get(0));
   host.html("");
 
+  function asNumberTriplet(value, fallback) {
+    if (!Array.isArray(value) || value.length !== 3) {
+      return fallback.slice();
+    }
+    var out = [];
+    for (var i = 0; i < 3; i++) {
+      var n = Number(value[i]);
+      out.push(isFinite(n) ? n : fallback[i]);
+    }
+    return out;
+  }
+
+  var boxRatios = asNumberTriplet($BOX_RATIOS, [1, 1, 0.4]).map(function(v) {
+    return Math.max(1e-9, Math.abs(v));
+  });
 
   var origin = { x: width / 2, y: height / 2 };
-  var scale = Math.min(width, height) * 0.14;
+  var maxBoxRatio = Math.max(boxRatios[0], boxRatios[1], boxRatios[2]);
+  var scale = Math.min(width, height) * 0.14 / maxBoxRatio;
   var angleX = 1.35;
   var angleY = 0.15;
   var angleZ = 0;
@@ -66,15 +82,30 @@ function render3DTrajectory(d33dModule, width, height) {
   var zMin = Math.min.apply(Math, data.map(function(o) { return o.z; }))
   var zMax = Math.max.apply(Math, data.map(function(o) { return o.z; }))
 
-  function makeAxes(L) {
+  var xMid = 0.5 * (xMin + xMax);
+  var yMid = 0.5 * (yMin + yMax);
+  var zMid = 0.5 * (zMin + zMax);
+  var xHalfSpan = Math.max(1e-9, 0.5 * (xMax - xMin));
+  var yHalfSpan = Math.max(1e-9, 0.5 * (yMax - yMin));
+  var zHalfSpan = Math.max(1e-9, 0.5 * (zMax - zMin));
+
+  function applyBoxRatios(o) {
+    return {
+      x: ((o.x - xMid) / xHalfSpan) * 10 * boxRatios[0],
+      y: ((o.y - yMid) / yHalfSpan) * 10 * boxRatios[1],
+      z: ((o.z - zMid) / zHalfSpan) * 10 * boxRatios[2]
+    };
+  }
+
+  function makeAxes(ratios) {
     return [
-      [{ x: -L, y: 0, z: 0 }, { x: L, y: 0, z: 0 }],
-      [{ x: 0, y: -L, z: 0 }, { x: 0, y: L, z: 0 }],
-      [{ x: 0, y: 0, z: -L }, { x: 0, y: 0, z: L }]
+      [{ x: -10 * ratios[0], y: 0, z: 0 }, { x: 10 * ratios[0], y: 0, z: 0 }],
+      [{ x: 0, y: -10 * ratios[1], z: 0 }, { x: 0, y: 10 * ratios[1], z: 0 }],
+      [{ x: 0, y: 0, z: -10 * ratios[2] }, { x: 0, y: 0, z: 10 * ratios[2] }]
     ];
   }
 
-  var axes = makeAxes(10);
+  var axes = makeAxes(boxRatios);
 
   // Compatibility grouping (avoids d3.group/Array.prototype.flatMap requirements)
   var groupsByName = {};
@@ -86,7 +117,7 @@ function render3DTrajectory(d33dModule, width, height) {
       groupsByName[gname] = { group: gname, values: [], type: String(item.type || "line").toLowerCase() };
       groupOrder.push(gname);
     }
-    groupsByName[gname].values.push(item);
+    groupsByName[gname].values.push(applyBoxRatios(item));
   }
 
   var grouped = [];
