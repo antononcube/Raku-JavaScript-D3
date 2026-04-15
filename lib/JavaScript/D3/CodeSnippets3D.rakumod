@@ -353,6 +353,9 @@ function render3DTrajectory(d33dModule, width, height) {
     .scale(scale)
     .rotateX(angleX)
     .rotateY(angleY);
+  if (typeof strip3d.rotateZ === "function") {
+    strip3d.rotateZ(angleZ);
+  }
 
   var pts3d = points3D()
     .x(function(d) { return d.x; })
@@ -362,6 +365,9 @@ function render3DTrajectory(d33dModule, width, height) {
     .scale(scale)
     .rotateX(angleX)
     .rotateY(angleY);
+  if (typeof pts3d.rotateZ === "function") {
+    pts3d.rotateZ(angleZ);
+  }
 
   var ax3d = lines3D()
     .x(function(d) { return d.x; })
@@ -371,11 +377,23 @@ function render3DTrajectory(d33dModule, width, height) {
     .scale(scale)
     .rotateX(angleX)
     .rotateY(angleY);
+  if (typeof ax3d.rotateZ === "function") {
+    ax3d.rotateZ(angleZ);
+  }
 
   function syncProjectors() {
     strip3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
     pts3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
     ax3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
+    if (typeof strip3d.rotateZ === "function") {
+      strip3d.rotateZ(angleZ);
+    }
+    if (typeof pts3d.rotateZ === "function") {
+      pts3d.rotateZ(angleZ);
+    }
+    if (typeof ax3d.rotateZ === "function") {
+      ax3d.rotateZ(angleZ);
+    }
   }
 
   function rotateX3d(p, a) {
@@ -618,6 +636,7 @@ function render3DTrajectory(d33dModule, width, height) {
   var startY = 0;
   var startAngleX = angleX;
   var startAngleY = angleY;
+  var startAngleZ = angleZ;
 
   svg.call(
     d3.drag()
@@ -627,11 +646,12 @@ function render3DTrajectory(d33dModule, width, height) {
         startY = event.y;
         startAngleX = angleX;
         startAngleY = angleY;
+        startAngleZ = angleZ;
       })
       .on("drag", function(event) {
         var dx = event.x - startX;
         var dy = event.y - startY;
-        angleY = startAngleY + dx * 0.01;
+        angleZ = startAngleZ + dx * 0.01;
         angleX = startAngleX - dy * 0.01;
         draw();
       })
