@@ -45,6 +45,7 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var origin = { x: width / 2, y: height / 2 };
   var showAxes = $AXES;
+  var showBoxed = $BOXED;
   var minScale = 1;
   var maxScale = 1;
   var scale = 1;
@@ -119,6 +120,30 @@ function render3DTrajectory(d33dModule, width, height) {
     ];
   }
 
+  function makeBoundingBoxEdges(ratios) {
+    var rx = 10 * ratios[0];
+    var ry = 10 * ratios[1];
+    var rz = 10 * ratios[2];
+    var corners = [
+      { x: -rx, y: -ry, z: -rz }, // 0
+      { x:  rx, y: -ry, z: -rz }, // 1
+      { x:  rx, y:  ry, z: -rz }, // 2
+      { x: -rx, y:  ry, z: -rz }, // 3
+      { x: -rx, y: -ry, z:  rz }, // 4
+      { x:  rx, y: -ry, z:  rz }, // 5
+      { x:  rx, y:  ry, z:  rz }, // 6
+      { x: -rx, y:  ry, z:  rz }  // 7
+    ];
+    var edgePairs = [
+      [0, 1], [1, 2], [2, 3], [3, 0],
+      [4, 5], [5, 6], [6, 7], [7, 4],
+      [0, 4], [1, 5], [2, 6], [3, 7]
+    ];
+    return edgePairs.map(function(e) {
+      return { a: corners[e[0]], b: corners[e[1]] };
+    });
+  }
+
   function makeAxisTicks(ratios) {
     var xValues = d3.ticks(xMin, xMax, 4);
     var yValues = d3.ticks(yMin, yMax, 4);
@@ -177,6 +202,7 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var axes = makeAxes(boxRatios);
   var axisTicks = makeAxisTicks(boxRatios);
+  var boxEdges = makeBoundingBoxEdges(boxRatios);
   var sceneRadiusSq = 0;
 
   function includeRadiusPoint(p) {
@@ -189,6 +215,10 @@ function render3DTrajectory(d33dModule, width, height) {
   for (var a = 0; a < axes.length; a++) {
     includeRadiusPoint(axes[a][0]);
     includeRadiusPoint(axes[a][1]);
+  }
+  for (var be = 0; be < boxEdges.length; be++) {
+    includeRadiusPoint(boxEdges[be].a);
+    includeRadiusPoint(boxEdges[be].b);
   }
 
   // Compatibility grouping (avoids d3.group/Array.prototype.flatMap requirements)
@@ -396,6 +426,29 @@ function render3DTrajectory(d33dModule, width, height) {
       svg.selectAll("text.axis-label").remove();
       svg.selectAll("line.axis-tick").remove();
       svg.selectAll("text.axis-tick-label").remove();
+    }
+
+    if (showBoxed) {
+      var projectedBoxEdges = boxEdges.map(function(e) {
+        return {
+          a: manualProjectPoint(e.a).projected,
+          b: manualProjectPoint(e.b).projected
+        };
+      });
+
+      svg.selectAll("line.bounding-box")
+        .data(projectedBoxEdges)
+        .join("line")
+        .attr("class", "bounding-box")
+        .attr("stroke-width", 1)
+        .attr("stroke", "#999")
+        .attr("fill", "none")
+        .attr("x1", function(d) { return d.a.x; })
+        .attr("y1", function(d) { return d.a.y; })
+        .attr("x2", function(d) { return d.b.x; })
+        .attr("y2", function(d) { return d.b.y; });
+    } else {
+      svg.selectAll("line.bounding-box").remove();
     }
 
     var lineInput = [];
