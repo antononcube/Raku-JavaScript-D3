@@ -53,6 +53,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          :$view-vertical is copy = Whatever, #= Specifies what direction in scaled coordinates should be vertical in the final image.
                          :$margins is copy = Whatever,
                          :$legends = Whatever,
+                         Bool:D :zoom(:$zooming-enabled) = False,
                          Bool:D :$axes = True,
                          Bool:D :$boxed = False,
                          Bool:D :$ticks = True,
@@ -192,6 +193,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
             .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false')
             .subst(:g, '$TICKS', $ticks ?? 'true' !! 'false')
+            .subst(:g, '$ZOOMING_ENABLED', $zooming-enabled ?? 'true' !! 'false')
             .subst(:g, '$VIEW_POINT', to-json($view-point):!pretty)
             .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical):!pretty)
             .subst(:g, '$MARGINS', to-json($margins):!pretty)

@@ -47,6 +47,7 @@ function render3DTrajectory(d33dModule, width, height) {
   var showAxes = $AXES;
   var showBoxed = $BOXED;
   var showTicks = $TICKS;
+  var zoomingEnabled = $ZOOMING_ENABLED;
   var minScale = 1;
   var maxScale = 1;
   var scale = 1;
@@ -688,12 +689,16 @@ function render3DTrajectory(d33dModule, width, height) {
       })
   );
 
-  svg.on("wheel", function(event) {
-    event.preventDefault();
-    var factor = event.deltaY > 0 ? 0.92 : 1.08;
-    scale = Math.max(minScale, Math.min(maxScale, scale * factor));
-    draw();
-  });
+  if (zoomingEnabled) {
+    svg.on("wheel", function(event) {
+      event.preventDefault();
+      var factor = event.deltaY > 0 ? 0.92 : 1.08;
+      scale = Math.max(minScale, Math.min(maxScale, scale * factor));
+      draw();
+    });
+  } else {
+    svg.on("wheel", null);
+  }
 }
 
 if (window.d33d && window.d33d.lineStrips3D) {
