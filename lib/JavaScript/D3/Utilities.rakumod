@@ -115,6 +115,9 @@ our sub ProcessLabelsColorsAndFontSizes(
         when $_.head ~~ Str:D && $_.tail.isa(Whatever) {
             $y-axis-label-color =  $x-axis-label-color;
         }
+        when $_.head ~~ Str:D && $_.tail ~~ Str:D {
+           # do nothing
+        }
         default {
             $x-axis-label-color = 'Black';
             $y-axis-label-color = 'Black';
@@ -127,11 +130,14 @@ our sub ProcessLabelsColorsAndFontSizes(
             $x-axis-label-font-size = max(4, round($title-font-size * 3 /4));
             $y-axis-label-font-size = max(4, round($title-font-size * 3 /4));
         }
-        when $_.head.isa(Whatever) && $_.tail ~~ Str:D {
+        when $_.head.isa(Whatever) && $_.tail ~~ Numeric:D {
             $x-axis-label-font-size =  $y-axis-label-font-size;
         }
-        when $_.head ~~ Str:D && $_.tail.isa(Whatever) {
+        when $_.head ~~ Numeric:D && $_.tail.isa(Whatever) {
             $y-axis-label-font-size =  $x-axis-label-font-size;
+        }
+        when $_.head ~~ Numeric:D && $_.tail ~~ Numeric:D {
+            # do nothing
         }
         default {
             $x-axis-label-font-size = 12;
