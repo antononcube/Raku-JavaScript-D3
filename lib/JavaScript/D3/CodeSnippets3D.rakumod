@@ -156,6 +156,36 @@ function render3DTrajectory(d33dModule, width, height) {
     });
   }
 
+  function makeBoundingBoxAxisLabelAnchors(ratios) {
+    var rx = 10 * ratios[0];
+    var ry = 10 * ratios[1];
+    var rz = 10 * ratios[2];
+    var offset = 1.2;
+    return [
+      {
+        text: xAxisLabelText,
+        fontSize: xAxisLabelFontSize,
+        fill: xAxisLabelFill,
+        // Center of x-edge used for box ticks: y = -ry, z = -rz
+        p: { x: 0, y: -ry - offset, z: -rz - offset }
+      },
+      {
+        text: yAxisLabelText,
+        fontSize: yAxisLabelFontSize,
+        fill: yAxisLabelFill,
+        // Center of y-edge used for box ticks: x = rx, z = -rz
+        p: { x: rx + offset, y: 0, z: -rz - offset }
+      },
+      {
+        text: zAxisLabelText,
+        fontSize: zAxisLabelFontSize,
+        fill: zAxisLabelFill,
+        // Center of z-edge used for box ticks: x = rx, y = -ry
+        p: { x: rx + offset, y: -ry - offset, z: 0 }
+      }
+    ].filter(function(d) { return (d.text || "").length > 0; });
+  }
+
   function makeAxisTicks(ratios) {
     var xValues = d3.ticks(xMin, xMax, 4);
     var yValues = d3.ticks(yMin, yMax, 4);
@@ -278,6 +308,7 @@ function render3DTrajectory(d33dModule, width, height) {
   var axisTicks = makeAxisTicks(boxRatios);
   var boxTicks = makeBoxTicks(boxRatios);
   var boxEdges = makeBoundingBoxEdges(boxRatios);
+  var boxAxisLabelAnchors = makeBoundingBoxAxisLabelAnchors(boxRatios);
   var sceneRadiusSq = 0;
 
   function includeRadiusPoint(p) {
@@ -565,6 +596,27 @@ function render3DTrajectory(d33dModule, width, height) {
         .attr("x2", function(d) { return d.b.x; })
         .attr("y2", function(d) { return d.b.y; });
 
+      var projectedBoxAxisLabels = boxAxisLabelAnchors.map(function(a) {
+        return {
+          text: a.text,
+          fontSize: a.fontSize,
+          fill: a.fill,
+          projected: manualProjectPoint(a.p).projected
+        };
+      });
+
+      svg.selectAll("text.box-axis-label")
+        .data(projectedBoxAxisLabels)
+        .join("text")
+        .attr("class", "box-axis-label")
+        .style("font-size", function(d) { return d.fontSize + "px"; })
+        .style("font-weight", "bold")
+        .style("fill", function(d) { return d.fill; })
+        .attr("x", function(d) { return d.projected.x; })
+        .attr("y", function(d) { return d.projected.y; })
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d.text; });
+
       if (showTicks) {
         var projectedBoxTickSegments = boxTicks.segments.map(function(s) {
           return {
@@ -607,6 +659,7 @@ function render3DTrajectory(d33dModule, width, height) {
       }
     } else {
       svg.selectAll("line.bounding-box").remove();
+      svg.selectAll("text.box-axis-label").remove();
       svg.selectAll("line.box-tick").remove();
       svg.selectAll("text.box-tick-label").remove();
     }
