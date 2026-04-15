@@ -51,7 +51,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          :$tooltip = Whatever,
                          Str :$tooltip-background-color = 'Black',
                          Str :$tooltip-color = 'White',
-                         :$box-ratios is copy = Whatever, #= The value [x, y, z] gives the side-length ratios of the corresponding axes.
+                         :$box-ratios is copy = [1, 1, 0.4], #= The value [x, y, z] gives the side-length ratios of the corresponding axes.
                          :$view-point is copy = Whatever, #= The value [x,y,z] gives the position of the view point relative to the center of the three-dimensional box that contains the objects.
                          :$view-vertical is copy = Whatever, #= Specifies what direction in scaled coordinates should be vertical in the final image.
                          :$margins is copy = Whatever,
@@ -89,7 +89,14 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
 
     # Process box ratios
     if $box-ratios.isa(Whatever) {
-        $box-ratios = [1, 1, 0.4]
+        my $xSpan = @data.map(*<x>); $xSpan = $xSpan.max - $xSpan.min;
+        my $ySpan = @data.map(*<y>); $ySpan = $ySpan.max - $ySpan.min;
+        my $zSpan = @data.map(*<z>); $zSpan = $zSpan.max - $zSpan.min;
+
+        $box-ratios = [$xSpan, $ySpan, $zSpan];
+        if $box-ratios.max > 0 {
+            $box-ratios = $box-ratios <</>> $box-ratios.max
+        }
     }
     die 'The value of $box-ratios is expected a list of three numbers or Whatever.'
     unless $box-ratios ~~ Positional:D && $box-ratios.elems == 3 && $box-ratios.all ~~ Numeric:D;
