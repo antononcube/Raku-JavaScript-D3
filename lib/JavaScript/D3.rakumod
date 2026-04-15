@@ -92,11 +92,13 @@ multi js-d3-list-line-plot($data, *%args) {
 #| Multiple sets of points (or lines) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".
 #| The values of "type" are expected to be one of "line" or "point".
-proto js-d3-list-plot3d($data, |) is export {*}
+proto js-d3-list-point-plot3d($data, |) is export {*}
 
-multi js-d3-list-plot3d($data, *%args) {
+multi js-d3-list-point-plot3d($data, *%args) {
     return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'point');
 }
+
+our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
 
 #============================================================
 #| Makes a list line plot for a list of x-y-z coordinates.
