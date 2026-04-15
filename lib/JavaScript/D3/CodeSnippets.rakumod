@@ -7,7 +7,7 @@ use JavaScript::D3::Utilities;
 #============================================================
 # The core JavaScript code is wrapped with HTML or Jupyter cell pre- and post code.
 
-our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
+our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever, Bool:D :$with-d33d = False) {
 
     if $div-id !~~ Str {
         warn 'The argument div-id is expected to be a string or Whatever' unless $div-id.isa(Whatever);
@@ -19,7 +19,7 @@ our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever) {
     }
 
     my $res =
-            [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format),
+            [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format, :$with-d33d),
              $code,
              JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
 
@@ -70,6 +70,19 @@ my $jsPlotStartingHTML = q:to/END/;
 <!DOCTYPE html>
 <head>
     <script src="https://d3js.org/d3.v7.js"></script>
+</head>
+<body>
+
+<div id="my_dataviz"></div>
+
+<script>
+END
+
+my $jsPlotStartingHTML3D = q:to/END/;
+<!DOCTYPE html>
+<head>
+    <script src="https://d3js.org/d3.v7.js"></script>
+    <script src="https://unpkg.com/d3-3d@2.0.2/build/d3-3d"></script>
 </head>
 <body>
 
@@ -226,8 +239,12 @@ END
 # JavaScript plot and chart snippets accessors
 #============================================================
 
-our sub GetPlotStartingCode(Str $format = 'jupyter') {
-    return $format.lc ∈ <jupyter asis> ?? $jsPlotStarting !! $jsPlotStartingHTML;
+our sub GetPlotStartingCode(Str $format = 'jupyter', Bool:D :$with-d33d = False) {
+    return do if $format.lc ∈ <jupyter asis> {
+        $jsPlotStarting
+    } else {
+        $with-d33d ?? $jsPlotStartingHTML3D !! $jsPlotStartingHTML;
+    }
 }
 
 our sub GetPlotEndingCode(Str $format = 'jupyter') {
