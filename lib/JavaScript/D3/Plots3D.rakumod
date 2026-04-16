@@ -89,7 +89,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
 
     # Process color scheme
     $color-scheme = do given $color-scheme {
-        when $_.isa(Whatever) { 'Set2' }
+        when $_.isa(Whatever) { 'd3.schemeSet2' }
         when $_ ~~ Str:D && $_.starts-with('d3.scheme') { $_ }
         when $_ ~~ Str:D && $_.starts-with('scheme') { 'd3.' ~ $_ }
         when $_ ~~ Str:D { 'd3.scheme' ~ $_.tc; }
