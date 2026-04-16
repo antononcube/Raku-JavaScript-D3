@@ -30,7 +30,7 @@ our multi ListLinePlot3D($data where is-positional-of-lists($data, 3), *%args) {
 our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          Str :$background = 'White',
                          Str :color(:$stroke-color) = 'SteelBlue',
-                         Str :color-palette(:$color-scheme) = 'Set2',
+                         :color-palette(:$color-scheme) is copy = Whatever,
                          :$width = 600,
                          :$height = 400,
                          Str :plot-label(:$title) = '',
@@ -86,6 +86,18 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
 
     # Process margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    # Process color scheme
+    $color-scheme = do given $color-scheme {
+        when $_.isa(Whatever) { 'Set2' }
+        when $_ ~~ Str:D && $_.starts-with('d3.scheme') { $_ }
+        when $_ ~~ Str:D && $_.starts-with('scheme') { 'd3.' ~ $_ }
+        when $_ ~~ Str:D { 'd3.scheme' ~ $_.tc; }
+        when $_ ~~ (Array:D | List:D | Seq:D) { $_.Array.&to-json }
+        default {
+            die 'The value of $color-scheme is expected to be a string, a list of strings, or Whatever.'
+        }
+    }
 
     # Process box ratios
     if $box-ratios.isa(Whatever) {
@@ -175,7 +187,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst(:g, '$POINT_COLOR', '"' ~ $stroke-color ~ '"')
             .subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"')
-            .subst(:g, '$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc )
+            .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
             .subst(:g, '$WIDTH', $width.Str)
