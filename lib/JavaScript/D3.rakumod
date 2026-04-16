@@ -50,10 +50,10 @@ END
 multi js-d3-config(:v(:$d3-version) = 7, :v3d(:$d33d-version) = '2.0.2', Bool:D :$direct = True, Bool:D :$with-d33d = True) is export {
     my $jsCode = $with-d33d ?? $jsD3ConfigCode3D !! $jsD3ConfigCode;
     if $direct {
-        return $jsCode.subst('$VER', $d3-version).substs('$VER_D33D', $d33d-version);
+        return $jsCode.subst('$VER', $d3-version).subst('$VER_D33D', $d33d-version);
     } else {
         return (JavaScript::D3::Plots::GetPlotStartingCode(),
-                $jsD3ConfigCode.subst('$VER', $d3-version).substs('$VER3D', $d33d-version),
+                $jsD3ConfigCode.subst('$VER', $d3-version).subst('$VER3D', $d33d-version),
                 JavaScript::D3::Plots::GetPlotEndingCode(),
         ).join("\n");
     }
