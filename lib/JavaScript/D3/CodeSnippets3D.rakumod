@@ -195,7 +195,7 @@ function render3DTrajectory(d33dModule, width, height) {
     if (!yValues.length) { yValues = [yMin]; }
     if (!zValues.length) { zValues = [zMin]; }
 
-    var tickSize = 0.35;
+    var tickSize = 0.2;
     var labelOffset = 1.1;
     var tickFormat = d3.format(".4~g");
     var segments = [];
