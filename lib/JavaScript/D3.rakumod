@@ -33,16 +33,15 @@ END
 my $jsD3ConfigCode3D = q:to/END/;
 require.config({
   paths: {
-    d3: "https://d3js.org/d3.v$VER.min",
-    d3_3d: "https://unpkg.com/d3-3d@$VER_D33D/build/d3-3d"
+    d3: "https://d3js.org/d3.v7.min",
+    d3_3d: "https://unpkg.com/d3-3d@2.0.2/build/d3-3d"
   }
 });
 
-require(["d3", "d3_3d"], function(d3) {
-  // expose for later JS cells
+require(["d3", "d3_3d"], function(d3, d3_3d) {
   window.d3 = d3;
-  window.d33d = window.d33d || {};
-  console.log("d3:", d3.version, "d3-3d:", Object.keys(window.d33d));
+  window.d33d = d3_3d || window.d33d || {};
+  console.log("d3:", d3.version, "d3_3d:", Object.keys(window.d33d));
 });
 END
 
