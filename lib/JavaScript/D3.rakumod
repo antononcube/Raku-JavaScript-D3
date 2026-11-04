@@ -730,3 +730,94 @@ multi sub js-d3-spirograph(Numeric:D :$k = 2/5,                #= How big the in
     # Graph
     return js-d3-list-line-plot(@points, :$width, :$height, :$axes, |%args);
 }
+
+#============================================================
+#| Applies an XKCD-like SVG filter to a JavaScript::D3 visualization.
+#| The argument is expected to be JavaScript returned in the default
+#| "jupyter" format, or in one of the HTML formats. The modifier is
+#| designed for use in a feed operator:
+#|
+#|     js-d3-box-whisker-chart(@data) ==> js-xkcd-modifier(:roughness(0.035))
+sub js-xkcd-modifier(
+        Str:D $javascript,
+        Numeric:D :$wobble = 10.6,
+        Numeric:D :$roughness = 0.018,
+        Numeric:D :$ink-bleed = 0.35,
+        Numeric:D :$paper-grain = 0.025
+        ) is export {
+
+    die 'js-xkcd-modifier expects JavaScript::D3 output wrapped for Jupyter or HTML.'
+    unless $javascript.contains('}) })(element);') || $javascript.contains('</script>');
+
+    my $filter-code = q:to/END/;
+function applyXkcdFilter(element, options = {}) {
+  if (!(element instanceof SVGElement)) {
+    throw new TypeError("applyXkcdFilter expects an SVG element.");
+  }
+
+  const settings = {
+    wobble: $WOBBLE,
+    roughness: $ROUGHNESS,
+    inkBleed: $INK_BLEED,
+    paperGrain: $PAPER_GRAIN,
+    ...options,
+  };
+  const svg = element instanceof SVGSVGElement ? element : element.ownerSVGElement;
+  if (!svg) throw new Error("The element must belong to an <svg> document.");
+
+  const NS = "http://www.w3.org/2000/svg";
+  const id = `xkcd-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
+  let defs = svg.querySelector(":scope > defs");
+  let createdDefs = false;
+  if (!defs) {
+    defs = document.createElementNS(NS, "defs");
+    svg.prepend(defs);
+    createdDefs = true;
+  }
+
+  const filter = document.createElementNS(NS, "filter");
+  filter.id = id;
+  filter.setAttribute("x", "-10%");
+  filter.setAttribute("y", "-10%");
+  filter.setAttribute("width", "120%");
+  filter.setAttribute("height", "120%");
+  filter.setAttribute("color-interpolation-filters", "sRGB");
+  filter.innerHTML = `
+    <feTurbulence type="fractalNoise" baseFrequency="${settings.roughness}" numOctaves="2" seed="17" stitchTiles="stitch" result="wobbleNoise" />
+    <feDisplacementMap in="SourceGraphic" in2="wobbleNoise" scale="${settings.wobble}" xChannelSelector="R" yChannelSelector="G" result="wobbled" />
+    <feGaussianBlur in="wobbled" stdDeviation="${settings.inkBleed}" result="softInk" />
+    <feComponentTransfer in="softInk" result="roughInk">
+      <feFuncR type="gamma" amplitude="1.08" exponent="0.9" offset="-0.025" />
+      <feFuncG type="gamma" amplitude="1.08" exponent="0.9" offset="-0.025" />
+      <feFuncB type="gamma" amplitude="1.08" exponent="0.9" offset="-0.025" />
+      <feFuncA type="table" tableValues="0 0.08 0.92 1" />
+    </feComponentTransfer>
+    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" seed="29" stitchTiles="stitch" result="paperNoise" />
+    <feColorMatrix in="paperNoise" type="matrix" values="0 0 0 0 0.35 0 0 0 0 0.35 0 0 0 0 0.35 0 0 0 ${settings.paperGrain} 0" result="faintPaperNoise" />
+    <feBlend in="roughInk" in2="faintPaperNoise" mode="multiply" />`;
+  defs.appendChild(filter);
+
+  const previousFilter = element.getAttribute("filter");
+  element.setAttribute("filter", `url(#${id})`);
+  return function removeXkcdFilter() {
+    if (previousFilter === null) element.removeAttribute("filter");
+    else element.setAttribute("filter", previousFilter);
+    filter.remove();
+    if (createdDefs && defs.childElementCount === 0) defs.remove();
+  };
+}
+
+const xkcdTarget = Array.from(document.querySelectorAll("svg")).at(-1);
+if (xkcdTarget) applyXkcdFilter(xkcdTarget);
+END
+
+    $filter-code = $filter-code
+            .subst('$WOBBLE', $wobble.Str)
+            .subst('$ROUGHNESS', $roughness.Str)
+            .subst('$INK_BLEED', $ink-bleed.Str)
+            .subst('$PAPER_GRAIN', $paper-grain.Str);
+
+    return $javascript.contains('}) })(element);')
+            ?? $javascript.subst('}) })(element);', $filter-code ~ "\n}) })(element);")
+            !! $javascript.subst('</script>', $filter-code ~ "\n</script>");
+}
