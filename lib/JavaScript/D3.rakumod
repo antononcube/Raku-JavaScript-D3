@@ -807,7 +807,7 @@ function applyXkcdFilter(element, options = {}) {
   };
 }
 
-const xkcdTarget = Array.from(document.querySelectorAll("svg")).at(-1);
+const xkcdTarget = $XKCD_TARGET;
 if (xkcdTarget) applyXkcdFilter(xkcdTarget);
 END
 
@@ -817,7 +817,20 @@ END
             .subst('$INK_BLEED', $ink-bleed.Str)
             .subst('$PAPER_GRAIN', $paper-grain.Str);
 
-    return $javascript.contains('}) })(element);')
-            ?? $javascript.subst('}) })(element);', $filter-code ~ "\n}) })(element);")
-            !! $javascript.subst('</script>', $filter-code ~ "\n</script>");
+    if $javascript.contains('}) })(element);') {
+        # `require(['d3'], ...)` is asynchronous. Restrict the lookup to the
+        # output container passed to this generated Jupyter cell, rather than
+        # querying the whole document (which could select a later cell's SVG).
+        my $jupyter-filter-code = $filter-code.subst(
+                '$XKCD_TARGET',
+                'Array.from(element.get(0).querySelectorAll("svg")).at(-1)');
+        return $javascript.subst('}) })(element);', $jupyter-filter-code ~ "\n}) })(element);");
+    }
+
+    # Complete HTML output has no Jupyter `element`. Its generated script is
+    # immediately after the visualization's div, so scope the SVG lookup there.
+    my $html-filter-code = $filter-code.subst(
+            '$XKCD_TARGET',
+            'Array.from(document.currentScript.previousElementSibling.querySelectorAll("svg")).at(-1)');
+    return $javascript.subst('</script>', $html-filter-code ~ "\n</script>");
 }

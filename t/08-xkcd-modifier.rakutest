@@ -4,7 +4,7 @@ use v6.d;
 use JavaScript::D3;
 use Test;
 
-plan 6;
+plan 7;
 
 my $plot = js-d3-list-line-plot([1, 3, 2]);
 my $modified = ($plot ==> js-xkcd-modifier(
@@ -16,8 +16,11 @@ my $modified = ($plot ==> js-xkcd-modifier(
 like $modified, / 'function applyXkcdFilter' /, 'adds the filter helper';
 like $modified, / 'roughness: 0.035' /, 'sets roughness';
 like $modified, / 'wobble: 5' /, 'sets wobble';
-like $modified, / 'Array.from(document.querySelectorAll("svg")).at(-1)' /, 'targets the SVG created most recently';
+like $modified, / 'element.get(0).querySelectorAll("svg")' /, 'targets the SVG in this Jupyter output container';
 ok $modified.index('function applyXkcdFilter') < $modified.index('}) })(element);'), 'inserts filter before the Jupyter wrapper closes';
 
 my $box-chart = (js-d3-box-whisker-chart((1..20).List) ==> js-xkcd-modifier(:roughness(0.035)));
 like $box-chart, / 'function applyXkcdFilter' /, 'works with output from another JavaScript::D3 routine';
+
+my $html = (js-d3-list-line-plot([1, 2, 3], :format<html>) ==> js-xkcd-modifier);
+like $html, / 'document.currentScript.previousElementSibling.querySelectorAll("svg")' /, 'scopes complete HTML output to its visualization div';
