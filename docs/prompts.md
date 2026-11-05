@@ -18,3 +18,9 @@ js-d3-box-whisker-chart(random-variate(BetaDistribution.new(120,10), 500))
 ```
 
 ````
+
+## Fix of applying the XKCD filter only to the last cell
+
+```text
+I moved js-xkcd-modifier at the bottom of the file "./libs/JavaScript/D3.rakumod". It seems that in Jupyter notebooks the filter is applied to the last cell output with JavaScript code. I.e. if I evaluate a previous #%js cell with that has XKCD filter the filter is not applied. Can investigate -- see the last two cells in "./docs/XKCD-modifications.ipynb".
+```
