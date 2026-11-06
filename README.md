@@ -1,5 +1,7 @@
 # JavaScript::D3 Raku package
 
+See [the architecture guide](docs/Architecture.md) for the feature-module and rendering boundaries.
+
 This repository has the Raku package for generation of 
 [JavaScript's D3](https://d3js.org/what-is-d3) 
 code for making plots and charts.
