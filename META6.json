@@ -1,62 +1,60 @@
 {
-  "name": "JavaScript::D3",
-  "description": "Generation of JavaScript's D3 code for plots and charts.",
-  "version": "0.3.2",
-  "perl": "6.d",
-  "authors": [
-    "Anton Antonov"
-  ],
-  "auth": "zef:antononcube",
-  "depends": [
-    "JSON::Fast:ver<0.19+>",
-    "Hash::Merge:ver<2.0.0+>:api<2+>",
-    "Statistics::Distributions:ver<0.1.+>",
-    "Data::TypeSystem:ver<0.1.4+>",
-    "FEN::Grammar:ver<0.0.6+>"
-  ],
-  "build-depends": [],
-  "test-depends": [],
-  "provides": {
-    "JavaScript::D3": "lib/JavaScript/D3.rakumod",
-    "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
-    "JavaScript::D3::Chess": "lib/JavaScript/D3/Chess.rakumod",
-    "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
-    "JavaScript::D3::CodeSnippets3D": "lib/JavaScript/D3/CodeSnippets3D.rakumod",
-    "JavaScript::D3::Gauge": "lib/JavaScript/D3/Gauge.rakumod",
-    "JavaScript::D3::Graph": "lib/JavaScript/D3/Graph.rakumod",
-    "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
-    "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
-    "JavaScript::D3::Plots3D": "lib/JavaScript/D3/Plots3D.rakumod",
-    "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
-    "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod",
-    "JavaScript::D3::Utilities": "lib/JavaScript/D3/Utilities.rakumod"
-  },
-  "resources": [
-    "named-colors.json"
-  ],
-  "license": "Artistic-2.0",
-  "tags": [
-    "chart",
-    "chessboard",
-    "cli",
-    "clock",
-    "clock gauge",
-    "code",
-    "d3",
-    "d3.js",
-    "graph",
-    "graph plot",
-    "graphics",
-    "image",
-    "javascript",
-    "js",
-    "koch",
-    "koch curve",
-    "mandala",
-    "mondrian",
-    "scribble",
-    "plot"
-  ],
-  "api": "1",
-  "source-url": "https://github.com/antononcube/Raku-JavaScript-D3"
+    "name": "JavaScript::D3",
+    "description": "Generation of JavaScript's D3 code for plots and charts.",
+    "version": "0.3.3",
+    "authors": [
+        "Anton Antonov"
+    ],
+    "auth": "zef:antononcube",
+    "depends": [
+        "JSON::Fast:ver<0.19+>",
+        "Hash::Merge:ver<2.0.0+>:api<2+>",
+        "Statistics::Distributions:ver<0.1.+>",
+        "Data::TypeSystem:ver<0.1.4+>",
+        "FEN::Grammar:ver<0.0.6+>"
+    ],
+    "build-depends": [],
+    "provides": {
+        "JavaScript::D3": "lib/JavaScript/D3.rakumod",
+        "JavaScript::D3::Charts": "lib/JavaScript/D3/Charts.rakumod",
+        "JavaScript::D3::Chess": "lib/JavaScript/D3/Chess.rakumod",
+        "JavaScript::D3::CodeSnippets": "lib/JavaScript/D3/CodeSnippets.rakumod",
+        "JavaScript::D3::CodeSnippets3D": "lib/JavaScript/D3/CodeSnippets3D.rakumod",
+        "JavaScript::D3::Gauge": "lib/JavaScript/D3/Gauge.rakumod",
+        "JavaScript::D3::Graph": "lib/JavaScript/D3/Graph.rakumod",
+        "JavaScript::D3::Images": "lib/JavaScript/D3/Images.rakumod",
+        "JavaScript::D3::Plots": "lib/JavaScript/D3/Plots.rakumod",
+        "JavaScript::D3::Plots3D": "lib/JavaScript/D3/Plots3D.rakumod",
+        "JavaScript::D3::Predicates": "lib/JavaScript/D3/Predicates.rakumod",
+        "JavaScript::D3::Random": "lib/JavaScript/D3/Random.rakumod",
+        "JavaScript::D3::Utilities": "lib/JavaScript/D3/Utilities.rakumod"
+    },
+    "resources": [
+        "named-colors.json"
+    ],
+    "license": "Artistic-2.0",
+    "tags": [
+        "chart",
+        "chessboard",
+        "cli",
+        "clock",
+        "clock gauge",
+        "code",
+        "d3",
+        "d3.js",
+        "graph",
+        "graph plot",
+        "graphics",
+        "image",
+        "javascript",
+        "js",
+        "koch",
+        "koch curve",
+        "mandala",
+        "mondrian",
+        "scribble",
+        "plot"
+    ],
+    "api": "1",
+    "source-url": "https://github.com/antononcube/Raku-JavaScript-D3"
 }
