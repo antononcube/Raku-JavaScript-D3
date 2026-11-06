@@ -136,23 +136,24 @@ js-d3-graphics --help
 ```
 ```
 # Usage:
-#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
-#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
-#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--title=<Str>] [--x-label=<Str>] [--y-label=<Str>] [--background=<Str>] [--color=<Str>] [--grid-lines] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
+#   js-d3-graphics <cmd> [<points> ...] [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--plot-label|--title=<Str>] [-x|--x-label=<Str>] [-y|--y-label=<Str>] [-b|--background=<Str>] [-c|--color=<Str>] [--grid-lines] [--xkcd|--xckd-modifier] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts.
+#   js-d3-graphics <cmd> <words> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--plot-label|--title=<Str>] [-x|--x-label=<Str>] [-y|--y-label=<Str>] [-b|--background=<Str>] [-c|--color=<Str>] [--grid-lines] [--xkcd|--xckd-modifier] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts by splitting a string of data points.
+#   js-d3-graphics <cmd> [-w|--width[=UInt]] [-h|--height[=UInt]] [-t|--plot-label|--title=<Str>] [-x|--x-label=<Str>] [-y|--y-label=<Str>] [-b|--background=<Str>] [-c|--color=<Str>] [--grid-lines] [--xkcd|--xckd-modifier] [--margins[=UInt]] [--format=<Str>] -- Generates HTML document code with D3.js plots or charts from pipeline input.
 #   
-#     <cmd>                 Graphics command.
-#     [<points> ...]        Data points.
-#     -w|--width[=UInt]     Width of the plot. (0 for Whatever.) [default: 800]
-#     -h|--height[=UInt]    Height of the plot. (0 for Whatever.) [default: 600]
-#     -t|--title=<Str>      Title of the plot. [default: '']
-#     --x-label=<Str>       Label of the X-axis. If Whatever, then no label is placed. [default: '']
-#     --y-label=<Str>       Label of the Y-axis. If Whatever, then no label is placed. [default: '']
-#     --background=<Str>    Image background color [default: 'white']
-#     --color=<Str>         Color. [default: 'steelblue']
-#     --grid-lines          Should grid lines be drawn or not? [default: False]
-#     --margins[=UInt]      Size of the top, bottom, left, and right margins. [default: 40]
-#     --format=<Str>        Output format, one of 'jupyter' or 'html'. [default: 'html']
-#     <words>               String with data points.
+#     <cmd>                            Graphics command.
+#     [<points> ...]                   Data points.
+#     -w|--width[=UInt]                Width of the plot. (0 for Whatever.) [default: 800]
+#     -h|--height[=UInt]               Height of the plot. (0 for Whatever.) [default: 600]
+#     -t|--plot-label|--title=<Str>    Title of the plot. [default: '']
+#     -x|--x-label=<Str>               Label of the X-axis. If Whatever, then no label is placed. [default: '']
+#     -y|--y-label=<Str>               Label of the Y-axis. If Whatever, then no label is placed. [default: '']
+#     -b|--background=<Str>            Image background color [default: 'white']
+#     -c|--color=<Str>                 Color. [default: 'steelblue']
+#     --grid-lines                     Should grid lines be drawn or not?wobble [default: False]
+#     --xkcd|--xckd-modifier           Whether to apply the XKCD modifier or not. [default: True]
+#     --margins[=UInt]                 Size of the top, bottom, left, and right margins. [default: 40]
+#     --format=<Str>                   Output format, one of 'jupyter' or 'html'. [default: 'html']
+#     <words>                          String with data points.
 ```
 
 Here is an usage example that produces a list line plot:
@@ -299,19 +300,22 @@ User specified or automatic:
    
 ## Second wave
 
-1. [X] Random Mandala, single plot
+1. [X] DONE Random Mandala, single plot
 
-2. [X] Random mandalas row
+2. [X] DONE Random mandalas row
 
-3. [ ] Random mandalas table/array
+3. [ ] MAYBE Random mandalas table/array
    
-   - (I am not sure I will do this.)
+   - (I am not sure if I will do this.)
    
-4. [X] Random Scribble, single plot 
+4. [X] DONE Random Scribble, single plot 
 
-5. [X] Random Scribbles row 
+5. [X] DONE Random Scribbles row
 
-6. [ ] 3D list plot and 3D list line plot
+6. [X] DONE 3D list plot and 3D list line plot
+
+7. [X] DONE XKCD modifier (or filter)
+
 
 --------
 

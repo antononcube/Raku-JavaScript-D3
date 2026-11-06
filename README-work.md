@@ -267,19 +267,21 @@ User specified or automatic:
    
 ## Second wave
 
-1. [X] Random Mandala, single plot
+1. [X] DONE Random Mandala, single plot
 
-2. [X] Random mandalas row
+2. [X] DONE Random mandalas row
 
-3. [ ] Random mandalas table/array
+3. [ ] MAYBE Random mandalas table/array
    
-   - (I am not sure I will do this.)
+   - (I am not sure if I will do this.)
    
-4. [X] Random Scribble, single plot 
+4. [X] DONE Random Scribble, single plot 
 
-5. [X] Random Scribbles row
+5. [X] DONE Random Scribbles row
 
-6. [ ] 3D list plot and 3D list line plot
+6. [X] DONE 3D list plot and 3D list line plot
+
+7. [X] DONE XKCD modifier (or filter)
 
 
 --------
