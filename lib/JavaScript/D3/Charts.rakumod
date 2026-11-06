@@ -189,6 +189,15 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
 #| Makes a histogram for a list of numbers.
 our proto Histogram($data, |) is export {*}
 
+my @knownCategoricalSchemes = <Category10 Accent Dark2 Observable10 Paired Pastel1 Pastel2 Set1 Set2 Set3 Tableau10>;
+
+sub categorical-scheme(Str:D $color-scheme --> Str:D) {
+    my $scheme = $color-scheme.starts-with('scheme') ?? $color-scheme.substr(6) !! $color-scheme;
+    die "The argument color-scheme is expected to be one of '{@knownCategoricalSchemes.join("', '")}'."
+    unless $scheme ∈ @knownCategoricalSchemes;
+    'scheme' ~ $scheme;
+}
+
 our multi Histogram($data, UInt $number-of-bins, *%args) {
     return Histogram($data, :$number-of-bins, |%args);
 }
@@ -197,11 +206,32 @@ our multi Histogram($data where $data ~~ Seq, *%args) {
     return Histogram($data.List, |%args);
 }
 
+our multi Histogram(@data where @data.all ~~ Positional, *%args) {
+    die 'The argument data is expected to be a non-empty list of non-empty numeric lists.'
+    unless @data.elems > 0 && [&&] @data.map({ $_.elems > 0 && $_.all ~~ Numeric });
+
+    my @series = @data.kv.map(-> $i, $values {
+        %(group => "Series {$i + 1}", values => $values.List)
+    }).Array;
+    grouped-histogram(@series, |%args);
+}
+
+our multi Histogram(@data where @data.all ~~ Map, *%args) {
+    die 'Long-form histogram data is expected to have numeric value and string group fields.'
+    unless @data.elems > 0 && [&&] @data.map({ $_<value> ~~ Numeric && $_<group> ~~ Str:D });
+
+    my %grouped = @data.classify(*<group>);
+    my @series = %grouped.keys.sort.map(-> $group {
+        %(group => $group, values => %grouped{$group}.map(*<value>).List)
+    }).Array;
+    grouped-histogram(@series, |%args);
+}
+
 our multi Histogram(@data where @data.all ~~ Numeric,
                     UInt :bins(:$number-of-bins) = 20,
                     Str :$background= 'white',
                     Str :$color= 'steelblue',
-                    Str :$color-scheme = 'schemeSet2',
+                    Str :color-palette(:$color-scheme) = 'Set2',
                     :$width = 600,
                     :$height = 400,
                     Str :plot-label(:$title) = '',
@@ -239,9 +269,12 @@ our multi Histogram(@data where @data.all ~~ Numeric,
     # Margins
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
+    my $x-axis-grid = $grid-lines[0] > 0 ?? ".ticks($grid-lines[0]).tickSizeInner(-height)" !! '';
+    my $y-axis-grid = $grid-lines[1] > 0 ?? ".ticks($grid-lines[1]).tickSizeInner(-width)" !! '';
+
     # Stencil code
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
-                   JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$grid-lines, JavaScript::D3::CodeSnippets::GetHistogramPart())].join("\n");
+                   JavaScript::D3::CodeSnippets::GetHistogramPart()].join("\n");
 
     # Concrete values
     my $res = $jsChart
@@ -249,7 +282,8 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst('$NUMBER_OF_BINS', $number-of-bins)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
-            .subst(:g, '$COLOR_SCHEME', $color-scheme)
+            .subst('$X_AXIS_GRID', $x-axis-grid)
+            .subst('$Y_AXIS_GRID', $y-axis-grid)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
             .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
@@ -264,6 +298,77 @@ our multi Histogram(@data where @data.all ~~ Numeric,
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
+sub grouped-histogram(@data where @data.all ~~ Map,
+                      UInt :bins(:$number-of-bins) = 20,
+                      Str :$background = 'white',
+                      Str :color-palette(:$color-scheme) = 'Set2',
+                      :$width = 600,
+                      :$height = 400,
+                      Str :plot-label(:$title) = '',
+                      UInt :plot-label-font-size(:$title-font-size) = 16,
+                      Str :plot-label-color(:$title-color) = 'Black',
+                      Str :x-label(:$x-axis-label) = '',
+                      :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                      :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                      Str :y-label(:$y-axis-label) = '',
+                      :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                      :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                      :$grid-lines is copy = False,
+                      :$margins is copy = Whatever,
+                      Bool :$legend = False,
+                      Str :$format = 'jupyter',
+                      :$div-id = Whatever) {
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size);
+
+    die 'Each histogram series is expected to have a group and a non-empty list of numeric values.'
+    unless [&&] @data.map({ $_<group> ~~ Str:D && $_<values> ~~ Positional:D && $_<values>.elems > 0 && $_<values>.all ~~ Numeric });
+
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+    my $scheme = categorical-scheme($color-scheme);
+    if $legend {
+        my $max-group-chars = @data.map(*<group>.chars).max;
+        $margins<right> = max($margins<right>, ($max-group-chars + 4) * 12);
+    }
+    my $x-axis-grid = $grid-lines[0] > 0 ?? ".ticks($grid-lines[0]).tickSizeInner(-height)" !! '';
+    my $y-axis-grid = $grid-lines[1] > 0 ?? ".ticks($grid-lines[1]).tickSizeInner(-width)" !! '';
+
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
+                   JavaScript::D3::CodeSnippets::GetMultiHistogramPart()].join("\n");
+    my $res = $jsChart
+            .subst('$DATA', to-json(@data, :!pretty))
+            .subst('$NUMBER_OF_BINS', $number-of-bins)
+            .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+            .subst('$COLOR_SCHEME', $scheme)
+            .subst('$SHOW_LEGEND', $legend ?? 'true' !! 'false')
+            .subst('$X_AXIS_GRID', $x-axis-grid)
+            .subst('$Y_AXIS_GRID', $y-axis-grid)
+            .subst('$WIDTH', $width.Str)
+            .subst('$HEIGHT', $height.Str)
+            .subst('$TITLE_FONT_SIZE', $title-font-size)
+            .subst('$TITLE_FILL', '"' ~ $title-color ~ '"')
+            .subst('$TITLE', '"' ~ $title ~ '"')
+            .subst('$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
+            .subst('$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')
+            .subst('$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+            .subst('$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
+            .subst('$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
+            .subst('$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst('$MARGINS', to-json($margins):!pretty)
+            .subst('$LEGEND_X_POS', 'width + 12')
+            .subst('$LEGEND_Y_POS', '0')
+            .subst('$LEGEND_Y_GAP', '22');
+
+    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
 

@@ -1025,45 +1025,110 @@ our sub GetBarChartLabelsPart(Bool :$horizontal = False) {
 # See https://d3-graph-gallery.com/graph/histogram_basic.html
 my $jsHistogramPart = q:to/END/;
 // Obtain data
-var data = $DATA
+var data = $DATA;
 
-var valueMin = Math.min.apply(Math, data)
-var valueMax = Math.max.apply(Math, data)
+var valueMin = d3.min(data);
+var valueMax = d3.max(data);
 
-// X axis: scale and draw:
 var x = d3.scaleLinear()
       .domain([valueMin, valueMax])
+      .nice()
       .range([0, width]);
 svg.append("g")
       .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .call(d3.axisBottom(x)$X_AXIS_GRID);
 
-// set the parameters for the histogram
-var histogram = d3.histogram()
-      .value(function(d) { return d; })  // I need to give the vector of value
-      .domain(x.domain())  // then the domain of the graphic
-      .thresholds(x.ticks($NUMBER_OF_BINS)); // then the numbers of bins
+var histogram = d3.bin()
+      .domain(x.domain())
+      .thresholds(x.ticks($NUMBER_OF_BINS));
 
-// And apply this function to data to get the bins
 var bins = histogram(data);
 
-// Y axis: scale and draw:
 var y = d3.scaleLinear()
+      .domain([0, d3.max(bins, function(d) { return d.length; }) || 1])
+      .nice()
       .range([height, 0]);
-      y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
 svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y)$Y_AXIS_GRID);
 
-// append the bar rectangles to the svg element
 svg.selectAll("rect")
       .data(bins)
-      .enter()
-      .append("rect")
+      .join("rect")
         .attr("x", 1)
         .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
-        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("width", function(d) { return Math.max(0, x(d.x1) - x(d.x0) - 1); })
         .attr("height", function(d) { return height - y(d.length); })
-        .style("fill", $FILL_COLOR)
+        .style("fill", $FILL_COLOR);
+END
+
+my $jsMultiHistogramPart = q:to/END/;
+// Obtain named series. Every series uses the same bin edges and scales.
+var series = $DATA;
+var allValues = series.flatMap(function(d) { return d.values; });
+var valueMin = d3.min(allValues);
+var valueMax = d3.max(allValues);
+
+var x = d3.scaleLinear()
+      .domain([valueMin, valueMax])
+      .nice()
+      .range([0, width]);
+svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x)$X_AXIS_GRID);
+
+var histogram = d3.bin()
+      .domain(x.domain())
+      .thresholds(x.ticks($NUMBER_OF_BINS));
+var groupedBins = series.map(function(d) {
+  return { group: d.group, bins: histogram(d.values) };
+});
+var maximumCount = d3.max(groupedBins, function(d) {
+  return d3.max(d.bins, function(bin) { return bin.length; });
+}) || 1;
+
+var y = d3.scaleLinear()
+      .domain([0, maximumCount])
+      .nice()
+      .range([height, 0]);
+svg.append("g")
+      .call(d3.axisLeft(y)$Y_AXIS_GRID);
+
+var myColor = d3.scaleOrdinal()
+      .domain(series.map(function(d) { return d.group; }))
+      .range(d3.$COLOR_SCHEME);
+
+svg.append("g")
+  .selectAll("g.histogram-series")
+  .data(groupedBins)
+  .join("g")
+    .attr("class", "histogram-series")
+    .attr("fill", function(d) { return myColor(d.group); })
+    .attr("fill-opacity", 0.55)
+  .selectAll("rect")
+  .data(function(d) { return d.bins; })
+  .join("rect")
+    .attr("x", function(d) { return x(d.x0) + 1; })
+    .attr("y", function(d) { return y(d.length); })
+    .attr("width", function(d) { return Math.max(0, x(d.x1) - x(d.x0) - 1); })
+    .attr("height", function(d) { return height - y(d.length); });
+
+if ($SHOW_LEGEND) {
+var legend = svg.append("g")
+  .attr("transform", "translate(" + $LEGEND_X_POS + "," + $LEGEND_Y_POS + ")")
+  .selectAll("g")
+  .data(series)
+  .join("g")
+    .attr("transform", function(d, i) { return "translate(0," + i * $LEGEND_Y_GAP + ")"; });
+legend.append("rect")
+  .attr("width", 10)
+  .attr("height", 10)
+  .attr("fill", function(d) { return myColor(d.group); });
+legend.append("text")
+  .attr("x", 14)
+  .attr("y", 9)
+  .style("font-size", "12px")
+  .text(function(d) { return d.group; });
+}
 END
 
 #============================================================
@@ -1072,6 +1137,10 @@ END
 
 our sub GetHistogramPart() {
     return $jsHistogramPart;
+}
+
+our sub GetMultiHistogramPart() {
+    return $jsMultiHistogramPart;
 }
 
 #============================================================

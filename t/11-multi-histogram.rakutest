@@ -1,0 +1,48 @@
+#!/usr/bin/env raku
+use v6.d;
+
+use JavaScript::D3;
+use Test;
+
+plan 20;
+
+my $single = js-d3-histogram([1, 2, 2, 3, 5, 8], :format<asis>, :grid-lines(4, 3));
+like $single, / 'var histogram = d3.bin()' /, 'single histogram uses the D3 v7 bin primitive';
+like $single, / '.ticks(4).tickSizeInner(-height)' /, 'single histogram honors x grid-line count';
+like $single, / '.ticks(3).tickSizeInner(-width)' /, 'single histogram honors y grid-line count';
+unlike $single, / 'data.map(function(o) { return o.x; })' /, 'single histogram does not use the generic x/y plot scaffold';
+
+my @series = [1, 2, 2, 3, 4, 5], [2, 3, 4, 4, 5, 6];
+my $multi = js-d3-histogram(
+        @series,
+        :format<asis>,
+        :number-of-bins(7),
+        :color-palette<Set2>,
+        :legend,
+        :title('Overlaid distributions'));
+
+like $multi, / 'var series = ' /, 'nested lists select the multi-series histogram';
+like $multi, / '"group":"Series 1"' /, 'first list receives a deterministic series label';
+like $multi, / '"group":"Series 2"' /, 'second list receives a deterministic series label';
+like $multi, / '.thresholds(x.ticks(7))' /, 'all series use the requested shared bin count';
+like $multi, / '.range(d3.schemeSet2)' /, 'short palette name is normalized to the D3 categorical palette';
+like $multi, / '.data(groupedBins)' /, 'series are rendered through grouped D3 data joins';
+like $multi, / 'histogram-series' /, 'series bars have a dedicated CSS class';
+like $multi, / 'Overlaid distributions' /, 'multi-series title is bound into JavaScript';
+like $multi, / 'var legend = svg.append' /, 'legend is emitted when requested';
+
+my $dark = js-d3-histogram(@series, :format<asis>, :color-scheme<schemeDark2>);
+like $dark, / '.range(d3.schemeDark2)' /, 'prefixed palette names are preserved';
+like $dark, / 'if (false)' /, 'legend is not rendered unless requested';
+
+my @long-form = %(value => 2.3, group => 'normal'),
+                 %(value => 9.3, group => 'normal'),
+                 %(value => 3.23, group => 'beta'),
+                 %(value => 4.1, group => 'beta');
+my $long = js-d3-histogram(@long-form, :format<asis>, :color-palette<Paired>, :legend);
+like $long, / '"group":"normal"' /, 'long-form data retains the normal group';
+like $long, / '"group":"beta"' /, 'long-form data retains the beta group';
+like $long, / '.range(d3.schemePaired)' /, 'long-form data uses its selected categorical palette';
+like $long, / 'var legend = svg.append' /, 'long-form groups receive a requested legend';
+
+dies-ok { js-d3-histogram(@series, :color-palette<NotAColorScheme>) }, 'unknown categorical palette is rejected';
