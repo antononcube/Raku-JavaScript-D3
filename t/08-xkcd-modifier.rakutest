@@ -4,7 +4,7 @@ use v6.d;
 use JavaScript::D3;
 use Test;
 
-plan 7;
+plan 8;
 
 my $plot = js-d3-list-line-plot([1, 3, 2]);
 my $modified = ($plot ==> js-xkcd-modifier(
@@ -24,3 +24,4 @@ like $box-chart, / 'function applyXkcdFilter' /, 'works with output from another
 
 my $html = (js-d3-list-line-plot([1, 2, 3], :format<html>) ==> js-xkcd-modifier);
 like $html, / 'document.currentScript.previousElementSibling.querySelectorAll("svg")' /, 'scopes complete HTML output to its visualization div';
+ok $html.index('function applyXkcdFilter') > $html.index('var data'), 'inserts the filter into the plot script, after the chart code';
