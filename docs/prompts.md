@@ -43,3 +43,29 @@ Examine the code of this package, "JavaScript::D3", and give suggestions for imp
 Make full, proper implementation of Bin2DChart using D3.js routines or primitives. 
 Follow the style of the other functions.
 ```
+
+----
+
+## Histogram
+
+````text
+Extend the implementation of js-d3-histogram to handle lists of lists as first arguments. For example:
+
+```
+js-d3-histogram(
+    [
+        random-variate(NormalDistribution.new(120,10), 500), 
+        random-variate(BetaDistribution.new(170,10), 500), 
+    ])
+```
+
+The colors of each histogram are assigned by a specified color palette. (E.g. "Set2".)
+```
+
+````text
+I want to also specify in the multiple distribution data in long form:
+```
+[{value => 2.3, group => 'normal'}, {value => 9.3, group => 'normal'}, {value => 3.23, group => 'beta'}, ...]
+```
+The option `:$legend` would show the groups colored according to the applied color scheme.
+````
