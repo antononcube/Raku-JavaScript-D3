@@ -1154,87 +1154,90 @@ our sub GetTooltipMultiBubbleChartPart() {
 # Bind2D code snippets
 #============================================================
 
-# See https://d3-graph-gallery.com/graph/density2d_hexbin.html
 my $jsHexbinChartPart = q:to/END/;
-  // Reformat the data: d3.hexbin() needs a specific format
-  const inputForHexbinFun = []
-  data.forEach(function(d) {
-    inputForHexbinFun.push( [x(d.x), y(d.y)] )  // Note that we had the transform value of X and Y !
-  })
+// Hexagonal binning implemented with D3 scales and data joins only.
+// The optional hexbin plug-in is not included in D3 v7.
+const hexRadius = 10;
+const hexRowStep = Math.sqrt(3) * hexRadius;
+const hexBins = new Map();
 
-  // Prepare a color palette
-  const color = d3.scaleLinear()
-      .domain([0, 500]) // Number of points in the bin?
-      .range(["transparent",  "#69b3a2"])
+data.forEach(function(d) {
+  const px = x(+d.x);
+  const py = y(+d.y);
+  const column = Math.round(px / (1.5 * hexRadius));
+  const row = Math.round((py - (column % 2 ? hexRowStep / 2 : 0)) / hexRowStep);
+  const key = column + "," + row;
+  let bin = hexBins.get(key);
+  if (!bin) {
+    bin = { column: column, row: row, count: 0 };
+    hexBins.set(key, bin);
+  }
+  bin.count += 1;
+});
 
-  // Compute the hexbin data
-  const hexbin = d3.hexbin()
-    .radius(9) // size of the bin in px
-    .extent([ [0, 0], [width, height] ])
+const hexagonData = Array.from(hexBins.values());
+const hexColor = d3.scaleLinear()
+  .domain([0, d3.max(hexagonData, function(d) { return d.count; }) || 1])
+  .range(["transparent", $FILL_COLOR]);
 
-  // Plot the hexbins
-  svg.append("clipPath")
-      .attr("id", "clip")
-    .append("rect")
-      .attr("width", width)
-      .attr("height", height)
+function hexagonPoints(d) {
+  const cx = d.column * 1.5 * hexRadius;
+  const cy = d.row * hexRowStep + (d.column % 2 ? hexRowStep / 2 : 0);
+  return d3.range(6).map(function(i) {
+    const angle = Math.PI / 3 * i;
+    return (cx + hexRadius * Math.cos(angle)) + "," + (cy + hexRadius * Math.sin(angle));
+  }).join(" ");
+}
 
-  svg.append("g")
-    .attr("clip-path", "url(#clip)")
-    .selectAll("path")
-    .data( hexbin(inputForHexbinFun) )
-    .join("path")
-      .attr("d", hexbin.hexagon())
-      .attr("transform", function(d) { return `translate(${d.x}, ${d.y})`})
-      .attr("fill", function(d) { return color(d.length); })
-      .attr("stroke", "black")
-      .attr("stroke-width", "0.1")
+svg.append("g")
+  .selectAll("polygon")
+  .data(hexagonData)
+  .join("polygon")
+    .attr("points", hexagonPoints)
+    .attr("fill", function(d) { return hexColor(d.count); })
+    .attr("stroke", $FILL_COLOR)
+    .attr("stroke-width", 0.25);
 
 END
 
 my $jsRectbinChartPart = q:to/END/;
-  // Reformat the data: d3.rectbin() needs a specific format
-  var inputForRectBinning = []
-  data.forEach(function(d) {
-    inputForRectBinning.push( [+d.x, +d.y] )  // Note that we had the transform value of X and Y !
-  })
+// Rectangular binning implemented with D3 scales and a keyed data join only.
+const rectColumns = Math.max(1, Math.round(Math.sqrt(data.length * width / Math.max(height, 1))));
+const rectRows = Math.max(1, Math.round(data.length / rectColumns));
+const rectXSpan = xMax - xMin || 1;
+const rectYSpan = yMax - yMin || 1;
+const rectXStep = rectXSpan / rectColumns;
+const rectYStep = rectYSpan / rectRows;
+const rectBins = new Map();
 
-  // Compute the rectbin
-  var size = 0.5
-  var rectbinData = d3.rectbin()
-    .dx(size)
-    .dy(size)
-    (inputForRectBinning)
+data.forEach(function(d) {
+  const column = Math.min(rectColumns - 1, Math.max(0, Math.floor((+d.x - xMin) / rectXSpan * rectColumns)));
+  const row = Math.min(rectRows - 1, Math.max(0, Math.floor((+d.y - yMin) / rectYSpan * rectRows)));
+  const key = column + "," + row;
+  let bin = rectBins.get(key);
+  if (!bin) {
+    bin = { x0: xMin + column * rectXStep, y0: yMin + row * rectYStep, count: 0 };
+    rectBins.set(key, bin);
+  }
+  bin.count += 1;
+});
 
-  // Prepare a color palette
-  var color = d3.scaleLinear()
-      .domain([0, 350]) // Number of points in the bin?
-      .range(["transparent",  "#69a3b2"])
+const rectangleData = Array.from(rectBins.values());
+const rectangleColor = d3.scaleLinear()
+  .domain([0, d3.max(rectangleData, function(d) { return d.count; }) || 1])
+  .range(["transparent", $FILL_COLOR]);
 
-  // What is the height of a square in px?
-  heightInPx = y( yLim[1]-size )
-
-  // What is the width of a square in px?
-  var widthInPx = x(xLim[0]+size)
-
-  // Now we can add the squares
-  svg.append("clipPath")
-      .attr("id", "clip")
-    .append("rect")
-      .attr("width", width)
-      .attr("height", height)
-  svg.append("g")
-      .attr("clip-path", "url(#clip)")
-    .selectAll("myRect")
-    .data(rectbinData)
-    .enter().append("rect")
-      .attr("x", function(d) { return x(d.x) })
-      .attr("y", function(d) { return y(d.y) - heightInPx })
-      .attr("width", widthInPx )
-      .attr("height", heightInPx )
-      .attr("fill", function(d) { return color(d.length); })
-      .attr("stroke", "black")
-      .attr("stroke-width", "0.4")
+svg.append("g")
+  .selectAll("rect")
+  .data(rectangleData)
+  .join("rect")
+    .attr("x", function(d) { return x(d.x0); })
+    .attr("y", function(d) { return y(d.y0 + rectYStep); })
+    .attr("width", Math.max(0, x(xMin + rectXStep) - x(xMin)))
+    .attr("height", Math.max(0, y(yMin) - y(yMin + rectYStep)))
+    .attr("fill", function(d) { return rectangleColor(d.count); })
+    .attr("stroke", $FILL_COLOR)
+    .attr("stroke-width", 0.25);
 END
 
 #============================================================

@@ -148,7 +148,7 @@ our multi BarChart(@data is copy where @data.all ~~ Map,
     my $res = $jsChart
             .subst('$DATA', $jsData)
             .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst('$FILL_COLOR', '"' ~ $color ~ '"')
+            .subst(:g, '$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
@@ -585,41 +585,59 @@ our multi Bin2DChart($data where $data ~~ Seq, *%args) {
     return Bin2DChart($data.List, |%args);
 }
 
-our multi Bin2DChart(@data where @data.all ~~ List, *%args) {
+our multi Bin2DChart(@data where @data.all ~~ Positional, *%args) {
+    die 'The argument data is expected to contain coordinate pairs.'
+    unless [&&] @data.map({ $_.elems >= 2 && $_[0] ~~ Numeric && $_[1] ~~ Numeric });
     my @data2 = @data.map({ %( <x y>.Array Z=> $_.Array) });
     return Bin2DChart(@data2, |%args);
 }
 
 our multi Bin2DChart(@data where @data.all ~~ Map,
-                     Str :$background= 'white',
-                     Str :$color= 'steelblue',
-                     :$width = 600,
-                     :$height = 600,
+                     Str :$background = 'white',
+                     Str :$color = 'steelblue',
+                     UInt:D :$width = 600,
+                     UInt:D :$height = 600,
                      Str :plot-label(:$title) = '',
-                     Str :$x-axis-label = '',
-                     UInt :$x-axis-label-font-size = 12;
-                     Str :$x-axis-label-color = 'Black';
-                     Str :$y-axis-label = '',
-                     UInt :$y-axis-label-font-size = 12;
-                     Str :$y-axis-label-color = 'Black';
+                     UInt:D :plot-label-font-size(:$title-font-size) = 16,
+                     Str :plot-label-color(:$title-color) = 'Black',
+                     Str :x-label(:$x-axis-label) = '',
+                     :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                     :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                     Str :y-label(:$y-axis-label) = '',
+                     :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                     :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                      :$grid-lines is copy = False,
                      :$margins is copy = Whatever,
                      :$method is copy = Whatever,
                      Str :$format = 'jupyter',
                      :$div-id = Whatever
                      ) {
-    my $jsData = to-json(@data, :!pretty);
+    die 'The argument data is expected to be non-empty.' unless @data.elems > 0;
+    die 'Every data record is expected to have numeric x and y values.'
+    unless [&&] @data.map({ $_<x> ~~ Numeric && $_<y> ~~ Numeric });
 
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+            JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color,
+            :$title-font-size,
+            :$x-axis-label-color,
+            :$x-axis-label-font-size,
+            :$y-axis-label-color,
+            :$y-axis-label-font-size);
+
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
 
-    if $method.isa(Whatever) {
-        $method = 'rectbin';
-    }
-    die 'The argument method is expected to be one of \'rectbin\', \'hexbin\', or Whatever'
-    unless $method ~~ Str && $method ∈ <rect rectangle rectbin hex hexagon hexbin>;
+    $method = 'rectbin' if $method.isa(Whatever);
+    die 'The argument method is expected to be one of rectbin, hexbin, or an alias of either.'
+    unless $method ~~ Str:D && $method.lc ∈ <rect rectangle rectbin hex hexagon hexbin>;
+    $method = $method.lc ∈ <rect rectangle rectbin> ?? 'rectbin' !! 'hexbin';
 
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format),
-                   $method eq 'rectbin' ?? JavaScript::D3::CodeSnippets::GetRectbinChartPart() !! JavaScript::D3::CodeSnippets::GetHexbinChartPart()].join("\n");
+    my $jsData = to-json(@data, :!pretty);
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines),
+                   $method eq 'rectbin'
+                   ?? JavaScript::D3::CodeSnippets::GetRectbinChartPart()
+                   !! JavaScript::D3::CodeSnippets::GetHexbinChartPart()].join("\n");
 
     my $res = $jsChart
             .subst('$DATA', $jsData)
@@ -627,6 +645,8 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst('$FILL_COLOR', '"' ~ $color ~ '"')
             .subst(:g, '$WIDTH', $width.Str)
             .subst(:g, '$HEIGHT', $height.Str)
+            .subst(:g, '$TITLE_FONT_SIZE', $title-font-size)
+            .subst(:g, '$TITLE_FILL', '"' ~ $title-color ~ '"')
             .subst(:g, '$TITLE', '"' ~ $title ~ '"')
             .subst(:g, '$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size)
             .subst(:g, '$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"')

@@ -1,0 +1,35 @@
+#!/usr/bin/env raku
+use v6.d;
+
+use JavaScript::D3;
+use Test;
+
+plan 13;
+
+my @points = (1, 1), (2, 2), (2.5, 2), (3, 4), (4, 5), (4.5, 5), (5, 7);
+
+my $rect = js-d3-density2d-chart(
+        @points,
+        :format<asis>,
+        :method<rectangle>,
+        :title('Point density'),
+        :x-axis-label<X>,
+        :y-axis-label<Y>,
+        :grid-lines(4, 3));
+
+like $rect, / 'const rectBins = new Map();' /, 'rectbin uses a core JavaScript map for bins';
+like $rect, / '.join("rect")' /, 'rectbin renders with a D3 data join';
+like $rect, / 'var title = "Point density"' /, 'rectbin binds title values';
+like $rect, / '.ticks(4).tickSizeInner(-height)' /, 'rectbin honors x grid-line count';
+like $rect, / '.ticks(3).tickSizeInner(-width)' /, 'rectbin honors y grid-line count';
+unlike $rect, / 'd3.rectbin' /, 'rectbin does not rely on an external D3 plug-in';
+unlike $rect, / '\$TITLE' /, 'rectbin leaves no title placeholder';
+
+my $hex = js-d3-density2d-chart(@points, :format<asis>, :method<hexagon>, :color<tomato>);
+like $hex, / 'const hexBins = new Map();' /, 'hexbin uses a core JavaScript map for bins';
+like $hex, / 'function hexagonPoints' /, 'hexbin generates SVG polygon primitives';
+like $hex, / '.join("polygon")' /, 'hexbin renders with a D3 data join';
+unlike $hex, / 'd3.hexbin' /, 'hexbin does not rely on an external D3 plug-in';
+like $hex, / '"tomato"' /, 'hexbin binds the requested color';
+
+dies-ok { js-d3-density2d-chart(@points, :method<triangle>) }, 'invalid binning method is rejected';
