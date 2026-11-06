@@ -732,18 +732,17 @@ multi sub js-d3-spirograph(Numeric:D :$k = 2/5,                #= How big the in
 }
 
 #============================================================
-#| Applies an XKCD-like SVG filter to a JavaScript::D3 visualization.
+#| Applies an XKCD-like SVG filter to a "JavaScript::D3" visualization.
 #| The argument is expected to be JavaScript returned in the default
 #| "jupyter" format, or in one of the HTML formats. The modifier is
 #| designed for use in a feed operator:
-#|
-#|     js-d3-box-whisker-chart(@data) ==> js-xkcd-modifier(:roughness(0.035))
+#| js-d3-box-whisker-chart(@data) ==> js-xkcd-modifier(:roughness(0.035))
 sub js-xkcd-modifier(
-        Str:D $javascript,
-        Numeric:D :$wobble = 10.6,
-        Numeric:D :$roughness = 0.018,
-        Numeric:D :$ink-bleed = 0.35,
-        Numeric:D :$paper-grain = 0.025
+        Str:D $javascript,               #= String with JavaScript code.
+        Numeric:D :$roughness = 0.018,   #= Roughness.
+        Numeric:D :$wobble = 10.6,       #= Wobbling.
+        Numeric:D :$ink-bleed = 0.35,    #= Ink-bleeding (i.e. Gaussian blur).
+        Numeric:D :$paper-grain = 0.025, #= Paper-graininess (overall).
         ) is export {
 
     die 'js-xkcd-modifier expects JavaScript::D3 output wrapped for Jupyter or HTML.'
