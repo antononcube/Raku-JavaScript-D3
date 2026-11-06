@@ -831,5 +831,10 @@ END
     my $html-filter-code = $filter-code.subst(
             '$XKCD_TARGET',
             'Array.from(document.currentScript.previousElementSibling.querySelectorAll("svg")).at(-1)');
-    return $javascript.subst('</script>', $html-filter-code ~ "\n</script>");
+    # HTML includes an earlier external D3 <script> in <head>. Insert into the
+    # final, inline script that creates the plot, not into that external tag.
+    my $script-end = $javascript.rindex('</script>');
+    return $javascript.substr(0, $script-end)
+            ~ $html-filter-code ~ "\n"
+            ~ $javascript.substr($script-end);
 }
