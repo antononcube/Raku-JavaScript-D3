@@ -4,13 +4,8 @@ use v6.d;
 use Test;
 use JavaScript::D3;
 need JavaScript::D3::Render;
-need JavaScript::D3::Plots::XY;
-need JavaScript::D3::Plots::Heatmap;
-need JavaScript::D3::Charts::Bar;
-need JavaScript::D3::Components::Layout;
-need JavaScript::D3::Templates::XY;
 
-plan 16;
+plan 13;
 
 my $line = js-d3-list-line-plot([1, 3, 2]);
 like $line, / "require(['d3']" /, 'the default output is a Jupyter wrapper';
@@ -35,11 +30,5 @@ like $rendered, / '<div id="render-spec"></div>' /, 'Render owns target creation
 is JavaScript::D3::Render::target-expression(:format<jupyter>), 'element.get(0)', 'Jupyter target expression is explicit';
 is JavaScript::D3::Render::target-expression(:format<html>, :div-id<custom>), 'document.getElementById("custom")', 'HTML target expression is explicit';
 
-my $via-feature-module = JavaScript::D3::Plots::XY::ListLinePlot([1, 3, 2]);
-like $via-feature-module, / 'var lineFunc = d3.line()' /, 'XY feature module preserves line-plot behavior';
-my $heatmap-record = %(x => 1, y => 2, z => 3);
-my @heatmap-data = $heatmap-record,;
-ok JavaScript::D3::Plots::Heatmap::HeatmapPlot(@heatmap-data).chars > 0, 'heatmap feature module is callable';
-ok JavaScript::D3::Charts::Bar::BarChart([1, 2, 3]).chars > 0, 'bar feature module is callable';
-like JavaScript::D3::Components::Layout::margins-and-title(), / 'var margin' /, 'layout component exposes the common scaffold';
-like JavaScript::D3::Templates::XY::line(), / 'd3.line' /, 'XY template exposes the line drawing fragment';
+ok js-d3-config.contains('require(["d3", "d3_3d"]'), 'configuration is delegated to the configuration module';
+like js-d3-config(:!direct), / '}) })(element);' /, 'embedded configuration has a Jupyter wrapper';
