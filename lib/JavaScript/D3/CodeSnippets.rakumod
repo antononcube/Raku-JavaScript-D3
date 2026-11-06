@@ -1,6 +1,7 @@
 unit module JavaScript::D3::CodeSnippets;
 
 use JavaScript::D3::Utilities;
+use JavaScript::D3::Render;
 
 #============================================================
 # Wrapping
@@ -8,45 +9,7 @@ use JavaScript::D3::Utilities;
 # The core JavaScript code is wrapped with HTML or Jupyter cell pre- and post code.
 
 our sub WrapIt(Str $code, Str :$format='jupyter', :$div-id is copy = Whatever, Bool:D :$with-d33d = False) {
-
-    if $div-id !~~ Str {
-        warn 'The argument div-id is expected to be a string or Whatever' unless $div-id.isa(Whatever);
-        $div-id = 'my-dataviz'
-    }
-
-    if $format eq 'asis' {
-        return $code
-    }
-
-    my $res =
-            [JavaScript::D3::CodeSnippets::GetPlotStartingCode($format, :$with-d33d),
-             $code,
-             JavaScript::D3::CodeSnippets::GetPlotEndingCode($format)].join("\n");
-
-
-    $res = do given $format.lc {
-
-        when $_ eq 'html' {
-            $res
-                    .subst(:g, '.select(element.get(0))', '.select("#' ~ $div-id ~ '")')
-                    .subst(:g, / 'element.get(0)' | '"my_dataviz"' /, '"' ~ $div-id ~ '"')
-                    .subst(:g, '"#my_dataviz"', '"#' ~ $div-id ~ '"');
-        }
-
-        when $_ ∈ <html-md html-markdown html-embedded html-fragment> {
-            $res
-                    .subst(:g, / 'element.get(0)' | '"my_dataviz"' /, '"' ~ $div-id ~ '"')
-                    .subst(:g, '"#my_dataviz"', '"#' ~ $div-id ~ '"')
-                    .subst(:g, '<body>')
-                    .subst(:g, '</body>')
-                    .subst(:g, '<!DOCTYPE html>')
-                    .subst(:g, '</html>');
-        }
-
-        default { $res }
-    }
-
-    return $res;
+    JavaScript::D3::Render::wrap($code, :$format, :$div-id, :$with-d33d);
 }
 
 #============================================================

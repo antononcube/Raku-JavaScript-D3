@@ -1,14 +1,29 @@
 unit module JavaScript::D3;
 
-use JavaScript::D3::Charts;
-use JavaScript::D3::Plots;
-use JavaScript::D3::Plots3D;
-use JavaScript::D3::Random;
-use JavaScript::D3::Images;
-use JavaScript::D3::Chess;
-use JavaScript::D3::Gauge;
-use JavaScript::D3::Graph;
-use JavaScript::D3::Utilities;
+need JavaScript::D3::Charts;
+need JavaScript::D3::Plots;
+need JavaScript::D3::Plots3D;
+need JavaScript::D3::Random;
+need JavaScript::D3::Images;
+need JavaScript::D3::Chess;
+need JavaScript::D3::Gauge;
+need JavaScript::D3::Graph;
+need JavaScript::D3::Utilities;
+need JavaScript::D3::Config;
+need JavaScript::D3::Plots::XY;
+need JavaScript::D3::Plots::Date;
+need JavaScript::D3::Plots::Heatmap;
+need JavaScript::D3::Plots::Matrix;
+need JavaScript::D3::Plots::ThreeD;
+need JavaScript::D3::Charts::Bar;
+need JavaScript::D3::Charts::HistogramFeature;
+need JavaScript::D3::Charts::BoxWhisker;
+need JavaScript::D3::Charts::Bubble;
+need JavaScript::D3::Charts::Density2D;
+need JavaScript::D3::Visualizations::Images;
+need JavaScript::D3::Visualizations::Chess;
+need JavaScript::D3::Visualizations::Graph;
+need JavaScript::D3::Visualizations::Gauge;
 use Hash::Merge;
 use JSON::Fast;
 
@@ -19,43 +34,9 @@ our sub resources {
 }
 
 #============================================================
-my $jsD3ConfigCode = q:to/END/;
-require.config({
-     paths: {
-     d3: 'https://d3js.org/d3.v$VER.min'
-}});
-
-require(['d3'], function(d3) {
-     console.log(d3);
-});
-END
-
-my $jsD3ConfigCode3D = q:to/END/;
-require.config({
-  paths: {
-    d3: "https://d3js.org/d3.v7.min",
-    d3_3d: "https://unpkg.com/d3-3d@2.0.2/build/d3-3d"
-  }
-});
-
-require(["d3", "d3_3d"], function(d3, d3_3d) {
-  window.d3 = d3;
-  window.d33d = d3_3d || window.d33d || {};
-  console.log("d3:", d3.version, "d3_3d:", Object.keys(window.d33d));
-});
-END
-
 #| Configuration JavaScript code to be executed in %%javascript magic cell in a Jupyter notebook.
 multi js-d3-config(:v(:$d3-version) = 7, :v3d(:$d33d-version) = '2.0.2', Bool:D :$direct = True, Bool:D :$with-d33d = True) is export {
-    my $jsCode = $with-d33d ?? $jsD3ConfigCode3D !! $jsD3ConfigCode;
-    if $direct {
-        return $jsCode.subst('$VER', $d3-version).subst('$VER_D33D', $d33d-version);
-    } else {
-        return (JavaScript::D3::Plots::GetPlotStartingCode(),
-                $jsD3ConfigCode.subst('$VER', $d3-version).subst('$VER3D', $d33d-version),
-                JavaScript::D3::Plots::GetPlotEndingCode(),
-        ).join("\n");
-    }
+    JavaScript::D3::Config::config(:$d3-version, :$d33d-version, :$direct, :$with-d33d)
 }
 
 #============================================================
@@ -75,7 +56,7 @@ multi sub js-d3-named-colors(*@names, Bool:D :p(:$pairs) = False) {
 proto js-d3-list-plot($data, |) is export {*}
 
 multi js-d3-list-plot($data, *%args) {
-    return JavaScript::D3::Plots::ListPlot($data, |%args);
+    JavaScript::D3::Plots::XY::ListPlot($data, |%args);
 }
 
 #============================================================
@@ -83,7 +64,7 @@ multi js-d3-list-plot($data, *%args) {
 proto js-d3-list-line-plot($data, |) is export {*}
 
 multi js-d3-list-line-plot($data, *%args) {
-    return JavaScript::D3::Plots::ListLinePlot($data, |%args);
+    JavaScript::D3::Plots::XY::ListLinePlot($data, |%args);
 }
 
 #============================================================
@@ -94,7 +75,7 @@ multi js-d3-list-line-plot($data, *%args) {
 proto js-d3-list-point-plot3d($data, |) is export {*}
 
 multi js-d3-list-point-plot3d($data, *%args) {
-    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'point');
+    JavaScript::D3::Plots::ThreeD::ListLinePlot3D($data, |%args, default-type => 'point');
 }
 
 our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
@@ -107,7 +88,7 @@ our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
 proto js-d3-list-line-plot3d($data, |) is export {*}
 
 multi js-d3-list-line-plot3d($data, *%args) {
-    return JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'line');
+    JavaScript::D3::Plots::ThreeD::ListLinePlot3D($data, |%args, default-type => 'line');
 }
 
 #============================================================
@@ -115,7 +96,7 @@ multi js-d3-list-line-plot3d($data, *%args) {
 proto js-d3-date-list-plot($data, |) is export {*}
 
 multi js-d3-date-list-plot($data, *%args) {
-    return JavaScript::D3::Plots::DateListPlot($data, |%args);
+    JavaScript::D3::Plots::Date::DateListPlot($data, |%args);
 }
 
 #============================================================
@@ -123,7 +104,7 @@ multi js-d3-date-list-plot($data, *%args) {
 proto js-d3-bar-chart($data, |) is export {*}
 
 multi js-d3-bar-chart($data, *%args) {
-    return JavaScript::D3::Charts::BarChart($data, |%args);
+    JavaScript::D3::Charts::Bar::BarChart($data, |%args);
 }
 
 #============================================================
@@ -131,11 +112,11 @@ multi js-d3-bar-chart($data, *%args) {
 proto js-d3-histogram($data, |) is export {*}
 
 multi js-d3-histogram($data, UInt $number-of-bins, *%args) {
-    return JavaScript::D3::Charts::Histogram($data, :$number-of-bins, |%args);
+    JavaScript::D3::Charts::HistogramFeature::Histogram($data, :$number-of-bins, |%args);
 }
 
 multi js-d3-histogram($data, *%args) {
-    return JavaScript::D3::Charts::Histogram($data, |%args);
+    JavaScript::D3::Charts::HistogramFeature::Histogram($data, |%args);
 }
 
 #============================================================
@@ -143,7 +124,7 @@ multi js-d3-histogram($data, *%args) {
 proto js-d3-box-whisker-chart($data, |) is export {*}
 
 multi js-d3-box-whisker-chart($data, *%args) {
-    return JavaScript::D3::Charts::BoxWhiskerChart($data, |%args);
+    JavaScript::D3::Charts::BoxWhisker::BoxWhiskerChart($data, |%args);
 }
 
 
@@ -152,7 +133,7 @@ multi js-d3-box-whisker-chart($data, *%args) {
 proto js-d3-bubble-chart($data, |) is export {*}
 
 multi js-d3-bubble-chart($data, *%args) {
-    return JavaScript::D3::Charts::BubbleChart($data, |%args);
+    JavaScript::D3::Charts::Bubble::BubbleChart($data, |%args);
 }
 
 #============================================================
@@ -171,7 +152,7 @@ multi js-d3-density2d-chart($data,
                             :$method = Whatever,
                             Str :$format = 'jupyter',
                             :$div-id = Whatever) {
-    return JavaScript::D3::Charts::Bin2DChart($data,
+    JavaScript::D3::Charts::Density2D::Bin2DChart($data,
             :$background,
             :$color,
             :$width, :$height,
@@ -616,7 +597,7 @@ multi sub js-d3-image-display(
         :$format = 'jupyter',
         :$div-id = Whatever) {
 
-    return JavaScript::D3::Images::ImageDisplay($spec, :$width, :$height, :$format, :$div-id);
+    JavaScript::D3::Visualizations::Images::ImageDisplay($spec, :$width, :$height, :$format, :$div-id);
 }
 
 #============================================================
@@ -633,7 +614,7 @@ multi sub js-d3-image(
         Str :$format = 'jupyter',
         :$div-id = Whatever) {
 
-    return JavaScript::D3::Images::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
+    JavaScript::D3::Visualizations::Images::Image($data, :$color-palette, :$width, :$height, :$low-value, :$high-value, :$format, :$div-id);
 }
 
 #============================================================
@@ -641,7 +622,7 @@ multi sub js-d3-image(
 proto js-d3-heatmap-plot(|) is export {*}
 
 multi sub js-d3-heatmap-plot($data, *%args) {
-    return JavaScript::D3::Plots::HeatmapPlot($data, |%args);
+    JavaScript::D3::Plots::Heatmap::HeatmapPlot($data, |%args);
 }
 
 #============================================================
@@ -649,7 +630,7 @@ multi sub js-d3-heatmap-plot($data, *%args) {
 proto js-d3-matrix-plot(|) is export {*}
 
 multi sub js-d3-matrix-plot($data, *%args) {
-    return JavaScript::D3::Plots::MatrixPlot($data, |%args);
+    JavaScript::D3::Plots::Matrix::MatrixPlot($data, |%args);
 }
 
 #============================================================
@@ -657,10 +638,10 @@ multi sub js-d3-matrix-plot($data, *%args) {
 proto js-d3-chessboard(|) is export {*}
 
 multi sub js-d3-chessboard(*%args) {
-    return JavaScript::D3::Chess::Chessboard(|%args);
+    JavaScript::D3::Visualizations::Chess::Chessboard(|%args);
 }
 multi sub js-d3-chessboard($data, *%args) {
-    return JavaScript::D3::Chess::Chessboard($data, |%args);
+    JavaScript::D3::Visualizations::Chess::Chessboard($data, |%args);
 }
 
 #============================================================
@@ -668,7 +649,7 @@ multi sub js-d3-chessboard($data, *%args) {
 proto js-d3-graph-plot(|) is export {*}
 
 multi sub js-d3-graph-plot($data, *%args) {
-    return JavaScript::D3::Graph::GraphPlot($data, |%args);
+    JavaScript::D3::Visualizations::Graph::GraphPlot($data, |%args);
 }
 
 
@@ -677,7 +658,7 @@ multi sub js-d3-graph-plot($data, *%args) {
 proto js-d3-clock-gauge(|) is export {*}
 
 multi sub js-d3-clock-gauge(*@rgs, *%args) {
-    return JavaScript::D3::Gauge::Clock(|@rgs, |%args);
+    JavaScript::D3::Visualizations::Gauge::Clock(|@rgs, |%args);
 }
 
 #============================================================
