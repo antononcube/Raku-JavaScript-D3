@@ -35,6 +35,8 @@ Examine the code of this package, "JavaScript::D3", and give suggestions for imp
 - Composing JavaScript chunks is adequately modularized
 ```
 
+Most of the refactoring done aftewards was discarded.
+
 ----
 
 ## Bin2DChart
@@ -64,8 +66,52 @@ The colors of each histogram are assigned by a specified color palette. (E.g. "S
 
 ````text
 I want to also specify in the multiple distribution data in long form:
+
 ```
 [{value => 2.3, group => 'normal'}, {value => 9.3, group => 'normal'}, {value => 3.23, group => 'beta'}, ...]
 ```
+
 The option `:$legend` would show the groups colored according to the applied color scheme.
 ````
+
+----
+
+## Parallel axis plot
+
+````text
+Implement `js-d3-parallel-axis-plot` that plots lines between equally spaced parallel lines,
+each corresponding to a data axis. For example:
+
+```raku
+js-d3-parallel-axis-plot((10.rand xx 40).rotor(5))
+```
+
+Implement the multiple datasets version too:
+
+```raku
+my @md-data = (10.rand xx 40).rotor(5), (10.rand xx 20).rotor(5), (10.rand xx 50).rotor(5);
+js-d3-parallel-axis-plot(@md-data)
+```
+
+Should work with long form data too:
+
+```
+[
+    {1 => 2.3, 2 => .23, 3 => 1.45, 4 => 3.2, group => 'first'}, 
+    {1 => 7.3, 2 => .63, 3 => 3.5, 4 => 4.2, group => 'first'}, 
+    {1 => 7.3, 2 => 2.38, 3 => 5.5, 4 => 5.2, group => 'second'}, 
+    ...
+]
+```
+
+The options for color palette, title and axes labels, should correspond to those of `js-d3-list-line-plot`.
+````
+
+```text
+Make sure that datased like this is plotted:
+```
+{bumble => 2.378383132755555, cancel => 8.149281270421287, contributor => 3.26138081729468, nervy => 0.1261034166787256},
+{bumble => 1.7675764038449282, cancel => 3.8843567988217886, contributor => 7.498732703954179, nervy => 8.582488572307456},
+{bumble => 7.636664441265772, cancel => 8.046858250770148, contributor => 6.5016792242452155, nervy => 8.798841831117617},
+```
+```
