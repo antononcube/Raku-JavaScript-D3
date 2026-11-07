@@ -475,6 +475,71 @@ our sub GetMultiPathPlotPart() {
 }
 
 #============================================================
+# ParallelAxisPlot code snippets
+#============================================================
+
+my $jsParallelAxisPlotPart = q:to/END/;
+var data = $DATA;
+var dimensions = $DIMENSIONS;
+
+var x = d3.scalePoint()
+  .domain(dimensions)
+  .range([0, width])
+  .padding(0.5);
+
+var y = {};
+dimensions.forEach(function(d) {
+  y[d] = d3.scaleLinear()
+    .domain(d3.extent(data, function(row) { return +row.values[d]; }))
+    .nice()
+    .range([height, 0]);
+});
+
+var myColor = d3.scaleOrdinal()
+  .domain([...new Set(data.map(function(row) { return row.group; }))])
+  .range(d3.$COLOR_SCHEME);
+
+var axes = svg.selectAll("g.parallel-axis")
+  .data(dimensions)
+  .join("g")
+    .attr("class", "parallel-axis")
+    .attr("transform", function(d) { return "translate(" + x(d) + ",0)"; })
+    .each(function(d) { d3.select(this).call(d3.axisLeft(y[d])$Y_AXIS_GRID); });
+
+axes.selectAll("text")
+  .style("fill", $AXIS_LABEL_COLOR);
+
+axes.append("text")
+  .attr("class", "parallel-axis-title")
+  .attr("y", -10)
+  .attr("text-anchor", "middle")
+  .style("fill", $AXIS_LABEL_COLOR)
+  .style("font-size", "12px")
+  .text(function(d) { return d; });
+
+var line = d3.line()
+  .x(function(d) { return x(d.dimension); })
+  .y(function(d) { return y[d.dimension](d.value); });
+
+svg.append("g")
+  .attr("class", "parallel-lines")
+  .selectAll("path")
+  .data(data)
+  .join("path")
+    .attr("fill", "none")
+    .attr("stroke", function(row) { return $HAS_GROUPS ? myColor(row.group) : $LINE_COLOR; })
+    .attr("stroke-width", $STROKE_WIDTH)
+    .attr("stroke-opacity", 0.7)
+    .attr("d", function(row) {
+      return line(dimensions.map(function(d) { return { dimension: d, value: row.values[d] }; }));
+    });
+END
+
+our sub GetParallelAxisPlotPart() {
+    return $jsParallelAxisPlotPart;
+}
+
+#============================================================
 # DateListPlot code snippets
 #============================================================
 

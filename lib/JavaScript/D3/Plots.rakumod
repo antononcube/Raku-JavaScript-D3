@@ -210,6 +210,141 @@ our multi ListLinePlot($data, *%args) {
 }
 
 #============================================================
+# ParallelAxisPlot
+#============================================================
+
+#| Makes a parallel-axis plot from rows of numeric values, multiple row datasets, or long-form records.
+our proto ParallelAxisPlot($data, |) is export {*}
+
+our multi ParallelAxisPlot($data where $data ~~ Seq, *%options) {
+    ParallelAxisPlot($data.List, |%options);
+}
+
+our multi ParallelAxisPlot(@data where (@data.elems > 0 && [&&] @data.map({
+        $_ ~~ (Positional | Seq) && $_.elems >= 2 && $_.all ~~ Numeric
+    })), *%options) {
+    my @rows = @data.map(*.List);
+    my @dimensions = (1 .. @rows[0].elems).map(*.Str);
+    die 'Each parallel-axis row is expected to have the same number of numeric values.'
+    unless [&&] @rows.map(*.elems == @dimensions.elems);
+
+    my @records = @rows.map({
+        %(values => (@dimensions Z=> $_.List).Hash)
+    }).Array;
+    parallel-axis-render(@records, @dimensions, |%options);
+}
+
+our multi ParallelAxisPlot(@datasets where (@datasets.elems > 0 && [&&] @datasets.map({
+        $_ ~~ (Positional | Seq) && $_.elems > 0 && [&&] $_.map({
+            $_ ~~ (Positional | Seq) && $_.elems >= 2 && $_.all ~~ Numeric
+        })
+    })), *%options) {
+    my @datasets2 = @datasets.map(*.List);
+    my @dimensions = (1 .. @datasets2[0][0].elems).map(*.Str);
+    die 'Each parallel-axis row is expected to have the same number of numeric values.'
+    unless [&&] @datasets2.map({ [&&] $_.map(*.elems == @dimensions.elems) });
+
+    my @records;
+    for @datasets2.kv -> $i, $dataset {
+        @records.append: $dataset.map({
+            %(group => "Series {$i + 1}", values => (@dimensions Z=> $_.List).Hash)
+        });
+    }
+    parallel-axis-render(@records, @dimensions, :has-groups, |%options);
+}
+
+sub parallel-axis-dimensions(%row --> Array:D) {
+    my @keys = %row.keys.grep(* ne 'group').map(*.Str);
+    return ([&&] @keys.map({ so $_ ~~ /^ \d+ $/ }))
+        ?? @keys.sort({ $^a.Numeric <=> $^b.Numeric }).Array
+        !! @keys.sort.Array;
+}
+
+our multi ParallelAxisPlot(@data where (@data.elems > 0 && @data.all ~~ Map), *%options) {
+    my @dimensions = parallel-axis-dimensions(@data[0]);
+    die 'Long-form parallel-axis data is expected to have at least two dimension keys.'
+    unless @dimensions.elems >= 2;
+    die 'Long-form parallel-axis records are expected to have the same dimension keys and numeric values.'
+    unless [&&] @data.map(-> %row {
+        my @keys = parallel-axis-dimensions(%row);
+        @keys eqv @dimensions && [&&] @dimensions.map(-> $dimension { %row{$dimension} ~~ Numeric })
+    });
+
+    my Bool $has-groups = [&&] @data.map({ $_<group> ~~ Str:D });
+    die 'Long-form parallel-axis data either has a string group in every record or none.'
+    unless $has-groups || [&&] @data.map({ !($_<group>:exists) });
+
+    my @records = @data.map(-> %row {
+        %(|(%row<group>:exists ?? %(group => %row<group>) !! Empty),
+          values => (@dimensions Z=> @dimensions.map(-> $dimension { %row{$dimension} })).Hash)
+    }).Array;
+    parallel-axis-render(@records, @dimensions, :$has-groups, |%options);
+}
+
+our multi ParallelAxisPlot($data, *%options) {
+    die 'Parallel-axis data is expected to be numeric rows, multiple numeric-row datasets, or long-form records.';
+}
+
+sub parallel-axis-render(@data, @dimensions,
+                         Bool :$has-groups = False,
+                         Str :$background = 'White',
+                         Str :color(:$stroke-color) = 'SteelBlue',
+                         Str :color-palette(:$color-scheme) = 'Set2',
+                         :$width = 600,
+                         :$height = 400,
+                         Str :plot-label(:$title) = '',
+                         UInt :plot-label-font-size(:$title-font-size) = 16,
+                         Str :plot-label-color(:$title-color) = 'Black',
+                         Str :x-label(:$x-axis-label) = '',
+                         :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                         :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                         Str :y-label(:$y-axis-label) = '',
+                         :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                         :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                         :$grid-lines is copy = False,
+                         :$margins is copy = Whatever,
+                         :$legends = Whatever,
+                         Bool :$legend = False,
+                         Numeric :$stroke-width = 1.5,
+                         Str :$format = 'jupyter',
+                         :$div-id = Whatever) {
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+        JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color, :$title-font-size,
+            :$x-axis-label-color, :$x-axis-label-font-size,
+            :$y-axis-label-color, :$y-axis-label-font-size);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+
+    my Bool $show-legend = $has-groups && ($legend || $legends ~~ Bool:D && $legends || $legends ~~ Whatever);
+    if $show-legend {
+        my $max-group-chars = @data.map(*<group>.chars).max;
+        $margins<right> = max($margins<right>, ($max-group-chars + 4) * 12);
+    }
+    my $y-axis-grid = $grid-lines[1] > 0 ?? ".ticks($grid-lines[1]).tickSize(-width)" !! '';
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
+                   JavaScript::D3::CodeSnippets::GetParallelAxisPlotPart(),
+                   $show-legend ?? JavaScript::D3::CodeSnippets::GetLegendCode() !! ''].join("\n");
+    my $res = $jsChart
+        .subst('$DATA', to-json(@data, :!pretty))
+        .subst('$DIMENSIONS', to-json(@dimensions, :!pretty))
+        .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"')
+        .subst('$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc)
+        .subst('$HAS_GROUPS', $has-groups ?? 'true' !! 'false')
+        .subst('$LINE_COLOR', '"' ~ $stroke-color ~ '"')
+        .subst('$STROKE_WIDTH', $stroke-width)
+        .subst('$Y_AXIS_GRID', $y-axis-grid)
+        .subst(:g, '$AXIS_LABEL_COLOR', '"' ~ $y-axis-label-color ~ '"')
+        .subst('$WIDTH', $width.Str).subst('$HEIGHT', $height.Str)
+        .subst('$TITLE_FONT_SIZE', $title-font-size).subst('$TITLE_FILL', '"' ~ $title-color ~ '"').subst('$TITLE', '"' ~ $title ~ '"')
+        .subst('$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size).subst('$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"').subst('$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+        .subst('$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size).subst('$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"').subst('$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+        .subst('$MARGINS', to-json($margins, :!pretty))
+        .subst(:g, '$LEGEND_X_POS', 'width + 12').subst(:g, '$LEGEND_Y_POS', '0').subst(:g, '$LEGEND_Y_GAP', '22');
+    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
+#============================================================
 # DateListPlot
 #============================================================
 

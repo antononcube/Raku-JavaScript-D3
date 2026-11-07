@@ -1,0 +1,62 @@
+#!/usr/bin/env raku
+use v6.d;
+use Test;
+use JavaScript::D3;
+
+plan 20;
+
+my @rows = (
+    [1, 4, 2, 8],
+    [2, 3, 5, 6],
+    [3, 7, 4, 5],
+);
+my $single = js-d3-parallel-axis-plot(
+    @rows,
+    :format<asis>,
+    :title('Parallel values'),
+    :x-axis-label<Measurements>,
+    :y-axis-label<Value>,
+    :x-axis-label-color<DarkSlateGray>,
+    :y-axis-label-color<DarkSlateGray>,
+    :grid-lines(0, 4),
+    :stroke-width(2));
+
+ok $single.chars > 0, 'numeric rows produce a parallel-axis plot';
+like $single, / 'var dimensions = ["1","2","3","4"]' /, 'row positions become equally spaced dimensions';
+like $single, / 'class", "parallel-axis"' /, 'a D3 axis is rendered for every dimension';
+like $single, / 'class", "parallel-lines"' /, 'observations are rendered as connecting paths';
+like $single, / '.ticks(4).tickSize(-width)' /, 'vertical-axis grid-line count is honored';
+like $single, / '"DarkSlateGray"' /, 'axis labels and dimension labels use the configured axis color';
+like $single, / '"Measurements"' /, 'x-axis label is emitted';
+like $single, / '"Value"' /, 'y-axis label is emitted';
+like $single, / '"Parallel values"' /, 'title is emitted';
+like $single, / '"stroke-width", 2' /, 'stroke width is configurable';
+
+my @multi = @rows, ([8, 2, 6, 3], [7, 4, 1, 5]);
+my $multiple = js-d3-parallel-axis-plot(@multi, :format<asis>, :color-palette<Paired>, :legend);
+like $multiple, / '"group":"Series 1"' /, 'multiple datasets receive stable group names';
+like $multiple, / '"group":"Series 2"' /, 'all multiple datasets are retained';
+like $multiple, / '.range(d3.schemePaired)' /, 'multiple datasets use the requested categorical palette';
+like $multiple, / 'var keys = data.map' /, 'legend is rendered for grouped data';
+
+my @long = (
+    {1 => 2.3, 2 => .23, 3 => 1.45, 4 => 3.2, group => 'first'},
+    {1 => 7.3, 2 => .63, 3 => 3.5, 4 => 4.2, group => 'first'},
+    {1 => 7.3, 2 => 2.38, 3 => 5.5, 4 => 5.2, group => 'second'},
+);
+my $long = js-d3-parallel-axis-plot(@long, :format<asis>, :color-palette<Set2>, :legends);
+like $long, / 'var dimensions = ["1","2","3","4"]' /, 'long-form numeric keys become dimensions';
+like $long, / '"group":"second"' /, 'long-form groups are retained';
+
+my @named = 
+    {bumble => 2.378383132755555, cancel => 8.149281270421287, contributor => 3.26138081729468, nervy => 0.1261034166787256},
+    {bumble => 1.7675764038449282, cancel => 3.8843567988217886, contributor => 7.498732703954179, nervy => 8.582488572307456},
+    {bumble => 7.636664441265772, cancel => 8.046858250770148, contributor => 6.5016792242452155, nervy => 8.798841831117617},
+;
+my $named = js-d3-parallel-axis-plot(@named, :format<asis>);
+like $named, / 'var dimensions = ["bumble","cancel","contributor","nervy"]' /, 'named numeric fields become parallel axes';
+like $named, / '"bumble":2.378383132755555' /, 'named-field values are retained';
+like $named, / 'return false ? myColor(row.group) : "SteelBlue"' /, 'ungrouped named records use the configured single-line color';
+
+dies-ok { js-d3-parallel-axis-plot([[1, 2], [3]]) }, 'ragged numeric rows are rejected';
+

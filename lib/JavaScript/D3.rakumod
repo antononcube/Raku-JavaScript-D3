@@ -54,6 +54,14 @@ multi js-d3-list-line-plot($data, *%args) {
 }
 
 #============================================================
+#| Makes a parallel-axis plot from numeric rows, multiple datasets, or long-form records.
+proto js-d3-parallel-axis-plot($data, |) is export {*}
+
+multi js-d3-parallel-axis-plot($data, *%args) {
+    JavaScript::D3::Plots::ParallelAxisPlot($data, |%args);
+}
+
+#============================================================
 #| Makes a list point plot for a list of x-y-z coordinates.
 #| Multiple sets of points (or lines) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".
