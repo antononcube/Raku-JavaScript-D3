@@ -4,7 +4,7 @@ use v6.d;
 use JavaScript::D3;
 use Test;
 
-plan 20;
+plan 22;
 
 my $single = js-d3-histogram([1, 2, 2, 3, 5, 8], :format<asis>, :grid-lines(4, 3));
 like $single, / 'var histogram = d3.bin()' /, 'single histogram uses the D3 v7 bin primitive';
@@ -18,6 +18,7 @@ my $multi = js-d3-histogram(
         :format<asis>,
         :number-of-bins(7),
         :color-palette<Set2>,
+        :x-axis-label-color<DarkSlateGray>,
         :legend,
         :title('Overlaid distributions'));
 
@@ -30,6 +31,8 @@ like $multi, / '.data(groupedBins)' /, 'series are rendered through grouped D3 d
 like $multi, / 'histogram-series' /, 'series bars have a dedicated CSS class';
 like $multi, / 'Overlaid distributions' /, 'multi-series title is bound into JavaScript';
 like $multi, / 'var legend = svg.append' /, 'legend is emitted when requested';
+ok $multi.contains('translate(" + (width + 12) + "," + (0) + ")'), 'legend position preserves arithmetic grouping';
+ok $multi.contains('.style("fill", "DarkSlateGray")'), 'legend text uses the x-axis label color';
 
 my $dark = js-d3-histogram(@series, :format<asis>, :color-scheme<schemeDark2>);
 like $dark, / '.range(d3.schemeDark2)' /, 'prefixed palette names are preserved';

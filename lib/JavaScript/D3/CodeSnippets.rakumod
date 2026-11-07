@@ -1114,7 +1114,7 @@ svg.append("g")
 
 if ($SHOW_LEGEND) {
 var legend = svg.append("g")
-  .attr("transform", "translate(" + $LEGEND_X_POS + "," + $LEGEND_Y_POS + ")")
+  .attr("transform", "translate(" + ($LEGEND_X_POS) + "," + ($LEGEND_Y_POS) + ")")
   .selectAll("g")
   .data(series)
   .join("g")
@@ -1127,6 +1127,7 @@ legend.append("text")
   .attr("x", 14)
   .attr("y", 9)
   .style("font-size", "12px")
+  .style("fill", $LEGEND_TEXT_COLOR)
   .text(function(d) { return d.group; });
 }
 END

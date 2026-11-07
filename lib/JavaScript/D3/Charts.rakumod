@@ -366,7 +366,8 @@ sub grouped-histogram(@data where @data.all ~~ Map,
             .subst('$MARGINS', to-json($margins):!pretty)
             .subst('$LEGEND_X_POS', 'width + 12')
             .subst('$LEGEND_Y_POS', '0')
-            .subst('$LEGEND_Y_GAP', '22');
+            .subst('$LEGEND_Y_GAP', '22')
+            .subst('$LEGEND_TEXT_COLOR', '"' ~ $x-axis-label-color ~ '"');
 
     JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
