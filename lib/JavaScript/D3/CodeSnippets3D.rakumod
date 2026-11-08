@@ -958,7 +958,7 @@ my $jsSurfacePlotPart = q:to/END/;
         .each(function(d) {
           var item = d3.select(this);
           item.selectAll("rect").data([d]).join("rect").attr("width", 10).attr("height", 10).attr("fill", color(d.group));
-          item.selectAll("text").data([d]).join("text").attr("x", 14).attr("y", 9).attr("font-size", 12).text(d.group);
+          item.selectAll("text").data([d]).join("text").attr("x", 14).attr("y", 9).attr("font-size", 12).attr("fill", $TITLE_COLOR).text(d.group);
         });
     } else {
       svg.selectAll("g.surface-legend").remove();

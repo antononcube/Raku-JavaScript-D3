@@ -103,14 +103,14 @@ our sub SurfacePlot3D($data,
                       UInt :plot-label-font-size(:$title-font-size) = 16,
                       Str :plot-label-color(:$title-color) = 'Black',
                       Numeric :$opacity = 0.72,
-                      Bool:D :$wireframe = True,
+                      Bool:D :mesh(:$wireframe) = True,
                       Numeric :$stroke-width = 0.45,
                       Numeric :$scale = 18,
                       :$box-ratios is copy = [1, 1, 0.4],
                       :$view-point is copy = Whatever,
                       :$view-vertical is copy = Whatever,
                       :$margins is copy = Whatever,
-                      :$legends = Whatever,
+                      :legend(:$legends) = Whatever,
                       Bool:D :zoom(:$zooming-enabled) = False,
                       Bool:D :$axes = False,
                       Bool:D :$boxed = True,
@@ -154,7 +154,7 @@ our sub SurfacePlot3D($data,
         .subst(:g, '$MARGINS', to-json($margins, :!pretty))
         .subst(:g, '$BACKGROUND', $background.raku)
         .subst(:g, '$COLOR_SCHEME', $color-scheme)
-        .subst(:g, '$TITLE_COLOR', $title-color.raku)
+        .subst(:g, '$TITLE_COLOR', $title-color.raku, :g)
         .subst(:g, '$TITLE_FONT_SIZE', $title-font-size, :g)
         .subst(:g, '$TITLE', $title.raku)
         .subst(:g, '$OPACITY', $opacity).subst(:g, '$WIREFRAME', $wireframe ?? 'true' !! 'false')
