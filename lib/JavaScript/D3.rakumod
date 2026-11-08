@@ -62,6 +62,14 @@ multi js-d3-parallel-axis-plot($data, *%args) {
 }
 
 #============================================================
+#| Makes a radial-axis plot from values, pairs, a map, or multiple maps.
+proto js-d3-radial-axis-plot($data, |) is export {*}
+
+multi js-d3-radial-axis-plot($data, *%args) {
+    JavaScript::D3::Plots::RadialAxisPlot($data, |%args);
+}
+
+#============================================================
 #| Makes a list point plot for a list of x-y-z coordinates.
 #| Multiple sets of points (or lines) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".

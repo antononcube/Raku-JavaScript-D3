@@ -1,0 +1,45 @@
+#!/usr/bin/env raku
+use v6.d;
+use Test;
+use JavaScript::D3;
+
+plan 23;
+
+my $list = js-d3-radial-axis-plot([2, 5, 3, 7], :format<asis>, :title<Radar>, :axes);
+ok $list.chars > 0, 'numeric values produce a radial-axis plot';
+like $list, / 'd3.lineRadial()' /, 'uses the D3 radial-line primitive';
+like $list, / '2 * Math.PI * dimensions.indexOf(dimension) / dimensions.length' /, 'axes are equally spaced clockwise from the positive y axis';
+like $list, / 'var dimensions = ["1","2","3","4"]' /, 'list positions label the axes';
+like $list, / 'var domains = [[2,7],[2,7],[2,7],[2,7]]' /, 'the default range is shared by all axes';
+like $list, / '.data(["1","2","3","4"])' /, 'axes true shows every radial axis';
+like $list, / 'd3.range(1, 0 + 1)' /, 'grid lines are configurable';
+like $list, / 'if (!false) { return "none"; }' /, 'filling defaults to false';
+
+my $filled = js-d3-radial-axis-plot([2, 5, 3, 7], :format<asis>, :filling);
+like $filled, / 'if (!true) { return "none"; }' /, 'filling can be enabled';
+like $filled, / '.brighter(0.8).formatHex()' /, 'filled curves use a lighter curve color';
+like $filled, / '"fill-opacity", true ? 0.3 : 0' /, 'filled curves are 0.7 transparent';
+
+my $pairs = js-d3-radial-axis-plot([speed => 3, quality => 8, cost => 2], :format<asis>);
+like $pairs, / 'var dimensions = ["speed","quality","cost"]' /, 'pair keys label the axes';
+
+my $map = js-d3-radial-axis-plot(%(bumble => 2.3, cancel => 'missing', contributor => 8.1), :format<asis>);
+like $map, / 'var dimensions = ["bumble","cancel","contributor"]' /, 'map keys label the axes';
+like $map, / '"cancel":null' /, 'non-numeric map values are represented as missing';
+like $map, / '.data(["bumble"])' /, 'default axes show only one spoke when ranges are shared';
+
+my $per-axis = js-d3-radial-axis-plot(%(a => 1, b => 2, c => 3), :format<asis>, :plot-range(%(a => [0, 2], b => [0, 4], c => [0, 6])));
+like $per-axis, / 'var domains = [[0,2],[0,4],[0,6]]' /, 'per-axis ranges are supported';
+like $per-axis, / '.data(["a","b","c"])' /, 'different ranges show every axis by default';
+
+my $multi = js-d3-radial-axis-plot([%(a => 1, b => 2, c => 3), %(a => 3, b => 2, c => 1)], :format<asis>, :color-palette<Paired>, :legend);
+like $multi, / '"group":"Series 2"' /, 'multiple maps form grouped radial series';
+like $multi, / '.range(d3.schemePaired)' /, 'grouped series use the requested palette';
+like $multi, / 'var keys = data.map' /, 'grouped series can show a legend';
+
+my $vectors = js-d3-radial-axis-plot([[1, 2, 3], [3, 2, 1]], :format<asis>, :color-palette<Set1>, :legend);
+like $vectors, / '"group":"Series 2"' /, 'multiple vectors form grouped radial series';
+like $vectors, / '.range(d3.schemeSet1)' /, 'multiple vectors use the specified palette';
+
+dies-ok { js-d3-radial-axis-plot([]) }, 'empty data is rejected';
+

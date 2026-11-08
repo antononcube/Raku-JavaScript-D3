@@ -540,6 +540,88 @@ our sub GetParallelAxisPlotPart() {
 }
 
 #============================================================
+# RadialAxisPlot code snippets
+#============================================================
+
+my $jsRadialAxisPlotPart = q:to/END/;
+var data = $DATA;
+var dimensions = $DIMENSIONS;
+var domains = $DOMAINS;
+var radius = Math.min(width, height) / 2;
+var center = svg.append("g")
+  .attr("class", "radial-axis-plot")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var angle = function(dimension) {
+  return 2 * Math.PI * dimensions.indexOf(dimension) / dimensions.length;
+};
+var radial = {};
+dimensions.forEach(function(d, i) {
+  radial[d] = d3.scaleLinear().domain(domains[i]).nice().range([0, radius]);
+});
+
+var myColor = d3.scaleOrdinal()
+  .domain([...new Set(data.map(function(row) { return row.group; }))])
+  .range(d3.$COLOR_SCHEME);
+
+center.selectAll("circle.radial-grid")
+  .data(d3.range(1, $GRID_LINES + 1))
+  .join("circle")
+    .attr("class", "radial-grid")
+    .attr("r", function(d) { return radius * d / $GRID_LINES; })
+    .attr("fill", "none")
+    .attr("stroke", "lightgray");
+
+center.selectAll("line.radial-axis")
+  .data($AXIS_DIMENSIONS)
+  .join("line")
+    .attr("class", "radial-axis")
+    .attr("x1", 0).attr("y1", 0)
+    .attr("x2", function(d) { return radius * Math.sin(angle(d)); })
+    .attr("y2", function(d) { return -radius * Math.cos(angle(d)); })
+    .attr("stroke", $AXIS_LABEL_COLOR);
+
+center.selectAll("text.radial-axis-label")
+  .data(dimensions)
+  .join("text")
+    .attr("class", "radial-axis-label")
+    .attr("x", function(d) { return (radius + 12) * Math.sin(angle(d)); })
+    .attr("y", function(d) { return -(radius + 12) * Math.cos(angle(d)); })
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "middle")
+    .style("fill", $AXIS_LABEL_COLOR)
+    .style("font-size", "12px")
+    .text(function(d) { return d; });
+
+var radialLine = d3.lineRadial()
+  .defined(function(d) { return d.value !== null; })
+  .angle(function(d) { return angle(d.dimension); })
+  .radius(function(d) { return radial[d.dimension](d.value); })
+  .curve(d3.curveLinearClosed);
+
+center.selectAll("path.radial-series")
+  .data(data)
+  .join("path")
+    .attr("class", "radial-series")
+    .attr("fill", function(row) {
+      if (!$FILLING) { return "none"; }
+      var color = $HAS_GROUPS ? myColor(row.group) : $LINE_COLOR;
+      return d3.color(color).brighter(0.8).formatHex();
+    })
+    .attr("fill-opacity", $FILLING ? 0.3 : 0)
+    .attr("stroke", function(row) { return $HAS_GROUPS ? myColor(row.group) : $LINE_COLOR; })
+    .attr("stroke-width", $STROKE_WIDTH)
+    .attr("stroke-opacity", 0.7)
+    .attr("d", function(row) {
+      return radialLine(dimensions.map(function(d) { return { dimension: d, value: row.values[d] }; }));
+    });
+END
+
+our sub GetRadialAxisPlotPart() {
+    return $jsRadialAxisPlotPart;
+}
+
+#============================================================
 # DateListPlot code snippets
 #============================================================
 

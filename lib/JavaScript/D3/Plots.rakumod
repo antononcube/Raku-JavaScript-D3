@@ -345,6 +345,136 @@ sub parallel-axis-render(@data, @dimensions,
 }
 
 #============================================================
+# RadialAxisPlot
+#============================================================
+
+#| Makes a radial-axis plot from values, pairs, a map, or multiple maps.
+our proto RadialAxisPlot($data, |) is export {*}
+
+our multi RadialAxisPlot($data where $data ~~ Seq, *%options) {
+    RadialAxisPlot($data.List, |%options);
+}
+
+our multi RadialAxisPlot(@data where (@data.elems > 0 && @data.all ~~ Pair:D), *%options) {
+    my @dimensions = @data.map(*.key.Str);
+    radial-axis-render([%(values => (@dimensions Z=> @data.map(*.value)).Hash)], @dimensions, |%options);
+}
+
+our multi RadialAxisPlot(@datasets where (@datasets.elems > 0 && [&&] @datasets.map({ $_ ~~ (Positional | Seq) })), *%options) {
+    my @datasets2 = @datasets.map(*.List);
+    my @dimensions = (1 .. @datasets2[0].elems).map(*.Str);
+    die 'Each radial-axis vector is expected to have the same number of values.'
+    unless [&&] @datasets2.map(*.elems == @dimensions.elems);
+    my @records = @datasets2.kv.map(-> $i, $values {
+        %(group => "Series {$i + 1}", values => (@dimensions Z=> $values).Hash)
+    }).Array;
+    radial-axis-render(@records, @dimensions, :has-groups, |%options);
+}
+
+our multi RadialAxisPlot(@data where (@data.elems > 0 && !(@data.all ~~ Map) && !([&&] @data.map({ $_ ~~ (Positional | Seq) }))), *%options) {
+    my @dimensions = (1 .. @data.elems).map(*.Str);
+    radial-axis-render([%(values => (@dimensions Z=> @data).Hash)], @dimensions, |%options);
+}
+
+our multi RadialAxisPlot(%data where %data.elems > 0, *%options) {
+    my @dimensions = parallel-axis-dimensions(%data);
+    radial-axis-render([%(values => (@dimensions Z=> @dimensions.map({ %data{$_} })).Hash)], @dimensions, |%options);
+}
+
+our multi RadialAxisPlot(@data where (@data.elems > 0 && @data.all ~~ Map), *%options) {
+    my @dimensions = parallel-axis-dimensions(@data[0]);
+    die 'Each radial-axis dataset is expected to have the same keys.'
+    unless [&&] @data.map({ parallel-axis-dimensions($_) eqv @dimensions });
+    my @records = @data.kv.map(-> $i, %row {
+        %(group => "Series {$i + 1}", values => (@dimensions Z=> @dimensions.map({ %row{$_} })).Hash)
+    }).Array;
+    radial-axis-render(@records, @dimensions, :has-groups, |%options);
+}
+
+sub radial-axis-range(@data, @dimensions, $plot-range --> Array:D) {
+    my @numeric = @data.map(*<values>.values).flat.grep(* ~~ Numeric);
+    my @shared = @numeric.elems ?? (@numeric.min, @numeric.max) !! (0, 1);
+    @shared = (0, @shared[1] == 0 ?? 1 !! @shared[1]) if @shared[0] == @shared[1];
+    given $plot-range {
+        when Whatever { return @dimensions.map({ @shared.Array }).Array; }
+        when Positional && .elems == 2 && .all ~~ Numeric { return @dimensions.map({ $_.List }).Array; }
+        when Map {
+            die 'Each plot-range map value is expected to be a two-number range.'
+            unless [&&] @dimensions.map(-> $dimension {
+                my $range = $plot-range{$dimension};
+                $range ~~ Positional && $range.elems == 2 && $range.all ~~ Numeric
+            });
+            return @dimensions.map({ $plot-range{$_}.List }).Array;
+        }
+        default { die 'The argument plot-range is expected to be a two-number range, a map of ranges, or Whatever.'; }
+    }
+}
+
+sub radial-axis-render(@data, @dimensions,
+                       Bool :$has-groups = False,
+                       Str :$background = 'White',
+                       Str :color(:$stroke-color) = 'SteelBlue',
+                       Str :color-palette(:$color-scheme) = 'Set2',
+                       :$width = 600, :$height = 400,
+                       Str :plot-label(:$title) = '',
+                       UInt :plot-label-font-size(:$title-font-size) = 16,
+                       Str :plot-label-color(:$title-color) = 'Black',
+                       Str :x-label(:$x-axis-label) = '',
+                       :x-label-color(:$x-axis-label-color) is copy = Whatever,
+                       :x-label-font-size(:$x-axis-label-font-size) is copy = Whatever,
+                       Str :y-label(:$y-axis-label) = '',
+                       :y-label-color(:$y-axis-label-color) is copy = Whatever,
+                       :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
+                       :$plot-range = Whatever,
+                       :$axes = Whatever,
+                       :$grid-lines is copy = False,
+                       :$margins is copy = Whatever,
+                       :$legends = Whatever,
+                       Bool :$legend = False,
+                       Bool :$filling = True,
+                       Numeric :$stroke-width = 1.5,
+                       Str :$format = 'jupyter', :$div-id = Whatever) {
+    ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
+        JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
+            :$title-color, :$title-font-size, :$x-axis-label-color, :$x-axis-label-font-size,
+            :$y-axis-label-color, :$y-axis-label-font-size);
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+    $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
+    my @normalized = @data.map(-> %row {
+        %(|(%row<group>:exists ?? %(group => %row<group>) !! Empty),
+          values => (@dimensions Z=> @dimensions.map(-> $d { %row<values>{$d} ~~ Numeric ?? %row<values>{$d} !! Any })).Hash)
+    }).Array;
+    my @domains = radial-axis-range(@normalized, @dimensions, $plot-range);
+    my Bool $same-ranges = [&&] @domains.map({ $_ eqv @domains[0] });
+    my @axis-dimensions = do given $axes {
+        when Bool:D { $_ ?? @dimensions !! () }
+        when Whatever { $same-ranges ?? @dimensions.head !! @dimensions }
+        default { die 'The argument axes is expected to be a Boolean or Whatever.'; }
+    };
+    my Bool $show-legend = $has-groups && ($legend || $legends ~~ Bool:D && $legends || $legends ~~ Whatever);
+    if $show-legend {
+        my $max-group-chars = @normalized.map(*<group>.chars).max;
+        $margins<right> = max($margins<right>, ($max-group-chars + 4) * 12);
+    }
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotMarginsTitleAndLabelsCode($format),
+                   JavaScript::D3::CodeSnippets::GetRadialAxisPlotPart(),
+                   $show-legend ?? JavaScript::D3::CodeSnippets::GetLegendCode() !! ''].join("\n");
+    my $res = $jsChart
+        .subst('$DATA', to-json(@normalized, :!pretty)).subst('$DIMENSIONS', to-json(@dimensions, :!pretty))
+        .subst('$DOMAINS', to-json(@domains, :!pretty)).subst('$AXIS_DIMENSIONS', to-json(@axis-dimensions, :!pretty))
+        .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"').subst('$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc)
+        .subst(:g, '$HAS_GROUPS', $has-groups ?? 'true' !! 'false').subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"').subst('$STROKE_WIDTH', $stroke-width)
+        .subst(:g, '$FILLING', $filling ?? 'true' !! 'false')
+        .subst(:g, '$GRID_LINES', $grid-lines.max)
+        .subst(:g, '$AXIS_LABEL_COLOR', '"' ~ $y-axis-label-color ~ '"').subst('$WIDTH', $width.Str).subst('$HEIGHT', $height.Str)
+        .subst('$TITLE_FONT_SIZE', $title-font-size).subst('$TITLE_FILL', '"' ~ $title-color ~ '"').subst('$TITLE', '"' ~ $title ~ '"')
+        .subst('$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size).subst('$X_AXIS_LABEL_FILL', '"' ~ $x-axis-label-color ~ '"').subst('$X_AXIS_LABEL', '"' ~ $x-axis-label ~ '"')
+        .subst('$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size).subst('$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"').subst('$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+        .subst('$MARGINS', to-json($margins, :!pretty)).subst(:g, '$LEGEND_X_POS', 'width + 12').subst(:g, '$LEGEND_Y_POS', '0').subst(:g, '$LEGEND_Y_GAP', '22');
+    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
+}
+
+#============================================================
 # DateListPlot
 #============================================================
 
