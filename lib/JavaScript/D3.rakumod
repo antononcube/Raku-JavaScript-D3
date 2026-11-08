@@ -83,6 +83,15 @@ multi js-d3-list-point-plot3d($data, *%args) {
 our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
 
 #============================================================
+#| Makes one or more 3D surfaces from numeric height matrices.
+#| A map from group names to matrices, or records with C<<group>> and C<<values>>, produces one surface per group.
+proto js-list-plot3D($data, |) is export {*}
+
+multi js-list-plot3D($data, *%args) {
+    JavaScript::D3::Plots3D::SurfacePlot3D($data, |%args);
+}
+
+#============================================================
 #| Makes a list line plot for a list of x-y-z coordinates.
 #| Multiple lines (or sets of points) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".

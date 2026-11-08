@@ -1,0 +1,19 @@
+#!/usr/bin/env raku
+use v6.d;
+use Test;
+use JavaScript::D3;
+
+plan 7;
+
+my @surface = [[1, 2, 1], [2, 4, 2], [1, 2, 1]];
+my $plot = js-list-plot3D(@surface);
+like $plot, / 'gridPlanes3D' /, 'surface plot uses d3-3d grid planes';
+like $plot, / '"surface"' /, 'a matrix becomes the default surface group';
+like $plot, / '"columns":3' /, 'the grid column count is retained';
+
+my $grouped = js-list-plot3D(%(low => @surface, high => [[4, 5, 4], [5, 7, 5], [4, 5, 4]]));
+like $grouped, / '"low"' /, 'map keys become group names';
+like $grouped, / '"high"' /, 'each group produces a surface';
+like $grouped, / 'surface-legend' /, 'multiple groups show a legend by default';
+
+dies-ok { js-list-plot3D([[1, 2], [3]]) }, 'ragged matrices are rejected';

@@ -770,3 +770,88 @@ END
 our sub GetMultiTrajectoryPlotPart() {
     return $jsMultiTrajectoryPlotPart;
 }
+
+#============================================================
+# SurfacePlot3D code snippets
+#============================================================
+my $jsSurfacePlotPart = q:to/END/;
+(function() {
+  // The notebook configuration sets window.d33d; the standalone UMD build
+  // augments the global d3 object instead.
+  var d33d = window.d33d || window.d3_3d || window.d3 || {};
+  if (!d33d.gridPlanes3D) {
+    d3.select(element.get(0)).append("div")
+      .style("color", "#b00020")
+      .text("d3-3d is not loaded. Prime the notebook with js-d3-config first.");
+    return;
+  }
+
+  var host = d3.select(element.get(0));
+  host.html("");
+  var width = $WIDTH, height = $HEIGHT;
+  var margin = $MARGINS;
+  var surfaces = $DATA;
+  var angleX = 1.15, angleY = 0.25, scale = $SCALE;
+  var origin = { x: width / 2, y: height / 2 };
+  var palette = $COLOR_SCHEME;
+  var color = d3.scaleOrdinal().domain(surfaces.map(function(s) { return s.group; })).range(palette);
+
+  if ($TITLE) {
+    host.append("div").style("font", "$TITLE_FONT_SIZEpx sans-serif")
+      .style("color", $TITLE_COLOR).style("margin-bottom", "6px").text($TITLE);
+  }
+  var svg = host.append("svg").attr("width", width).attr("height", height)
+    .style("display", "block").style("background", $BACKGROUND).style("cursor", "grab");
+
+  function draw() {
+    var faces = [];
+    surfaces.forEach(function(surface) {
+      var renderer = d33d.gridPlanes3D()
+        .rows(surface.columns)
+        .origin(origin)
+        .scale(scale)
+        .rotateX(angleX)
+        .rotateY(angleY);
+      renderer.data(surface.points).forEach(function(face) {
+        faces.push({ face: face, group: surface.group, renderer: renderer });
+      });
+    });
+    // SVG has no depth buffer; this is the painter's ordering for all surfaces.
+    faces.sort(function(a, b) { return d3.ascending(a.face.centroid.z, b.face.centroid.z); });
+
+    svg.selectAll("path.surface-face")
+      .data(faces)
+      .join("path")
+      .attr("class", "surface-face")
+      .attr("d", function(d) { return d.renderer.draw(d.face); })
+      .attr("fill", function(d) { return color(d.group); })
+      .attr("fill-opacity", $OPACITY)
+      .attr("stroke", $WIREFRAME ? function(d) { return color(d.group); } : "none")
+      .attr("stroke-width", $STROKE_WIDTH);
+
+    if ($SHOW_LEGENDS) {
+      svg.selectAll("g.surface-legend").data(surfaces).join("g")
+        .attr("class", "surface-legend")
+        .attr("transform", function(d, i) { return "translate(" + (width - margin.right + 8) + "," + (18 + i * 18) + ")"; })
+        .each(function(d) {
+          var item = d3.select(this);
+          item.selectAll("rect").data([d]).join("rect").attr("width", 10).attr("height", 10).attr("fill", color(d.group));
+          item.selectAll("text").data([d]).join("text").attr("x", 14).attr("y", 9).attr("font-size", 12).text(d.group);
+        });
+    } else {
+      svg.selectAll("g.surface-legend").remove();
+    }
+  }
+
+  draw();
+  var startX, startY, startAngleX, startAngleY;
+  svg.call(d3.drag()
+    .on("start", function(event) { svg.style("cursor", "grabbing"); startX = event.x; startY = event.y; startAngleX = angleX; startAngleY = angleY; })
+    .on("drag", function(event) { angleY = startAngleY + (event.x - startX) * 0.01; angleX = startAngleX - (event.y - startY) * 0.01; draw(); })
+    .on("end", function() { svg.style("cursor", "grab"); }));
+})();
+END
+
+our sub GetSurfacePlotPart() {
+    return $jsSurfacePlotPart;
+}

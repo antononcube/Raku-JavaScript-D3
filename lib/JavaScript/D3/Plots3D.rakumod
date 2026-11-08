@@ -8,6 +8,110 @@ use JavaScript::D3::CodeSnippets3D;
 use JavaScript::D3::Utilities;
 
 #============================================================
+# SurfacePlot3D
+#============================================================
+sub is-surface-matrix($data --> Bool:D) {
+    return False unless $data ~~ Positional:D && $data.elems >= 2;
+    my @rows = $data.List;
+    return False unless @rows.all ~~ Positional:D && @rows[0].elems >= 2;
+    my $columns = @rows[0].elems;
+    for @rows -> $row {
+        return False unless $row.elems == $columns;
+        for $row.List -> $value {
+            return False unless $value ~~ Numeric:D;
+        }
+    }
+    True;
+}
+
+sub surface-specs($data --> Array:D) {
+    if is-surface-matrix($data) {
+        return [%( group => 'surface', values => $data.List )].Array;
+    }
+    if $data ~~ Map:D {
+        my $all-matrices = True;
+        for $data.values -> $matrix {
+            $all-matrices = False unless is-surface-matrix($matrix);
+        }
+        if $all-matrices {
+            return $data.keys.sort.map({ %( group => $_.Str, values => $data{$_}.List ) }).Array;
+        }
+    }
+    if $data ~~ Positional:D && $data.elems > 0 {
+        my @specs = $data.List;
+        my $valid-specs = True;
+        for @specs -> $spec {
+            unless $spec ~~ Map:D {
+                $valid-specs = False;
+                next;
+            }
+            my $has-values = $spec<values>:exists;
+            my $has-matrix = $spec<matrix>:exists;
+            $valid-specs = False unless ($has-values || $has-matrix) && is-surface-matrix($spec<values> // $spec<matrix>);
+        }
+        if $valid-specs {
+            return @specs.map({ %( group => (.<group> // 'surface').Str, values => (.<values> // .<matrix>).List ) }).Array;
+        }
+    }
+    die 'Surface data is expected to be a numeric matrix, a map from group names to matrices, or surface records with group and values keys.';
+}
+
+our sub SurfacePlot3D($data,
+                      Str :$background = 'White',
+                      :color-palette(:$color-scheme) is copy = Whatever,
+                      :$width = 600, :$height = 400,
+                      Str :plot-label(:$title) = '',
+                      UInt :plot-label-font-size(:$title-font-size) = 16,
+                      Str :plot-label-color(:$title-color) = 'Black',
+                      Numeric :$opacity = 0.72,
+                      Bool:D :$wireframe = True,
+                      Numeric :$stroke-width = 0.45,
+                      Numeric :$scale = 18,
+                      :$margins is copy = Whatever,
+                      :$legends = Whatever,
+                      Str :$format = 'jupyter', :$div-id = Whatever --> Str:D) is export {
+    die 'The argument opacity is expected to be in the interval [0, 1].' unless 0 <= $opacity <= 1;
+    die 'The argument scale is expected to be positive.' unless $scale > 0;
+    my @specs = surface-specs($data);
+    my @surfaces;
+    for @specs -> %spec {
+        my @rows = %spec<values>.List;
+        my $columns = @rows[0].elems;
+        my @points;
+        for @rows.kv -> $y, $row {
+            for $row.List.kv -> $x, $z {
+                @points.push(%( x => $x, y => -$y, z => $z ));
+            }
+        }
+        @surfaces.push(%( group => %spec<group>, columns => $columns, points => @points ));
+    }
+    $color-scheme = do given $color-scheme {
+        when $_.isa(Whatever) { 'd3.schemeSet2' }
+        when $_ ~~ Str:D && $_.starts-with('d3.scheme') { $_ }
+        when $_ ~~ Str:D && $_.starts-with('scheme') { 'd3.' ~ $_ }
+        when $_ ~~ Str:D { 'd3.scheme' ~ $_.tc }
+        when $_ ~~ Positional:D { $_.List.&to-json }
+        default { die 'The value of color-scheme is expected to be a D3 scheme name or a list of colors.' }
+    };
+    $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+    my Bool:D $show-legends = $legends ~~ Bool:D ?? $legends !! @surfaces.elems > 1;
+    if $show-legends { $margins<right> = max($margins<right>, 100); }
+    my $res = JavaScript::D3::CodeSnippets3D::GetSurfacePlotPart()
+        .subst(:g, '$DATA', to-json(@surfaces, :!pretty))
+        .subst(:g, '$WIDTH', $width.Str).subst(:g, '$HEIGHT', $height.Str)
+        .subst(:g, '$MARGINS', to-json($margins, :!pretty))
+        .subst(:g, '$BACKGROUND', $background.raku)
+        .subst(:g, '$COLOR_SCHEME', $color-scheme)
+        .subst(:g, '$TITLE_COLOR', $title-color.raku)
+        .subst(:g, '$TITLE_FONT_SIZE', $title-font-size, :g)
+        .subst(:g, '$TITLE', $title.raku)
+        .subst(:g, '$OPACITY', $opacity).subst(:g, '$WIREFRAME', $wireframe ?? 'true' !! 'false')
+        .subst(:g, '$STROKE_WIDTH', $stroke-width).subst(:g, '$SCALE', $scale)
+        .subst(:g, '$SHOW_LEGENDS', $show-legends ?? 'true' !! 'false');
+    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id, :with-d33d);
+}
+
+#============================================================
 # ListPlotGeneric
 #============================================================
 
@@ -185,8 +289,8 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     my $res = $jsScatterPlot
             .subst(:g, '$DATA', $jsData)
             .subst(:g, '$BACKGROUND_COLOR', '"' ~ $background ~ '"')
-            .subst(:g, '$POINT_COLOR', '"' ~ $stroke-color ~ '"')
-            .subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"')
+            .subst(:g, '$POINT_COLOR', '"' ~ $stroke-color ~ '"', :g)
+            .subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"', :g)
             .subst(:g, '$COLOR_SCHEME', $color-scheme)
             .subst(:g, '$POINT_RADIUS', round($point-size / 2))
             .subst(:g, '$STROKE_WIDTH', $stroke-width)
