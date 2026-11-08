@@ -1,7 +1,5 @@
 # JavaScript::D3 Raku package
 
-See [the architecture guide](docs/Architecture.md) for the feature-module and rendering boundaries.
-
 This repository has the Raku package for generation of 
 [JavaScript's D3](https://d3js.org/what-is-d3) 
 code for making plots and charts.
@@ -208,6 +206,10 @@ In the lists below the highest priority items are placed first.
 2. [X] DONE List line plot
 3. [X] DONE Date list plot
 4. [X] DONE Box plot
+5. [X] DONE Parallel-axis plot
+6. [X] DONE Radial-axis plot
+7. [X] DONE List point plot 3D
+8. [X] DONE List plot 3D (for surfaces)
 
 #### Multiple datasets
 
@@ -215,6 +217,10 @@ In the lists below the highest priority items are placed first.
 2. [X] DONE List line plot
 3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
+5. [X] DONE Parallel-axis plot
+6. [X] DONE Radial-axis plot
+7. [X] DONE List point plot 3D
+8. [X] DONE List plot 3D (for surfaces)
 
 ### Graph plots
 
@@ -247,21 +253,23 @@ In the lists below the highest priority items are placed first.
    - [X] DONE Chart label per bar   
 2. [X] DONE Histogram 
 3. [X] DONE Bubble chart
-4. [ ] TODO Density 2D chart -- rectangular bins
-5. [ ] TODO Radar chart 
-6. [ ] TODO Density 2D chart -- hexagonal bins
-7. [ ] TODO Pie chart
-8. [X] DONE Heatmap plot
-9. [X] DONE Chessboard position
+4. [X] DONE Density 2D chart 
+   - Rectangular bins
+   - Hexagonal bins
+5. [X] DONE Heatmap plot
+6. [X] DONE Chessboard position
+7. [ ] TODO Sector chart 
+8. [ ] TODO Pie chart
 
 #### Multiple datasets
 
-1. [X] TODO Bar chart
-2. [ ] TODO Histogram
+1. [X] DONE Bar chart
+2. [X] DONE Histogram
 3. [X] DONE Bubble chart
 4. [X] DONE Bubble chart with tooltips
 5. [ ] TODO Pie chart 
-6. [ ] TODO Radar chart
+6. [ ] TODO Sector chart 
+7. [ ] TODO Radar chart
 
 ### Decorations
 

@@ -173,8 +173,10 @@ In the lists below the highest priority items are placed first.
 2. [X] DONE List line plot
 3. [X] DONE Date list plot
 4. [X] DONE Box plot
-5. [ ] TODO Parallel-axis plot
-6. [ ] TODO Radial-axis plot
+5. [X] DONE Parallel-axis plot
+6. [X] DONE Radial-axis plot
+7. [X] DONE List point plot 3D
+8. [X] DONE List plot 3D (for surfaces)
 
 #### Multiple datasets
 
@@ -182,8 +184,10 @@ In the lists below the highest priority items are placed first.
 2. [X] DONE List line plot
 3. [X] DONE Date list plot 
 4. [ ] TODO Box plot 
-5. [ ] TODO Parallel-axis plot
-6. [ ] TODO Radial-axis plot
+5. [X] DONE Parallel-axis plot
+6. [X] DONE Radial-axis plot
+7. [X] DONE List point plot 3D
+8. [X] DONE List plot 3D (for surfaces)
 
 ### Graph plots
 
