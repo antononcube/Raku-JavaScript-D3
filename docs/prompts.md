@@ -114,4 +114,40 @@ Make sure that datased like this is plotted:
 {bumble => 1.7675764038449282, cancel => 3.8843567988217886, contributor => 7.498732703954179, nervy => 8.582488572307456},
 {bumble => 7.636664441265772, cancel => 8.046858250770148, contributor => 6.5016792242452155, nervy => 8.798841831117617},
 ```
+````
+
+----
+
+## Radial axis plot
+
+````text
+Implement `js-d3-radial-axis-plot` that plots equally spaced radial axes,
+each corresponding to a data element. For example:
+
+```raku
+js-d3-radial-axis-plot([y_1, y_2, ..., y_n])
 ```
+
+Using an array of pairs as argument is equivalent to use using the values of those pairs:
+
+```raku
+js-d3-radial-axis-plot( %( k_1 => y_1, k_2 => y_2, ..., k_n => y_n) )
+```
+
+Same for a hashmap argument -- its values are used for the plot.
+
+- Values y_i that are not numeric are taken to be missing and are not shown.
+- The axes are arranged clockwise starting from the positive y axis.
+- By default, all the axes have the same plot range.
+- With the default setting `plot-ange => Whatever`, all the axes use the same plot range.
+- With `axes => Whatever`, only the first axis will be shown if all of the axes have the same scale and plot range. If there are any differences, all the axes will be shown.
+
+The options for title, axes, legend, etc. are the same as those of `js-d3-parallel-axis-plot`.
+````
+
+````text
+Implement option `filling => True` that can take values `True`, `False`. If `True` the area inside the radial plot curve is filled with the same color as the curve but: 0.8 lighter and 0.7 more transparent.
+
+Also, make the `js-d3-radial-axis-plot` work with multiple vectors (or a list of hashmaps). 
+For each vector have different color. The color of each plot curve is selected according to specified color palette.
+````
