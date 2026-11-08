@@ -80,15 +80,14 @@ multi js-d3-list-point-plot3d($data, *%args) {
     JavaScript::D3::Plots3D::ListLinePlot3D($data, |%args, default-type => 'point');
 }
 
-our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
-
 #============================================================
-#| Makes one or more triangulated 3D surfaces from explicit x-y-z points.
+#| Makes one or more 3D surfaces from explicit x-y-z points or dense height matrices.
+#| A numeric matrix with more than three columns is a regular height grid; exactly three columns are x-y-z triplets.
 #| Points can be numeric triplets or maps with C<<x>>, C<<y>>, and C<<z>> keys.
-#| A C<<group>> key, or a map from group names to point collections, produces one surface per group.
-proto js-list-plot3D($data, |) is export {*}
+#| A C<<group>> key, or a map from group names to surface specifications, produces one surface per group.
+proto js-d3-list-plot3D($data, |) is export {*}
 
-multi js-list-plot3D($data, *%args) {
+multi js-d3-list-plot3D($data, *%args) {
     JavaScript::D3::Plots3D::SurfacePlot3D($data, |%args);
 }
 

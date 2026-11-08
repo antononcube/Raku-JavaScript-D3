@@ -16,34 +16,68 @@ sub surface-point($point --> Map:D) {
         my $has-y = $point<y>:exists;
         my $has-z = $point<z>:exists;
         die 'Each surface point is expected to have numeric x, y, and z values.'
-            unless $has-x && $has-y && $has-z
-                && $point<x> ~~ Numeric:D && $point<y> ~~ Numeric:D && $point<z> ~~ Numeric:D;
+        unless $has-x && $has-y && $has-z
+                && $point<x> ~~ Numeric:D 
+                && $point<y> ~~ Numeric:D 
+                && $point<z> ~~ Numeric:D;
         return %(x => $point<x>, y => $point<y>, z => $point<z>, group => ($point<group> // 'surface').Str);
     }
-    if $point ~~ Positional:D && $point.elems == 3 && $point.all ~~ Numeric:D {
+    if $point ~~ (Positional:D | Seq:D) && $point.elems == 3 && $point.all ~~ Numeric:D {
         return %(x => $point[0], y => $point[1], z => $point[2], group => 'surface');
     }
     die 'Each surface point is expected to be an x-y-z triplet or a map with x, y, and z keys.';
 }
 
+sub is-dense-surface-matrix($data --> Bool:D) {
+    return False unless $data ~~ (Positional:D | Seq:D) && $data.elems >= 2;
+    my @rows = $data.List;
+    return False unless @rows[0] ~~ (Positional:D | Seq:D) && @rows[0].elems > 3;
+    my $columns = @rows[0].elems;
+    for @rows -> $row {
+        return False unless $row ~~ (Positional:D | Seq:D) && $row.elems == $columns && $row.all ~~ Numeric:D;
+    }
+    return True;
+}
+
+sub dense-surface-spec($matrix, Str:D :$group = 'surface' --> Map:D) {
+    my @rows = $matrix.List;
+    my @points;
+    for @rows.kv -> $y, $row {
+        for $row.List.kv -> $x, $z {
+            @points.push(%(x => $x, y => $y, z => $z));
+        }
+    }
+    %(group => $group, points => @points, regular => True, columns => @rows[0].elems, rows => @rows.elems);
+}
+
 sub is-surface-point-collection($data --> Bool:D) {
-    return False unless $data ~~ Positional:D && $data.elems >= 3;
+    return False unless $data ~~ (Positional:D | Seq:D) && $data.elems >= 3;
     try {
-        for $data.List -> $point { surface-point($point); }
+        for $data.Array -> $point { surface-point($point); }
         CATCH { default { return False; } }
     }
     True;
 }
 
 sub surface-specs($data --> Array:D) {
+    if is-dense-surface-matrix($data) {
+        my @specs;
+        @specs.push(dense-surface-spec($data).Hash);
+        return @specs;
+    }
     if $data ~~ Map:D {
-        my $all-point-collections = True;
-        for $data.values -> $points {
-            $all-point-collections = False unless is-surface-point-collection($points);
+        my @specs;
+        for $data.keys.sort -> $group {
+            my $surface = $data{$group};
+            if is-dense-surface-matrix($surface) {
+                @specs.push(dense-surface-spec($surface, :$group).Hash);
+            } elsif is-surface-point-collection($surface) {
+                @specs.push(%(group => $group.Str, points => $surface.List.map({ surface-point($_).antipairs.grep({ .key ne 'group' }).Hash }).Array, regular => False).Hash);
+            } else {
+                die 'Each grouped surface is expected to be a dense numeric matrix with more than three columns, or at least three x-y-z points.';
+            }
         }
-        if $all-point-collections {
-            return $data.keys.sort.map({ %( group => $_.Str, points => $data{$_}.List.map({ surface-point($_) }).Array ) }).Array;
-        }
+        return @specs if @specs.elems > 0;
     }
     if is-surface-point-collection($data) {
         my %groups;
@@ -52,9 +86,13 @@ sub surface-specs($data --> Array:D) {
             %groups{%normalized<group>} //= [];
             %groups{%normalized<group>}.push(%(x => %normalized<x>, y => %normalized<y>, z => %normalized<z>));
         }
-        return %groups.keys.sort.map({ %( group => $_, points => %groups{$_}.Array ) }).Array;
+        my @specs;
+        for %groups.keys.sort -> $group {
+            @specs.push(%(group => $group, points => %groups{$group}.Array, regular => False).Hash);
+        }
+        return @specs;
     }
-    die 'Surface data is expected to be at least three x-y-z points, or a map from group names to such point collections.';
+    die 'Surface data is expected to be at least three x-y-z points, or a dense numeric matrix with more than three columns.';
 }
 
 our sub SurfacePlot3D($data,
@@ -97,7 +135,7 @@ our sub SurfacePlot3D($data,
     my @specs = surface-specs($data);
     my @surfaces;
     for @specs -> %spec {
-        @surfaces.push(%( group => %spec<group>, points => %spec<points> ));
+        @surfaces.push(%spec.Hash);
     }
     $color-scheme = do given $color-scheme {
         when $_.isa(Whatever) { 'd3.schemeSet2' }

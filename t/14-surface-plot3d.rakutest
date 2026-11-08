@@ -1,29 +1,41 @@
 #!/usr/bin/env raku
 use v6.d;
 use Test;
+use JSON::Fast;
 use JavaScript::D3;
 
-plan 22;
+plan 26;
 
 my @surface = [[0, 0, 1], [1, 0, 0], [0, 1, 0]];
-my $plot = js-list-plot3D(@surface);
+my $plot = js-d3-list-plot3D(@surface);
 like $plot, / 'd3.Delaunay.from' /, 'surface plot triangulates explicit points';
 like $plot, / '"surface"' /, 'unlabeled points become the default surface group';
 like $plot, / '"z":1' /, 'triplet values become explicit z coordinates';
+like $plot, / '"regular":false' /, 'three-column numeric rows use irregular treatment';
 
-my $map-plot = js-list-plot3D([
+my $regular = js-d3-list-plot3D([[1, 2, 3, 4], [2, 3, 4, 5], [3, 4, 5, 6]]);
+like $regular, / '"regular":true' /, 'numeric matrices with more than three columns use regular-grid treatment';
+my $surface-line = $regular.lines.first(*.starts-with('  var surfaces = '));
+my @surface-payload = from-json($surface-line.subst('  var surfaces = ', '').subst(/ ';' $/, ''));
+is @surface-payload.elems, 1, 'a regular grid is serialized as one surface object';
+my $has-points = @surface-payload[0]<points>:exists;
+my $has-rows = @surface-payload[0]<rows>:exists;
+my $has-columns = @surface-payload[0]<columns>:exists;
+ok $has-points && $has-rows && $has-columns, 'regular surface object retains its points and dimensions';
+
+my $map-plot = js-d3-list-plot3D([
     {x => 0, y => 0, z => 1}, {x => 1, y => 0, z => 0}, {x => 0, y => 1, z => 0}
 ]);
 ok $map-plot.contains('d3.Delaunay.from'), 'x-y-z maps use the same triangulated-surface renderer as coordinate triplets';
 
-my $grouped = js-list-plot3D(%(low => @surface, high => [[0, 0, 2], [1, 0, 1], [0, 1, 1]]));
+my $grouped = js-d3-list-plot3D(%(low => @surface, high => [[0, 0, 2], [1, 0, 1], [0, 1, 1]]));
 like $grouped, / '"low"' /, 'map keys become group names';
 like $grouped, / '"high"' /, 'each group produces a surface';
 like $grouped, / 'surface-legend' /, 'multiple groups show a legend by default';
 
-dies-ok { js-list-plot3D([[0, 0], [1, 0], [0, 1]]) }, 'points without z coordinates are rejected';
+dies-ok { js-d3-list-plot3D([[0, 0], [1, 0], [0, 1]]) }, 'points without z coordinates are rejected';
 
-my $view-options = js-list-plot3D(
+my $view-options = js-d3-list-plot3D(
     @surface,
     box-ratios => [2, 3, 0.5],
     view-point => [1, -2, 3],
@@ -42,8 +54,8 @@ ok $view-options.contains('cameraForward'), 'surface camera is based on the requ
 like $view-options, / 'selector.split(".")[1]' /, 'frame redraws retain the selected CSS class';
 like $plot, / 'surface-tick-label' /, 'ticks are enabled by default';
 like $plot, / 'd3.ticks(bounds.x0, bounds.x1, 4)' /, 'ticks are derived from the x data range';
-unlike js-list-plot3D(@surface, :!ticks), / 'showTicks = true' /, 'ticks can be disabled';
+unlike js-d3-list-plot3D(@surface, :!ticks), / 'showTicks = true' /, 'ticks can be disabled';
 
-dies-ok { js-list-plot3D(@surface, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
-dies-ok { js-list-plot3D(@surface, view-point => [0, 0, 0]) }, 'zero view point is rejected';
-dies-ok { js-list-plot3D(@surface, view-vertical => [0, 0, 0]) }, 'zero view vertical is rejected';
+dies-ok { js-d3-list-plot3D(@surface, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
+dies-ok { js-d3-list-plot3D(@surface, view-point => [0, 0, 0]) }, 'zero view point is rejected';
+dies-ok { js-d3-list-plot3D(@surface, view-vertical => [0, 0, 0]) }, 'zero view vertical is rejected';

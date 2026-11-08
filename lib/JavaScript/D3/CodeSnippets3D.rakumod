@@ -830,14 +830,23 @@ my $jsSurfacePlotPart = q:to/END/;
                y: map(p.y, bounds.y0, bounds.y1, boxRatios[1]),
                z: map(p.z, bounds.z0, bounds.z1, boxRatios[2]) };
     });
-    var triangulation = d3.Delaunay.from(surface.scenePoints, function(p) { return p.x; }, function(p) { return p.y; });
     surface.faces = [];
-    for (var i = 0; i < triangulation.triangles.length; i += 3) {
-      surface.faces.push([
-        surface.scenePoints[triangulation.triangles[i]],
-        surface.scenePoints[triangulation.triangles[i + 1]],
-        surface.scenePoints[triangulation.triangles[i + 2]]
-      ]);
+    if (surface.regular) {
+      for (var row = 0; row < surface.rows - 1; row++) {
+        for (var column = 0; column < surface.columns - 1; column++) {
+          var index = row * surface.columns + column;
+          surface.faces.push([surface.scenePoints[index], surface.scenePoints[index + 1], surface.scenePoints[index + surface.columns + 1], surface.scenePoints[index + surface.columns]]);
+        }
+      }
+    } else {
+      var triangulation = d3.Delaunay.from(surface.scenePoints, function(p) { return p.x; }, function(p) { return p.y; });
+      for (var i = 0; i < triangulation.triangles.length; i += 3) {
+        surface.faces.push([
+          surface.scenePoints[triangulation.triangles[i]],
+          surface.scenePoints[triangulation.triangles[i + 1]],
+          surface.scenePoints[triangulation.triangles[i + 2]]
+        ]);
+      }
     }
   });
 
