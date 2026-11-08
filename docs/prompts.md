@@ -151,3 +151,16 @@ Implement option `filling => True` that can take values `True`, `False`. If `Tru
 Also, make the `js-d3-radial-axis-plot` work with multiple vectors (or a list of hashmaps). 
 For each vector have different color. The color of each plot curve is selected according to specified color palette.
 ````
+
+````text
+This just plots one axis and a legend, nothing else:
+
+```raku
+js-d3-radial-axis-plot([[3,9,9,7,2],[8,10,0,6,7],[7,10,2,4,3]])
+```
+````
+
+```text
+Make the grid-lines option take not just Boolean but also string shape values "polygon", "circle".
+Add `:$grid-lines-color` option that takes color values.
+```
