@@ -3,20 +3,25 @@ use v6.d;
 use Test;
 use JavaScript::D3;
 
-plan 18;
+plan 22;
 
-my @surface = [[1, 2, 1], [2, 4, 2], [1, 2, 1]];
+my @surface = [[0, 0, 1], [1, 0, 0], [0, 1, 0]];
 my $plot = js-list-plot3D(@surface);
-like $plot, / 'gridPlanes3D' /, 'surface plot uses d3-3d grid planes';
-like $plot, / '"surface"' /, 'a matrix becomes the default surface group';
-like $plot, / '"columns":3' /, 'the grid column count is retained';
+like $plot, / 'd3.Delaunay.from' /, 'surface plot triangulates explicit points';
+like $plot, / '"surface"' /, 'unlabeled points become the default surface group';
+like $plot, / '"z":1' /, 'triplet values become explicit z coordinates';
 
-my $grouped = js-list-plot3D(%(low => @surface, high => [[4, 5, 4], [5, 7, 5], [4, 5, 4]]));
+my $map-plot = js-list-plot3D([
+    {x => 0, y => 0, z => 1}, {x => 1, y => 0, z => 0}, {x => 0, y => 1, z => 0}
+]);
+ok $map-plot.contains('d3.Delaunay.from'), 'x-y-z maps use the same triangulated-surface renderer as coordinate triplets';
+
+my $grouped = js-list-plot3D(%(low => @surface, high => [[0, 0, 2], [1, 0, 1], [0, 1, 1]]));
 like $grouped, / '"low"' /, 'map keys become group names';
 like $grouped, / '"high"' /, 'each group produces a surface';
 like $grouped, / 'surface-legend' /, 'multiple groups show a legend by default';
 
-dies-ok { js-list-plot3D([[1, 2], [3]]) }, 'ragged matrices are rejected';
+dies-ok { js-list-plot3D([[0, 0], [1, 0], [0, 1]]) }, 'points without z coordinates are rejected';
 
 my $view-options = js-list-plot3D(
     @surface,
@@ -35,6 +40,9 @@ like $view-options, / 'showAxes = true' /, 'axes are enabled in the renderer';
 like $view-options, / 'showBoxed = false' /, 'the bounding box can be disabled';
 ok $view-options.contains('cameraForward'), 'surface camera is based on the requested view vectors';
 like $view-options, / 'selector.split(".")[1]' /, 'frame redraws retain the selected CSS class';
+like $plot, / 'surface-tick-label' /, 'ticks are enabled by default';
+like $plot, / 'd3.ticks(bounds.x0, bounds.x1, 4)' /, 'ticks are derived from the x data range';
+unlike js-list-plot3D(@surface, :!ticks), / 'showTicks = true' /, 'ticks can be disabled';
 
 dies-ok { js-list-plot3D(@surface, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
 dies-ok { js-list-plot3D(@surface, view-point => [0, 0, 0]) }, 'zero view point is rejected';

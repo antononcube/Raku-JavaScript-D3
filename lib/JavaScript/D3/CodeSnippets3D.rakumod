@@ -776,13 +776,10 @@ our sub GetMultiTrajectoryPlotPart() {
 #============================================================
 my $jsSurfacePlotPart = q:to/END/;
 (function() {
-  // The notebook configuration sets window.d33d; the standalone UMD build
-  // augments the global d3 object instead.
-  var d33d = window.d33d || window.d3_3d || window.d3 || {};
-  if (!d33d.gridPlanes3D) {
+  if (!d3.Delaunay) {
     d3.select(element.get(0)).append("div")
       .style("color", "#b00020")
-      .text("d3-3d is not loaded. Prime the notebook with js-d3-config first.");
+      .text("This D3 build does not provide Delaunay triangulation.");
     return;
   }
 
@@ -795,7 +792,7 @@ my $jsSurfacePlotPart = q:to/END/;
   var viewPoint = $VIEW_POINT;
   var viewVertical = $VIEW_VERTICAL;
   var scale = $SCALE, initialScale = scale;
-  var zoomingEnabled = $ZOOMING_ENABLED, showAxes = $AXES, showBoxed = $BOXED;
+  var zoomingEnabled = $ZOOMING_ENABLED, showAxes = $AXES, showBoxed = $BOXED, showTicks = $TICKS;
   var origin = { x: width / 2, y: height / 2 };
   var palette = $COLOR_SCHEME;
   var color = d3.scaleOrdinal().domain(surfaces.map(function(s) { return s.group; })).range(palette);
@@ -833,6 +830,15 @@ my $jsSurfacePlotPart = q:to/END/;
                y: map(p.y, bounds.y0, bounds.y1, boxRatios[1]),
                z: map(p.z, bounds.z0, bounds.z1, boxRatios[2]) };
     });
+    var triangulation = d3.Delaunay.from(surface.scenePoints, function(p) { return p.x; }, function(p) { return p.y; });
+    surface.faces = [];
+    for (var i = 0; i < triangulation.triangles.length; i += 3) {
+      surface.faces.push([
+        surface.scenePoints[triangulation.triangles[i]],
+        surface.scenePoints[triangulation.triangles[i + 1]],
+        surface.scenePoints[triangulation.triangles[i + 2]]
+      ]);
+    }
   });
 
   // Camera basis: view-point looks from the center toward the viewer, while
@@ -865,6 +871,33 @@ my $jsSurfacePlotPart = q:to/END/;
     var x = 10 * boxRatios[0], y = 10 * boxRatios[1], z = 10 * boxRatios[2];
     return [[{x:-x,y:0,z:0},{x:x,y:0,z:0}],[{x:0,y:-y,z:0},{x:0,y:y,z:0}],[{x:0,y:0,z:-z},{x:0,y:0,z:z}]];
   }
+  function scaleX(value) { return map(value, bounds.x0, bounds.x1, boxRatios[0]); }
+  function scaleY(value) { return map(value, bounds.y0, bounds.y1, boxRatios[1]); }
+  function scaleZ(value) { return map(value, bounds.z0, bounds.z1, boxRatios[2]); }
+  function makeTicks(boxed) {
+    var xValues = d3.ticks(bounds.x0, bounds.x1, 4);
+    var yValues = d3.ticks(bounds.y0, bounds.y1, 4);
+    var zValues = d3.ticks(bounds.z0, bounds.z1, 4);
+    var format = d3.format(".4~g"), size = boxed ? 0.35 : 0.2, offset = 0.9;
+    var rx = 10 * boxRatios[0], ry = 10 * boxRatios[1], rz = 10 * boxRatios[2];
+    var lines = [], labels = [];
+    xValues.forEach(function(value) {
+      var x = scaleX(value), y = boxed ? -ry : 0, z = boxed ? -rz : 0;
+      lines.push([{x:x,y:y,z:z},{x:x,y:y,z:z + size}]);
+      labels.push({p:{x:x,y:y,z:z - offset}, text:format(value)});
+    });
+    yValues.forEach(function(value) {
+      var x = boxed ? rx : 0, y = scaleY(value), z = boxed ? -rz : 0;
+      lines.push([{x:x,y:y,z:z},{x:x,y:y,z:z + size}]);
+      labels.push({p:{x:x + offset,y:y,z:z}, text:format(value)});
+    });
+    zValues.forEach(function(value) {
+      var x = boxed ? rx : 0, y = boxed ? -ry : 0, z = scaleZ(value);
+      lines.push([{x:x,y:y,z:z},{x:x,y:y + size,z:z}]);
+      labels.push({p:{x:x + offset,y:y,z:z}, text:format(value)});
+    });
+    return { lines: lines, labels: labels };
+  }
   function drawLines(selector, lines, stroke, width) {
     var className = selector.split(".")[1];
     svg.selectAll(selector).data(lines).join("line").attr("class", className)
@@ -876,7 +909,7 @@ my $jsSurfacePlotPart = q:to/END/;
   function draw() {
     var faces = [];
     surfaces.forEach(function(surface) {
-      d33d.gridPlanes3D().rows(surface.columns).data(surface.scenePoints).forEach(function(face) {
+      surface.faces.forEach(function(face) {
         faces.push({ face: face, group: surface.group });
       });
     });
@@ -897,6 +930,17 @@ my $jsSurfacePlotPart = q:to/END/;
     else { svg.selectAll("line.surface-axis").remove(); }
     if (showBoxed) { drawLines("line.surface-box", boxEdges(), "#999", 1); }
     else { svg.selectAll("line.surface-box").remove(); }
+    if (showTicks && (showAxes || showBoxed)) {
+      var ticks = makeTicks(showBoxed);
+      drawLines("line.surface-tick", ticks.lines, "#777", 1);
+      svg.selectAll("text.surface-tick-label").data(ticks.labels).join("text")
+        .attr("class", "surface-tick-label").attr("font-size", 10).attr("fill", "#666")
+        .attr("x", function(d) { return project(d.p).x; }).attr("y", function(d) { return project(d.p).y; })
+        .attr("text-anchor", "middle").text(function(d) { return d.text; });
+    } else {
+      svg.selectAll("line.surface-tick").remove();
+      svg.selectAll("text.surface-tick-label").remove();
+    }
 
     if ($SHOW_LEGENDS) {
       svg.selectAll("g.surface-legend").data(surfaces).join("g")

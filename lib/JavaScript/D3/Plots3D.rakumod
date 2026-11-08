@@ -10,50 +10,51 @@ use JavaScript::D3::Utilities;
 #============================================================
 # SurfacePlot3D
 #============================================================
-sub is-surface-matrix($data --> Bool:D) {
-    return False unless $data ~~ Positional:D && $data.elems >= 2;
-    my @rows = $data.List;
-    return False unless @rows.all ~~ Positional:D && @rows[0].elems >= 2;
-    my $columns = @rows[0].elems;
-    for @rows -> $row {
-        return False unless $row.elems == $columns;
-        for $row.List -> $value {
-            return False unless $value ~~ Numeric:D;
-        }
+sub surface-point($point --> Map:D) {
+    if $point ~~ Map:D {
+        my $has-x = $point<x>:exists;
+        my $has-y = $point<y>:exists;
+        my $has-z = $point<z>:exists;
+        die 'Each surface point is expected to have numeric x, y, and z values.'
+            unless $has-x && $has-y && $has-z
+                && $point<x> ~~ Numeric:D && $point<y> ~~ Numeric:D && $point<z> ~~ Numeric:D;
+        return %(x => $point<x>, y => $point<y>, z => $point<z>, group => ($point<group> // 'surface').Str);
+    }
+    if $point ~~ Positional:D && $point.elems == 3 && $point.all ~~ Numeric:D {
+        return %(x => $point[0], y => $point[1], z => $point[2], group => 'surface');
+    }
+    die 'Each surface point is expected to be an x-y-z triplet or a map with x, y, and z keys.';
+}
+
+sub is-surface-point-collection($data --> Bool:D) {
+    return False unless $data ~~ Positional:D && $data.elems >= 3;
+    try {
+        for $data.List -> $point { surface-point($point); }
+        CATCH { default { return False; } }
     }
     True;
 }
 
 sub surface-specs($data --> Array:D) {
-    if is-surface-matrix($data) {
-        return [%( group => 'surface', values => $data.List )].Array;
-    }
     if $data ~~ Map:D {
-        my $all-matrices = True;
-        for $data.values -> $matrix {
-            $all-matrices = False unless is-surface-matrix($matrix);
+        my $all-point-collections = True;
+        for $data.values -> $points {
+            $all-point-collections = False unless is-surface-point-collection($points);
         }
-        if $all-matrices {
-            return $data.keys.sort.map({ %( group => $_.Str, values => $data{$_}.List ) }).Array;
-        }
-    }
-    if $data ~~ Positional:D && $data.elems > 0 {
-        my @specs = $data.List;
-        my $valid-specs = True;
-        for @specs -> $spec {
-            unless $spec ~~ Map:D {
-                $valid-specs = False;
-                next;
-            }
-            my $has-values = $spec<values>:exists;
-            my $has-matrix = $spec<matrix>:exists;
-            $valid-specs = False unless ($has-values || $has-matrix) && is-surface-matrix($spec<values> // $spec<matrix>);
-        }
-        if $valid-specs {
-            return @specs.map({ %( group => (.<group> // 'surface').Str, values => (.<values> // .<matrix>).List ) }).Array;
+        if $all-point-collections {
+            return $data.keys.sort.map({ %( group => $_.Str, points => $data{$_}.List.map({ surface-point($_) }).Array ) }).Array;
         }
     }
-    die 'Surface data is expected to be a numeric matrix, a map from group names to matrices, or surface records with group and values keys.';
+    if is-surface-point-collection($data) {
+        my %groups;
+        for $data.List -> $point {
+            my %normalized = surface-point($point);
+            %groups{%normalized<group>} //= [];
+            %groups{%normalized<group>}.push(%(x => %normalized<x>, y => %normalized<y>, z => %normalized<z>));
+        }
+        return %groups.keys.sort.map({ %( group => $_, points => %groups{$_}.Array ) }).Array;
+    }
+    die 'Surface data is expected to be at least three x-y-z points, or a map from group names to such point collections.';
 }
 
 our sub SurfacePlot3D($data,
@@ -75,6 +76,7 @@ our sub SurfacePlot3D($data,
                       Bool:D :zoom(:$zooming-enabled) = False,
                       Bool:D :$axes = False,
                       Bool:D :$boxed = True,
+                      Bool:D :$ticks = True,
                       Str :$format = 'jupyter', :$div-id = Whatever --> Str:D) is export {
     
     die 'The argument opacity is expected to be in the interval [0, 1].' unless 0 <= $opacity <= 1;
@@ -95,15 +97,7 @@ our sub SurfacePlot3D($data,
     my @specs = surface-specs($data);
     my @surfaces;
     for @specs -> %spec {
-        my @rows = %spec<values>.List;
-        my $columns = @rows[0].elems;
-        my @points;
-        for @rows.kv -> $y, $row {
-            for $row.List.kv -> $x, $z {
-                @points.push(%( x => $x, y => -$y, z => $z ));
-            }
-        }
-        @surfaces.push(%( group => %spec<group>, columns => $columns, points => @points ));
+        @surfaces.push(%( group => %spec<group>, points => %spec<points> ));
     }
     $color-scheme = do given $color-scheme {
         when $_.isa(Whatever) { 'd3.schemeSet2' }
@@ -133,7 +127,8 @@ our sub SurfacePlot3D($data,
         .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical, :!pretty))
         .subst(:g, '$ZOOMING_ENABLED', $zooming-enabled ?? 'true' !! 'false')
         .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
-        .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false');
+        .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false')
+        .subst(:g, '$TICKS', $ticks ?? 'true' !! 'false');
     JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id, :with-d33d);
 }
 

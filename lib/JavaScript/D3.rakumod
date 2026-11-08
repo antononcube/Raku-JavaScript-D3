@@ -83,8 +83,9 @@ multi js-d3-list-point-plot3d($data, *%args) {
 our &js-d3-list-plot3d is export = &js-d3-list-point-plot3d;
 
 #============================================================
-#| Makes one or more 3D surfaces from numeric height matrices.
-#| A map from group names to matrices, or records with C<<group>> and C<<values>>, produces one surface per group.
+#| Makes one or more triangulated 3D surfaces from explicit x-y-z points.
+#| Points can be numeric triplets or maps with C<<x>>, C<<y>>, and C<<z>> keys.
+#| A C<<group>> key, or a map from group names to point collections, produces one surface per group.
 proto js-list-plot3D($data, |) is export {*}
 
 multi js-list-plot3D($data, *%args) {
