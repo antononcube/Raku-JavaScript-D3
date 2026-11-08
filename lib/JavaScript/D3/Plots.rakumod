@@ -366,7 +366,7 @@ our multi RadialAxisPlot(@datasets where (@datasets.elems > 0 && [&&] @datasets.
     die 'Each radial-axis vector is expected to have the same number of values.'
     unless [&&] @datasets2.map(*.elems == @dimensions.elems);
     my @records = @datasets2.kv.map(-> $i, $values {
-        %(group => "Series {$i + 1}", values => (@dimensions Z=> $values).Hash)
+        %(group => "Series {$i + 1}", values => (@dimensions Z=> $values.List).Hash)
     }).Array;
     radial-axis-render(@records, @dimensions, :has-groups, |%options);
 }
@@ -428,6 +428,7 @@ sub radial-axis-render(@data, @dimensions,
                        :$plot-range = Whatever,
                        :$axes = Whatever,
                        :$grid-lines is copy = False,
+                       Str :$grid-lines-color = 'lightgray',
                        :$margins is copy = Whatever,
                        :$legends = Whatever,
                        Bool :$legend = False,
@@ -439,6 +440,13 @@ sub radial-axis-render(@data, @dimensions,
             :$title-color, :$title-font-size, :$x-axis-label-color, :$x-axis-label-font-size,
             :$y-axis-label-color, :$y-axis-label-font-size);
     $margins = JavaScript::D3::Utilities::ProcessMargins($margins);
+    my $grid-shape = 'circle';
+    if $grid-lines ~~ Str:D {
+        $grid-shape = $grid-lines.lc;
+        die 'The string grid-lines value is expected to be "circle" or "polygon".'
+        unless $grid-shape ∈ <circle polygon>;
+        $grid-lines = True;
+    }
     $grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
     my @normalized = @data.map(-> %row {
         %(|(%row<group>:exists ?? %(group => %row<group>) !! Empty),
@@ -465,6 +473,7 @@ sub radial-axis-render(@data, @dimensions,
         .subst('$BACKGROUND_COLOR', '"' ~ $background ~ '"').subst('$COLOR_SCHEME', $color-scheme.starts-with('scheme') ?? $color-scheme !! 'scheme' ~ $color-scheme.tc)
         .subst(:g, '$HAS_GROUPS', $has-groups ?? 'true' !! 'false').subst(:g, '$LINE_COLOR', '"' ~ $stroke-color ~ '"').subst('$STROKE_WIDTH', $stroke-width)
         .subst(:g, '$FILLING', $filling ?? 'true' !! 'false')
+        .subst('$GRID_SHAPE', $grid-shape).subst('$GRID_LINES_COLOR', '"' ~ $grid-lines-color ~ '"', :g)
         .subst(:g, '$GRID_LINES', $grid-lines.max)
         .subst(:g, '$AXIS_LABEL_COLOR', '"' ~ $y-axis-label-color ~ '"').subst('$WIDTH', $width.Str).subst('$HEIGHT', $height.Str)
         .subst('$TITLE_FONT_SIZE', $title-font-size).subst('$TITLE_FILL', '"' ~ $title-color ~ '"').subst('$TITLE', '"' ~ $title ~ '"')

@@ -564,13 +564,28 @@ var myColor = d3.scaleOrdinal()
   .domain([...new Set(data.map(function(row) { return row.group; }))])
   .range(d3.$COLOR_SCHEME);
 
-center.selectAll("circle.radial-grid")
-  .data(d3.range(1, $GRID_LINES + 1))
-  .join("circle")
-    .attr("class", "radial-grid")
-    .attr("r", function(d) { return radius * d / $GRID_LINES; })
-    .attr("fill", "none")
-    .attr("stroke", "lightgray");
+if ("$GRID_SHAPE" === "polygon") {
+  center.selectAll("path.radial-grid")
+    .data(d3.range(1, $GRID_LINES + 1))
+    .join("path")
+      .attr("class", "radial-grid")
+      .attr("fill", "none")
+      .attr("stroke", $GRID_LINES_COLOR)
+      .attr("d", function(level) {
+        return d3.line().curve(d3.curveLinearClosed)(dimensions.map(function(d) {
+          return [radius * level * Math.sin(angle(d)) / $GRID_LINES,
+                  -radius * level * Math.cos(angle(d)) / $GRID_LINES];
+        }));
+      });
+} else {
+  center.selectAll("circle.radial-grid")
+    .data(d3.range(1, $GRID_LINES + 1))
+    .join("circle")
+      .attr("class", "radial-grid")
+      .attr("r", function(d) { return radius * d / $GRID_LINES; })
+      .attr("fill", "none")
+      .attr("stroke", $GRID_LINES_COLOR);
+}
 
 center.selectAll("line.radial-axis")
   .data($AXIS_DIMENSIONS)
