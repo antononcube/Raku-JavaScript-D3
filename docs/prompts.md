@@ -164,3 +164,34 @@ js-d3-radial-axis-plot([[3,9,9,7,2],[8,10,0,6,7],[7,10,2,4,3]])
 Make the grid-lines option take not just Boolean but also string shape values "polygon", "circle".
 Add `:$grid-lines-color` option that takes color values.
 ```
+
+---
+
+## 3D surfaces
+
+```text
+Does 3D plotting of D3.js support plotting of surfaces?
+If, yes, outline an implementation plan for this package, "JavaScript::D3".
+```
+
+````text
+Ok. Change the implementation to use explicit 3D points. I expect to see a triangle with this spec:
+
+```raku
+js-list-plot3D([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+```
+
+Should be equivalent to:
+
+```raku
+js-list-plot3D([{x => 0, y => 0, z => 1}, {x => 1, y => 0, z => 0}, {x => 0, y => 1, z => 0}])
+```
+````
+
+```text
+Your previous implementation assumed regular data -- a matrix of Z-values. 
+Let us have both:
+- Irregular data treatment is used for a list of triplets.
+- Regular data treatment is used if the argument is a dense matrix with columns more than 3.
+- Irregular data is by default -- matrices with exactly three columns are treated as irregular data. 
+```
