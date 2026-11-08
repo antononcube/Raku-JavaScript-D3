@@ -3,7 +3,7 @@ use v6.d;
 use Test;
 use JavaScript::D3;
 
-plan 7;
+plan 18;
 
 my @surface = [[1, 2, 1], [2, 4, 2], [1, 2, 1]];
 my $plot = js-list-plot3D(@surface);
@@ -17,3 +17,25 @@ like $grouped, / '"high"' /, 'each group produces a surface';
 like $grouped, / 'surface-legend' /, 'multiple groups show a legend by default';
 
 dies-ok { js-list-plot3D([[1, 2], [3]]) }, 'ragged matrices are rejected';
+
+my $view-options = js-list-plot3D(
+    @surface,
+    box-ratios => [2, 3, 0.5],
+    view-point => [1, -2, 3],
+    view-vertical => [0, 1, 0],
+    :zooming-enabled,
+    :axes,
+    :!boxed,
+);
+like $view-options, / 'var boxRatios = [2,3,0.5]' /, 'box ratios are emitted for the scene transform';
+like $view-options, / 'var viewPoint = [1,-2,3]' /, 'view point is emitted for the camera';
+like $view-options, / 'var viewVertical = [0,1,0]' /, 'view vertical is emitted for the camera';
+like $view-options, / 'var zoomingEnabled = true' /, 'zooming is enabled in the renderer';
+like $view-options, / 'showAxes = true' /, 'axes are enabled in the renderer';
+like $view-options, / 'showBoxed = false' /, 'the bounding box can be disabled';
+ok $view-options.contains('cameraForward'), 'surface camera is based on the requested view vectors';
+like $view-options, / 'selector.split(".")[1]' /, 'frame redraws retain the selected CSS class';
+
+dies-ok { js-list-plot3D(@surface, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
+dies-ok { js-list-plot3D(@surface, view-point => [0, 0, 0]) }, 'zero view point is rejected';
+dies-ok { js-list-plot3D(@surface, view-vertical => [0, 0, 0]) }, 'zero view vertical is rejected';

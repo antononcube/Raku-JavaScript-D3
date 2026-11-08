@@ -791,7 +791,11 @@ my $jsSurfacePlotPart = q:to/END/;
   var width = $WIDTH, height = $HEIGHT;
   var margin = $MARGINS;
   var surfaces = $DATA;
-  var angleX = 1.15, angleY = 0.25, scale = $SCALE;
+  var boxRatios = $BOX_RATIOS;
+  var viewPoint = $VIEW_POINT;
+  var viewVertical = $VIEW_VERTICAL;
+  var scale = $SCALE, initialScale = scale;
+  var zoomingEnabled = $ZOOMING_ENABLED, showAxes = $AXES, showBoxed = $BOXED;
   var origin = { x: width / 2, y: height / 2 };
   var palette = $COLOR_SCHEME;
   var color = d3.scaleOrdinal().domain(surfaces.map(function(s) { return s.group; })).range(palette);
@@ -803,31 +807,96 @@ my $jsSurfacePlotPart = q:to/END/;
   var svg = host.append("svg").attr("width", width).attr("height", height)
     .style("display", "block").style("background", $BACKGROUND).style("cursor", "grab");
 
+  function dot(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+  function cross(a, b) { return { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }; }
+  function unit(v) {
+    var n = Math.sqrt(dot(v, v));
+    return n > 1e-9 ? { x: v.x / n, y: v.y / n, z: v.z / n } : { x: 0, y: 0, z: 1 };
+  }
+  function sceneBounds() {
+    var all = [];
+    surfaces.forEach(function(s) { all = all.concat(s.points); });
+    return {
+      x0: d3.min(all, function(p) { return p.x; }), x1: d3.max(all, function(p) { return p.x; }),
+      y0: d3.min(all, function(p) { return p.y; }), y1: d3.max(all, function(p) { return p.y; }),
+      z0: d3.min(all, function(p) { return p.z; }), z1: d3.max(all, function(p) { return p.z; })
+    };
+  }
+  var bounds = sceneBounds();
+  function map(value, lo, hi, ratio) {
+    var mid = (lo + hi) / 2, half = Math.max(1e-9, (hi - lo) / 2);
+    return (value - mid) / half * 10 * ratio;
+  }
+  surfaces.forEach(function(surface) {
+    surface.scenePoints = surface.points.map(function(p) {
+      return { x: map(p.x, bounds.x0, bounds.x1, boxRatios[0]),
+               y: map(p.y, bounds.y0, bounds.y1, boxRatios[1]),
+               z: map(p.z, bounds.z0, bounds.z1, boxRatios[2]) };
+    });
+  });
+
+  // Camera basis: view-point looks from the center toward the viewer, while
+  // view-vertical selects the direction that remains up on screen.
+  var cameraForward = unit({ x: viewPoint[0], y: viewPoint[1], z: viewPoint[2] });
+  var cameraUpHint = unit({ x: viewVertical[0], y: viewVertical[1], z: viewVertical[2] });
+  function cameraBasis() {
+    var right = cross(cameraUpHint, cameraForward);
+    if (Math.sqrt(dot(right, right)) < 1e-6) { right = cross({ x: 0, y: 1, z: 0 }, cameraForward); }
+    right = unit(right);
+    return { right: right, up: unit(cross(cameraForward, right)) };
+  }
+  function project(p) {
+    var basis = cameraBasis();
+    return { x: origin.x + scale * dot(p, basis.right), y: origin.y - scale * dot(p, basis.up), depth: dot(p, cameraForward) };
+  }
+  function path(face) {
+    return face.map(function(p, i) { var q = project(p); return (i ? "L" : "M") + q.x + "," + q.y; }).join("") + "Z";
+  }
+  function rotate(v, axis, angle) {
+    var c = Math.cos(angle), s = Math.sin(angle), d = dot(axis, v), q = cross(axis, v);
+    return { x: v.x * c + q.x * s + axis.x * d * (1 - c), y: v.y * c + q.y * s + axis.y * d * (1 - c), z: v.z * c + q.z * s + axis.z * d * (1 - c) };
+  }
+  function boxEdges() {
+    var x = 10 * boxRatios[0], y = 10 * boxRatios[1], z = 10 * boxRatios[2];
+    var c = [{x:-x,y:-y,z:-z},{x:x,y:-y,z:-z},{x:x,y:y,z:-z},{x:-x,y:y,z:-z},{x:-x,y:-y,z:z},{x:x,y:-y,z:z},{x:x,y:y,z:z},{x:-x,y:y,z:z}];
+    return [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].map(function(e) { return [c[e[0]], c[e[1]]]; });
+  }
+  function sceneAxes() {
+    var x = 10 * boxRatios[0], y = 10 * boxRatios[1], z = 10 * boxRatios[2];
+    return [[{x:-x,y:0,z:0},{x:x,y:0,z:0}],[{x:0,y:-y,z:0},{x:0,y:y,z:0}],[{x:0,y:0,z:-z},{x:0,y:0,z:z}]];
+  }
+  function drawLines(selector, lines, stroke, width) {
+    var className = selector.split(".")[1];
+    svg.selectAll(selector).data(lines).join("line").attr("class", className)
+      .attr("stroke", stroke).attr("stroke-width", width)
+      .attr("x1", function(d) { return project(d[0]).x; }).attr("y1", function(d) { return project(d[0]).y; })
+      .attr("x2", function(d) { return project(d[1]).x; }).attr("y2", function(d) { return project(d[1]).y; });
+  }
+
   function draw() {
     var faces = [];
     surfaces.forEach(function(surface) {
-      var renderer = d33d.gridPlanes3D()
-        .rows(surface.columns)
-        .origin(origin)
-        .scale(scale)
-        .rotateX(angleX)
-        .rotateY(angleY);
-      renderer.data(surface.points).forEach(function(face) {
-        faces.push({ face: face, group: surface.group, renderer: renderer });
+      d33d.gridPlanes3D().rows(surface.columns).data(surface.scenePoints).forEach(function(face) {
+        faces.push({ face: face, group: surface.group });
       });
     });
     // SVG has no depth buffer; this is the painter's ordering for all surfaces.
-    faces.sort(function(a, b) { return d3.ascending(a.face.centroid.z, b.face.centroid.z); });
+    faces.sort(function(a, b) { return d3.ascending(d3.mean(a.face, function(p) { return project(p).depth; }), d3.mean(b.face, function(p) { return project(p).depth; })); });
 
     svg.selectAll("path.surface-face")
       .data(faces)
       .join("path")
       .attr("class", "surface-face")
-      .attr("d", function(d) { return d.renderer.draw(d.face); })
+      .attr("d", function(d) { return path(d.face); })
       .attr("fill", function(d) { return color(d.group); })
       .attr("fill-opacity", $OPACITY)
       .attr("stroke", $WIREFRAME ? function(d) { return color(d.group); } : "none")
       .attr("stroke-width", $STROKE_WIDTH);
+
+    if (showAxes) { drawLines("line.surface-axis", sceneAxes(), "#777", 1.5); }
+    else { svg.selectAll("line.surface-axis").remove(); }
+    if (showBoxed) { drawLines("line.surface-box", boxEdges(), "#999", 1); }
+    else { svg.selectAll("line.surface-box").remove(); }
 
     if ($SHOW_LEGENDS) {
       svg.selectAll("g.surface-legend").data(surfaces).join("g")
@@ -844,11 +913,18 @@ my $jsSurfacePlotPart = q:to/END/;
   }
 
   draw();
-  var startX, startY, startAngleX, startAngleY;
+  var startX, startY, startForward;
   svg.call(d3.drag()
-    .on("start", function(event) { svg.style("cursor", "grabbing"); startX = event.x; startY = event.y; startAngleX = angleX; startAngleY = angleY; })
-    .on("drag", function(event) { angleY = startAngleY + (event.x - startX) * 0.01; angleX = startAngleX - (event.y - startY) * 0.01; draw(); })
+    .on("start", function(event) { svg.style("cursor", "grabbing"); startX = event.x; startY = event.y; startForward = cameraForward; })
+    .on("drag", function(event) {
+      var basis = cameraBasis();
+      cameraForward = unit(rotate(rotate(startForward, cameraUpHint, (event.x - startX) * 0.01), basis.right, -(event.y - startY) * 0.01));
+      draw();
+    })
     .on("end", function() { svg.style("cursor", "grab"); }));
+  if (zoomingEnabled) {
+    svg.on("wheel", function(event) { event.preventDefault(); scale = Math.max(initialScale * 0.2, Math.min(initialScale * 4, scale * (event.deltaY > 0 ? 0.92 : 1.08))); draw(); });
+  }
 })();
 END
 

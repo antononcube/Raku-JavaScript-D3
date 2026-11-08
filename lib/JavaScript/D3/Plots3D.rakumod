@@ -67,11 +67,31 @@ our sub SurfacePlot3D($data,
                       Bool:D :$wireframe = True,
                       Numeric :$stroke-width = 0.45,
                       Numeric :$scale = 18,
+                      :$box-ratios is copy = [1, 1, 0.4],
+                      :$view-point is copy = Whatever,
+                      :$view-vertical is copy = Whatever,
                       :$margins is copy = Whatever,
                       :$legends = Whatever,
+                      Bool:D :zoom(:$zooming-enabled) = False,
+                      Bool:D :$axes = False,
+                      Bool:D :$boxed = True,
                       Str :$format = 'jupyter', :$div-id = Whatever --> Str:D) is export {
+    
     die 'The argument opacity is expected to be in the interval [0, 1].' unless 0 <= $opacity <= 1;
+    
     die 'The argument scale is expected to be positive.' unless $scale > 0;
+
+    die 'The value of box-ratios is expected to be a list of three positive numbers.'
+    unless $box-ratios ~~ Positional:D && $box-ratios.elems == 3 && $box-ratios.all ~~ Numeric:D && $box-ratios.all > 0;
+    
+    $view-point = [1.3, -2.4, 2.0] if $view-point.isa(Whatever);
+    die 'The value of view-point is expected to be a non-zero list of three numbers.'
+    unless $view-point ~~ Positional:D && $view-point.elems == 3 && $view-point.all ~~ Numeric:D && $view-point.map({ $_ * $_ }).sum > 0;
+    
+    $view-vertical = [0, 0, 1] if $view-vertical.isa(Whatever);
+    die 'The value of view-vertical is expected to be a non-zero list of three numbers.'
+    unless $view-vertical ~~ Positional:D && $view-vertical.elems == 3 && $view-vertical.all ~~ Numeric:D && $view-vertical.map({ $_ * $_ }).sum > 0;
+    
     my @specs = surface-specs($data);
     my @surfaces;
     for @specs -> %spec {
@@ -107,7 +127,13 @@ our sub SurfacePlot3D($data,
         .subst(:g, '$TITLE', $title.raku)
         .subst(:g, '$OPACITY', $opacity).subst(:g, '$WIREFRAME', $wireframe ?? 'true' !! 'false')
         .subst(:g, '$STROKE_WIDTH', $stroke-width).subst(:g, '$SCALE', $scale)
-        .subst(:g, '$SHOW_LEGENDS', $show-legends ?? 'true' !! 'false');
+        .subst(:g, '$SHOW_LEGENDS', $show-legends ?? 'true' !! 'false')
+        .subst(:g, '$BOX_RATIOS', to-json($box-ratios, :!pretty))
+        .subst(:g, '$VIEW_POINT', to-json($view-point, :!pretty))
+        .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical, :!pretty))
+        .subst(:g, '$ZOOMING_ENABLED', $zooming-enabled ?? 'true' !! 'false')
+        .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
+        .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false');
     JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id, :with-d33d);
 }
 
