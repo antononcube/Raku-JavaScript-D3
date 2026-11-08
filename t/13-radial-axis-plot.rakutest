@@ -13,12 +13,12 @@ like $list, / 'var dimensions = ["1","2","3","4"]' /, 'list positions label the 
 like $list, / 'var domains = [[2,7],[2,7],[2,7],[2,7]]' /, 'the default range is shared by all axes';
 like $list, / '.data(["1","2","3","4"])' /, 'axes true shows every radial axis';
 like $list, / 'd3.range(1, 0 + 1)' /, 'grid lines are configurable';
-like $list, / 'if (!false) { return "none"; }' /, 'filling defaults to false';
+like $list, / 'if (!true) { return "none"; }' /, 'filling defaults to true';
 
-my $filled = js-d3-radial-axis-plot([2, 5, 3, 7], :format<asis>, :filling);
-like $filled, / 'if (!true) { return "none"; }' /, 'filling can be enabled';
-like $filled, / '.brighter(0.8).formatHex()' /, 'filled curves use a lighter curve color';
-like $filled, / '"fill-opacity", true ? 0.3 : 0' /, 'filled curves are 0.7 transparent';
+my $unfilled = js-d3-radial-axis-plot([2, 5, 3, 7], :format<asis>, :!filling);
+like $unfilled, / 'if (!false) { return "none"; }' /, 'filling can be disabled explicitly';
+like $list, / '.brighter(0.8).formatHex()' /, 'filled curves use a lighter curve color';
+like $list, / '"fill-opacity", true ? 0.3 : 0' /, 'filled curves are 0.7 transparent';
 
 my $pairs = js-d3-radial-axis-plot([speed => 3, quality => 8, cost => 2], :format<asis>);
 like $pairs, / 'var dimensions = ["speed","quality","cost"]' /, 'pair keys label the axes';
