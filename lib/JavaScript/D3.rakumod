@@ -54,7 +54,12 @@ our sub js-d3-layer-labels($data, *%args) is export {
     JavaScript::D3::Combination::LayerLabels($data, |%args);
 }
 
-#| Combines 2D line, point, and label layers into one plot with shared axes.
+#| Creates a histogram layer for C<js-d3-combine>.
+our sub js-d3-layer-histogram($data, *%args) is export {
+    JavaScript::D3::Combination::LayerHistogram($data, |%args);
+}
+
+#| Combines 2D histogram, line, point, and label layers into one plot with shared axes.
 our sub js-d3-combine(*@layers, *%args) is export {
     JavaScript::D3::Combination::Combine(|@layers, |%args);
 }

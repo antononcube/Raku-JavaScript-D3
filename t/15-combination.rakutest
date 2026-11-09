@@ -1,0 +1,38 @@
+#!/usr/bin/env raku
+use v6.d;
+use Test;
+use JavaScript::D3;
+
+plan 13;
+
+my $plot = js-d3-combine(
+    js-d3-layer-histogram([1, 2, 2, 3, 5, 8], :color<steelblue>, :legend('Sample A'), :number-of-bins(4)),
+    js-d3-layer-histogram([2, 3, 3, 4, 6, 8], :color<tomato>, :legend('Sample B'), :number-of-bins(4)),
+    js-d3-layer-line([[1, 1], [8, 3]], :color<black>, :legend<Trend>),
+    js-d3-layer-points([[2, 2], [6, 4]], :color<gold>, :legend<Observations>),
+    :title<Histogram line points>,
+    :x-axis-label<Value>,
+    :y-axis-label<Count>,
+    :format<asis>);
+
+like $plot, / '// BEGIN shared-scales-and-axes' /, 'shared axes are emitted once';
+like $plot, / 'var histogramBinGenerator = d3.bin()' /, 'histogram layers use D3 binning';
+like $plot, / '.thresholds(4)' /, 'histogram layers share the requested number of bins';
+like $plot, / 'var histogramBins1 = histogramBinGenerator' /, 'first histogram uses shared bin boundaries';
+like $plot, / 'var histogramBins2 = histogramBinGenerator' /, 'second histogram uses shared bin boundaries';
+like $plot, / '// BEGIN layer: histogram-1' /, 'first histogram is a layer';
+like $plot, / '// BEGIN layer: histogram-2' /, 'second histogram is a layer';
+like $plot, / '// BEGIN layer: line-3' /, 'line can share histogram axes';
+like $plot, / '// BEGIN layer: points-4' /, 'points can share histogram axes';
+like $plot, / 'fill-opacity' /, 'histograms are rendered transparently for overlay comparison';
+like $plot, / 'legendEntries' /, 'all layer types contribute to one legend';
+unlike $plot, / 'AXIS_X_GRID' | 'AXIS_Y_GRID' /, 'axis-grid placeholders are resolved before JavaScript is emitted';
+
+dies-ok {
+    js-d3-combine(
+        js-d3-layer-histogram([1, 2, 3], :number-of-bins(4)),
+        js-d3-layer-histogram([2, 3, 4], :number-of-bins(5)),
+        :format<asis>)
+}, 'histogram layers with inconsistent bin counts are rejected';
+
+done-testing;

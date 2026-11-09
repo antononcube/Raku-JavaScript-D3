@@ -14,6 +14,8 @@ class Layer is export {
     has Numeric $.stroke-width = 1.5;
     has Numeric $.point-size = 6;
     has Numeric $.font-size = 12;
+    has Numeric $.opacity = 0.55;
+    has UInt $.number-of-bins = 20;
     has Str $.legend = '';
 }
 
@@ -84,6 +86,18 @@ our sub LayerLabels($data, Str :$color = 'black', Numeric :$font-size = 12,
             :$color, :$font-size, :$legend);
 }
 
+#| Creates a histogram layer. All histogram layers in one composition use the
+#| same bin boundaries; set C<number-of-bins> identically on each layer.
+our sub LayerHistogram($data, Str :$color = 'steelblue', Numeric :$opacity = 0.55,
+                       UInt :bins(:$number-of-bins) = 20, Str :$legend = '' --> Layer:D) is export {
+    my @values = $data ~~ Seq ?? $data.List !! $data.List;
+    die 'A histogram layer needs at least one numeric value.'
+    unless @values.elems && @values.all ~~ Numeric;
+
+    Layer.new(kind => 'histogram', data => @values.Array,
+              :$color, :$opacity, :$number-of-bins, :$legend);
+}
+
 sub layer-code(Layer:D $layer, Int:D $index --> Str:D) {
     my $data = to-json($layer.data, :!pretty);
     my $color = to-json($layer.color);
@@ -126,6 +140,19 @@ group.selectAll('text')
     .text(function(d) { return d.label; });
 END
         }
+        when 'histogram' {
+            q:to/END/;
+group.selectAll('rect')
+  .data(HISTOGRAM_BINS)
+  .join('rect')
+    .attr('x', function(d) { return x(d.x0) + 1; })
+    .attr('y', function(d) { return y(d.length); })
+    .attr('width', function(d) { return Math.max(0, x(d.x1) - x(d.x0) - 1); })
+    .attr('height', function(d) { return y(0) - y(d.length); })
+    .attr('fill', LAYER_COLOR)
+    .attr('fill-opacity', LAYER_OPACITY);
+END
+        }
         default { die "Unsupported combination layer kind '{$layer.kind}'."; }
     };
 
@@ -137,9 +164,94 @@ var group = svg.append('g').attr('class', '$class');
             .subst(:g, 'LAYER_COLOR', $color)
             .subst(:g, 'LAYER_STROKE_WIDTH', $layer.stroke-width)
             .subst(:g, 'LAYER_POINT_RADIUS', $layer.point-size / 2)
-            .subst(:g, 'LAYER_FONT_SIZE', $layer.font-size)}
+            .subst(:g, 'LAYER_FONT_SIZE', $layer.font-size)
+            .subst(:g, 'LAYER_OPACITY', $layer.opacity)
+            .subst(:g, 'HISTOGRAM_BINS', "histogramBins$index")}
 // END layer: {$layer.kind}-$index
 END
+}
+
+sub shared-scales-code(@layers, Bool:D $axes, $grid-lines,
+                       :$x-axis-scale = Whatever, :$y-axis-scale = Whatever --> Str:D) {
+    my @points = @layers.grep(*.kind ne 'histogram').map(*.data).flat.Array;
+    my %histogram-data;
+    my @histogram-bins;
+    for @layers.kv -> $index, $layer {
+        if $layer.kind eq 'histogram' {
+            %histogram-data{$index + 1} = $layer.data;
+            @histogram-bins.push($layer.number-of-bins);
+        }
+    }
+    die 'Histogram layers in one composition must use the same number-of-bins.'
+        if @histogram-bins.unique.elems > 1;
+
+    my $histogram-data = to-json(%histogram-data, :!pretty);
+    my $point-data = to-json(@points, :!pretty);
+    my $bin-count = @histogram-bins.elems ?? @histogram-bins[0] !! 0;
+    my $x-axis = JavaScript::D3::CodeSnippets::ProcessAxisScale($x-axis-scale);
+    my $y-axis = JavaScript::D3::CodeSnippets::ProcessAxisScale($y-axis-scale);
+    my $x-grid = $axes && $grid-lines[0] > 0 ?? ".ticks($grid-lines[0]).tickSizeInner(-height)" !! '';
+    my $y-grid = $axes && $grid-lines[1] > 0 ?? ".ticks($grid-lines[1]).tickSizeInner(-width)" !! '';
+    my $axes-code = '';
+    if $axes {
+        $axes-code = q:to/END/;
+svg.append('g')
+  .attr('transform', 'translate(0,' + height + ')')
+  .call(d3.axisBottom(x)AXIS_X_GRID);
+svg.append('g')
+  .call(d3.axisLeft(y)AXIS_Y_GRID);
+END
+    }
+    # AXES_CODE is inserted after the main template substitutions, so resolve
+    # its local placeholders before embedding it.
+    $axes-code = $axes-code
+        .subst('AXIS_X_GRID', $x-grid, :g)
+        .subst('AXIS_Y_GRID', $y-grid, :g);
+
+    my $code = q:to/END/;
+// Obtain point-like data and raw histogram values separately.
+var combinationPoints = POINT_DATA;
+var histogramLayerData = HISTOGRAM_DATA;
+var histogramValues = Object.values(histogramLayerData).flat();
+var xValues = combinationPoints.map(function(d) { return d.x; }).concat(histogramValues);
+var yValues = combinationPoints.map(function(d) { return d.y; });
+var xMin = d3.min(xValues);
+var xMax = d3.max(xValues);
+
+// Histogram layers intentionally share one bin generator and therefore one
+// set of bin boundaries.
+var histogramBinGenerator = d3.bin()
+  .domain([xMin, xMax])
+  .thresholds(NUMBER_OF_BINS);
+HISTOGRAM_BIN_SETS
+
+var histogramCounts = HISTOGRAM_COUNTS;
+var yMin = yValues.length ? d3.min(yValues) : 0;
+var yMax = yValues.length ? d3.max(yValues) : 0;
+if (histogramCounts.length) {
+  yMin = Math.min(0, yMin);
+  yMax = Math.max(yMax, d3.max(histogramCounts));
+}
+
+var x = d3.X_AXIS_SCALE
+  .domain([xMin, xMax])
+  .range([0, width]);
+var y = d3.Y_AXIS_SCALE
+  .domain([yMin, yMax])
+  .range([height, 0]);
+AXES_CODE
+END
+    my @bin-sets = %histogram-data.keys.sort.map({ "var histogramBins$_ = histogramBinGenerator(histogramLayerData[\"$_\"]);" });
+    my $counts = %histogram-data.keys.sort.map({ 'histogramBins' ~ $_ ~ '.map(function(bin) { return bin.length; })' }).join('.flat().concat(');
+    $counts = %histogram-data.elems ?? "[].concat($counts)" !! '[]';
+    $code.subst('POINT_DATA', $point-data)
+        .subst('HISTOGRAM_DATA', $histogram-data)
+        .subst('NUMBER_OF_BINS', $bin-count)
+        .subst('HISTOGRAM_BIN_SETS', @bin-sets.join("\n"))
+        .subst('HISTOGRAM_COUNTS', $counts)
+        .subst('X_AXIS_SCALE', $x-axis, :g)
+        .subst('Y_AXIS_SCALE', $y-axis, :g)
+        .subst('AXES_CODE', $axes-code, :g);
 }
 
 sub legend-code(@layers --> Str:D) {
@@ -163,7 +275,7 @@ END
     $code.subst('LEGEND_ENTRIES', $entries);
 }
 
-#| Compose 2D line, point, and label layers in one SVG with shared linear axes.
+#| Compose 2D histogram, line, point, and label layers in one SVG with shared axes.
 our sub Combine(*@layers,
                 Str :$background = 'White',
                 :$width = 600, :$height = 400,
@@ -191,7 +303,6 @@ our sub Combine(*@layers,
     my $title-text = $title ~~ Positional ?? $title.join(' ') !! $title.Str;
     my $x-label-text = $x-axis-label ~~ Positional ?? $x-axis-label.join(' ') !! $x-axis-label.Str;
     my $y-label-text = $y-axis-label ~~ Positional ?? $y-axis-label.join(' ') !! $y-axis-label.Str;
-    my @data = @layers.map(*.data).flat.Array;
     my %margins = JavaScript::D3::Utilities::ProcessMargins($margins);
     my $processed-grid-lines = JavaScript::D3::Utilities::ProcessGridLines($grid-lines);
     if $legends && @layers.grep(*.legend.chars).elems {
@@ -206,10 +317,8 @@ our sub Combine(*@layers,
             .subst('$X_AXIS_LABEL_FONT_SIZE', $x-axis-label-font-size).subst('$X_AXIS_LABEL_FILL', to-json($x-axis-label-color)).subst('$X_AXIS_LABEL', to-json($x-label-text))
             .subst('$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size).subst('$Y_AXIS_LABEL_FILL', to-json($y-axis-label-color)).subst('$Y_AXIS_LABEL', to-json($y-label-text));
 
-    my $scales = ($axes
-            ?? JavaScript::D3::CodeSnippets::GetPlotDataScalesAndAxesCode(|$processed-grid-lines, :$x-axis-scale, :$y-axis-scale)
-            !! JavaScript::D3::CodeSnippets::GetPlotDataAndScalesCode(:$x-axis-scale, :$y-axis-scale))
-            .subst('$DATA', to-json(@data, :!pretty));
+    my $scales = shared-scales-code(@layers, $axes, $processed-grid-lines,
+            :$x-axis-scale, :$y-axis-scale);
 
     my $layers = @layers.kv.map(-> $index, $layer { layer-code($layer, $index + 1) }).join("\n");
     my $legend = $legends ?? legend-code(@layers) !! '';
