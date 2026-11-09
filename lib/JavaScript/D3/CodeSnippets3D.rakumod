@@ -698,7 +698,7 @@ function render3DTrajectory(d33dModule, width, height) {
       .attr("stroke-width", 0.4)
       .attr("cx", function(d) { return d.projected.x; })
       .attr("cy", function(d) { return d.projected.y; })
-      .attr("r", function(d) { return Math.max(1.8, 3.4 + 0.02 * d.rotated.z); });
+      .attr("r", function(d) { return Math.max($POINT_RADIUS, 2 * $POINT_RADIUS - 0.2 + 0.02 * d.rotated.z); });
 
     if (showLegends) {
       svg.selectAll("text.legend")
