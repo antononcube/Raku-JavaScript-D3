@@ -293,6 +293,10 @@ User specified or automatic:
 
 7. [X] DONE XKCD modifier (or filter)
 
+8. [-] TODO Plot combinations
+   - [X] DONE Multiple line- and point plots
+   - [X] DONE Multiple histogram and box-whisker charts 
+   - [X] DONE Charts and plots 
 
 --------
 
