@@ -59,7 +59,12 @@ our sub js-d3-layer-histogram($data, *%args) is export {
     JavaScript::D3::Combination::LayerHistogram($data, |%args);
 }
 
-#| Combines 2D histogram, line, point, and label layers into one plot with shared axes.
+#| Creates a box-whisker layer for C<js-d3-combine>.
+our sub js-d3-layer-box-whisker($data, *%args) is export {
+    JavaScript::D3::Combination::LayerBoxWhisker($data, |%args);
+}
+
+#| Combines 2D histogram, box-whisker, line, point, and label layers into one plot with shared axes.
 our sub js-d3-combine(*@layers, *%args) is export {
     JavaScript::D3::Combination::Combine(|@layers, |%args);
 }

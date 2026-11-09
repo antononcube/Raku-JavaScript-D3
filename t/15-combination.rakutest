@@ -3,7 +3,7 @@ use v6.d;
 use Test;
 use JavaScript::D3;
 
-plan 13;
+plan 19;
 
 my $plot = js-d3-combine(
     js-d3-layer-histogram([1, 2, 2, 3, 5, 8], :color<steelblue>, :legend('Sample A'), :number-of-bins(4)),
@@ -27,6 +27,22 @@ like $plot, / '// BEGIN layer: points-4' /, 'points can share histogram axes';
 like $plot, / 'fill-opacity' /, 'histograms are rendered transparently for overlay comparison';
 like $plot, / 'legendEntries' /, 'all layer types contribute to one legend';
 unlike $plot, / 'AXIS_X_GRID' | 'AXIS_Y_GRID' /, 'axis-grid placeholders are resolved before JavaScript is emitted';
+ok $plot.contains('var histogramCounts = [histogramBins1.map(function(bin) { return bin.length; }), histogramBins2.map(function(bin) { return bin.length; })].flat();'),
+    'two histograms generate a syntactically complete combined-count expression';
+
+my $boxes = js-d3-combine(
+    js-d3-layer-box-whisker([1, 2, 3, 4, 10], :x(1), :color<steelblue>, :legend<First>),
+    js-d3-layer-box-whisker([2, 3, 4, 5, 12], :x(2), :color<tomato>, :legend<Second>),
+    :format<asis>);
+like $boxes, / '// BEGIN layer: box-whisker-1' /, 'first box-whisker chart is a layer';
+like $boxes, / '// BEGIN layer: box-whisker-2' /, 'second box-whisker chart is a layer';
+like $boxes, / 'd3.quantileSorted' /, 'box-whisker layers calculate quartiles with D3';
+
+my $horizontal-box = js-d3-combine(
+    js-d3-layer-box-whisker([1, 2, 3, 4, 10], :x(1), :horizontal, :color<purple>),
+    :format<asis>);
+like $horizontal-box, / 'if (true)' /, 'horizontal box-whisker option is emitted';
+like $horizontal-box, / 'boxCenter = y(1)' /, 'horizontal boxes place their category position on y';
 
 dies-ok {
     js-d3-combine(

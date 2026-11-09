@@ -235,3 +235,25 @@ Make it in separate "Combination.rakumod" file in the "Plots" directory.
 What if I want to combine two charts, or a chart and plot? Say, two histograms. 
 You have to implement a histogram layer?
 ```
+
+```text
+Ok. Make the changes for using histogram layers. Make sure I can combine histograms, lines, and points.
+```
+
+````text
+Ok. I can combine one chart with multiple plots but I cannot combine two or more charts. Please:
+- Make a box-whisker plot layer
+- Make sure I can combine two more charts
+This should work / render:
+
+```raku
+js-d3-combine(
+    js-d3-layer-histogram([1, 2, 2, 3, 5, 8], :color<steelblue>, :legend('Sample A'), :number-of-bins(4)),
+    js-d3-layer-histogram([2, 3, 3, 4, 6, 8], :color<tomato>, :legend('Sample B'), :number-of-bins(4)),
+)
+```
+````
+
+```text
+The box-whisker layer should take the boolean option :horizontal.
+```
