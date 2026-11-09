@@ -6,6 +6,7 @@ need JavaScript::D3::Plots3D;
 need JavaScript::D3::Random;
 need JavaScript::D3::Images;
 need JavaScript::D3::Chess;
+need JavaScript::D3::Combination;
 need JavaScript::D3::Gauge;
 need JavaScript::D3::Graph;
 need JavaScript::D3::Utilities;
@@ -35,6 +36,27 @@ multi sub js-d3-named-colors() {
 
 multi sub js-d3-named-colors(*@names, Bool:D :p(:$pairs) = False) {
     return $pairs ?? (@names Z=> JavaScript::D3::Utilities::get-named-colors(){@names}).List !! JavaScript::D3::Utilities::get-named-colors(){@names};
+}
+
+#============================================================
+#| Creates a line layer for C<js-d3-combine>.
+our sub js-d3-layer-line($data, *%args) is export {
+    JavaScript::D3::Combination::LayerLine($data, |%args);
+}
+
+#| Creates a point layer for C<js-d3-combine>.
+our sub js-d3-layer-points($data, *%args) is export {
+    JavaScript::D3::Combination::LayerPoints($data, |%args);
+}
+
+#| Creates a text-label layer for C<js-d3-combine>.
+our sub js-d3-layer-labels($data, *%args) is export {
+    JavaScript::D3::Combination::LayerLabels($data, |%args);
+}
+
+#| Combines 2D line, point, and label layers into one plot with shared axes.
+our sub js-d3-combine(*@layers, *%args) is export {
+    JavaScript::D3::Combination::Combine(|@layers, |%args);
 }
 
 #============================================================
