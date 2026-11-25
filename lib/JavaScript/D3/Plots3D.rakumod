@@ -95,6 +95,13 @@ sub surface-specs($data --> Array:D) {
     die 'Surface data is expected to be at least three x-y-z points, or a dense numeric matrix with more than three columns.';
 }
 
+sub process-view-projection($view-projection is copy --> Str:D) {
+    $view-projection = 'perspective' if $view-projection.isa(Whatever);
+    die 'The value of view-projection is expected to be "orthographic", "perspective", or Whatever.'
+    unless $view-projection ~~ Str:D && $view-projection.lc ∈ <orthographic perspective perspecive>;
+    $view-projection.lc eq 'orthographic' ?? 'orthographic' !! $view-projection.lc;
+}
+
 our sub SurfacePlot3D($data,
                       Str :$background = 'White',
                       :color-palette(:$color-scheme) is copy = Whatever,
@@ -109,6 +116,7 @@ our sub SurfacePlot3D($data,
                       :$box-ratios is copy = [1, 1, 0.4],
                       :$view-point is copy = Whatever,
                       :$view-vertical is copy = Whatever,
+                      :$view-projection is copy = Whatever,
                       :$margins is copy = Whatever,
                       :legend(:$legends) = Whatever,
                       Bool:D :zoom(:$zooming-enabled) = False,
@@ -131,6 +139,7 @@ our sub SurfacePlot3D($data,
     $view-vertical = [0, 0, 1] if $view-vertical.isa(Whatever);
     die 'The value of view-vertical is expected to be a non-zero list of three numbers.'
     unless $view-vertical ~~ Positional:D && $view-vertical.elems == 3 && $view-vertical.all ~~ Numeric:D && $view-vertical.map({ $_ * $_ }).sum > 0;
+    $view-projection = process-view-projection($view-projection);
     
     my @specs = surface-specs($data);
     my @surfaces;
@@ -163,11 +172,12 @@ our sub SurfacePlot3D($data,
         .subst(:g, '$BOX_RATIOS', to-json($box-ratios, :!pretty))
         .subst(:g, '$VIEW_POINT', to-json($view-point, :!pretty))
         .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical, :!pretty))
+        .subst(:g, '$VIEW_PROJECTION', $view-projection.raku)
         .subst(:g, '$ZOOMING_ENABLED', $zooming-enabled ?? 'true' !! 'false')
         .subst(:g, '$AXES', $axes ?? 'true' !! 'false')
         .subst(:g, '$BOXED', $boxed ?? 'true' !! 'false')
         .subst(:g, '$TICKS', $ticks ?? 'true' !! 'false');
-    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id, :with-d33d);
+    JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }
 
 #============================================================
@@ -214,6 +224,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          :$box-ratios is copy = [1, 1, 0.4], #= The value [x, y, z] gives the side-length ratios of the corresponding axes.
                          :$view-point is copy = Whatever, #= The value [x,y,z] gives the position of the view point relative to the center of the three-dimensional box that contains the objects.
                          :$view-vertical is copy = Whatever, #= Specifies what direction in scaled coordinates should be vertical in the final image.
+                         :$view-projection is copy = Whatever, #= C<orthographic> (default) or C<perspective>; C<perspecive> is accepted as an alias.
                          :$margins is copy = Whatever,
                          :$legends = Whatever,
                          Bool:D :zoom(:$zooming-enabled) = False,
@@ -226,6 +237,10 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
                          Str :$format = 'jupyter',
                          :$div-id = Whatever,
                           ) {
+    die 'The argument data is expected to be non-empty.' unless @data.elems > 0;
+    die 'Every data record is expected to have numeric x, y, and z values.'
+    unless [&&] @data.map({ $_<x> ~~ Numeric:D && $_<y> ~~ Numeric:D && $_<z> ~~ Numeric:D });
+
     # Process labels colors and font sizes
     ($x-axis-label-color, $x-axis-label-font-size, $y-axis-label-color, $y-axis-label-font-size) =
             JavaScript::D3::Utilities::ProcessLabelsColorsAndFontSizes(
@@ -273,23 +288,24 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             $box-ratios = ($box-ratios <</>> $box-ratios.max).List
         }
     }
-    die 'The value of $box-ratios is expected a list of three numbers or Whatever.'
-    unless $box-ratios ~~ Positional:D && $box-ratios.elems == 3 && $box-ratios.all ~~ Numeric:D;
+    die 'The value of $box-ratios is expected to be a list of three positive numbers or Whatever.'
+    unless $box-ratios ~~ Positional:D && $box-ratios.elems == 3 && $box-ratios.all ~~ Numeric:D && $box-ratios.all > 0;
 
     # Process view point
     if $view-point.isa(Whatever) {
         $view-point = [1.3, -2.4, 2.0]
     }
-    die 'The value of $view-point is expected a list of three numbers or Whatever.'
-    unless $view-point ~~ Positional:D && $view-point.elems == 3 && $view-point.all ~~ Numeric:D;
+    die 'The value of $view-point is expected to be a non-zero list of three numbers or Whatever.'
+    unless $view-point ~~ Positional:D && $view-point.elems == 3 && $view-point.all ~~ Numeric:D && $view-point.map({ $_ * $_ }).sum > 0;
 
     # Process view vertical
     # The setting is view-vertical => [0,0,1] specifies that the z axis in your original coordinate system should end up vertical in the final image.
     if $view-vertical.isa(Whatever) {
         $view-vertical = [0, 0, 1]
     }
-    die 'The value of $view-vertical is expected a list of three numbers or Whatever.'
-    unless $view-vertical ~~ Positional:D && $view-vertical.elems == 3 && $view-vertical.all ~~ Numeric:D;
+    die 'The value of $view-vertical is expected to be a non-zero list of three numbers or Whatever.'
+    unless $view-vertical ~~ Positional:D && $view-vertical.elems == 3 && $view-vertical.all ~~ Numeric:D && $view-vertical.map({ $_ * $_ }).sum > 0;
+    $view-projection = process-view-projection($view-projection);
 
     # Face grids
     # TBD...
@@ -340,9 +356,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
     }
 
     # Stencil
-    my $jsScatterPlot = [JavaScript::D3::CodeSnippets::GetPlotMarginsAndTitle($format),
-                         $jsPlotMiddle]
-            .join("\n");
+    my $jsScatterPlot = $jsPlotMiddle;
 
     # Concrete parameters
     my $res = $jsScatterPlot
@@ -378,6 +392,7 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
             .subst(:g, '$SHOW_LEGENDS', $show-legends ?? 'true' !! 'false')
             .subst(:g, '$VIEW_POINT', to-json($view-point):!pretty)
             .subst(:g, '$VIEW_VERTICAL', to-json($view-vertical):!pretty)
+            .subst(:g, '$VIEW_PROJECTION', $view-projection.raku)
             .subst(:g, '$MARGINS', to-json($margins):!pretty)
             .subst(:g, '$LEGEND_X_POS', 'width + 3*12')
             .subst(:g, '$LEGEND_Y_POS', '0')
@@ -389,5 +404,5 @@ our multi ListLinePlot3D(@data where @data.all ~~ Map,
 #        $res .= subst($marker, $marker ~ "\n" ~ JavaScript::D3::CodeSnippets::GetTooltipMousePart);
 #    }
 
-    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id, :with-d33d);
+    return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);
 }

@@ -8,21 +8,7 @@ use JavaScript::D3::Utilities;
 # ListPlot3D code snippets
 #============================================================
 my $jsMultiTrajectoryPlotPart = q:to/END/;
-function render3DTrajectory(d33dModule, width, height) {
-  var d33d = d33dModule || window.d33d || {};
-  var lineStrips3D = d33d.lineStrips3D;
-  var points3D = d33d.points3D;
-  var lines3D = d33d.lines3D;
-
-  if (!lineStrips3D || !points3D || !lines3D) {
-    d3.select(element.get(0))
-      .append("div")
-      .style("color", "#b00020")
-      .style("font-family", "sans-serif")
-      .style("padding", "8px")
-      .text("d3-3d is not loaded. Prime notebook first with require.config for d3_3d.");
-    return;
-  }
+function render3DTrajectory(width, height) {
 
   var host = d3.select(element.get(0));
   host.html("");
@@ -52,14 +38,10 @@ function render3DTrajectory(d33dModule, width, height) {
   var minScale = 1;
   var maxScale = 1;
   var scale = 1;
-  var angleX = 1.35;
-  var angleY = 0.15;
-  var angleZ = 0;
-
-  // Toggle point projection mode:
-  // true  -> manual projection (rotates points correctly)
-  // false -> library points3D() projection
-  var USE_MANUAL_POINT_PROJECTION = true;
+  var viewProjection = $VIEW_PROJECTION;
+  var perspectiveDistance = 1;
+  var viewPoint = asNumberTriplet($VIEW_POINT, [1.3, -2.4, 2.0]);
+  var viewVertical = asNumberTriplet($VIEW_VERTICAL, [0, 0, 1]);
 
   host
     .append("div")
@@ -123,6 +105,69 @@ function render3DTrajectory(d33dModule, width, height) {
 
   function mapZValueToScene(v) {
     return ((v - zMid) / zHalfSpan) * 10 * boxRatios[2];
+  }
+
+  function dot(a, b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+  }
+
+  function cross(a, b) {
+    return {
+      x: a.y * b.z - a.z * b.y,
+      y: a.z * b.x - a.x * b.z,
+      z: a.x * b.y - a.y * b.x
+    };
+  }
+
+  function unit(v) {
+    var length = Math.sqrt(dot(v, v));
+    return length > 1e-9 ? { x: v.x / length, y: v.y / length, z: v.z / length } : { x: 0, y: 0, z: 1 };
+  }
+
+  // This is the sole projection path for points, lines, axes, box edges,
+  // ticks, and labels. It supports orthographic and perspective projection.
+  var cameraForward = unit({ x: viewPoint[0], y: viewPoint[1], z: viewPoint[2] });
+  var cameraUpHint = unit({ x: viewVertical[0], y: viewVertical[1], z: viewVertical[2] });
+
+  function cameraBasis() {
+    var right = cross(cameraUpHint, cameraForward);
+    if (Math.sqrt(dot(right, right)) < 1e-6) {
+      right = cross({ x: 0, y: 1, z: 0 }, cameraForward);
+    }
+    right = unit(right);
+    return { right: right, up: unit(cross(cameraForward, right)) };
+  }
+
+  function projectScenePoint(point, basis) {
+    basis = basis || cameraBasis();
+    var x = dot(point, basis.right);
+    var y = dot(point, basis.up);
+    var depth = dot(point, cameraForward);
+    var perspectiveScale = viewProjection === "perspective"
+      ? perspectiveDistance / Math.max(1e-9, perspectiveDistance - depth)
+      : 1;
+    return {
+      x: point.x,
+      y: point.y,
+      z: point.z,
+      group: point.group,
+      type: point.type,
+      rotated: { x: x, y: y, z: depth },
+      projected: { x: origin.x + scale * perspectiveScale * x, y: origin.y - scale * perspectiveScale * y },
+      depth: depth
+    };
+  }
+
+  function rotate(vector, axis, angle) {
+    var cosine = Math.cos(angle);
+    var sine = Math.sin(angle);
+    var projection = dot(axis, vector);
+    var perpendicular = cross(axis, vector);
+    return {
+      x: vector.x * cosine + perpendicular.x * sine + axis.x * projection * (1 - cosine),
+      y: vector.y * cosine + perpendicular.y * sine + axis.y * projection * (1 - cosine),
+      z: vector.z * cosine + perpendicular.z * sine + axis.z * projection * (1 - cosine)
+    };
   }
 
   function makeAxes(ratios) {
@@ -346,7 +391,11 @@ function render3DTrajectory(d33dModule, width, height) {
   var sceneRadius = Math.max(1e-9, Math.sqrt(sceneRadiusSq));
   var paddingPx = 24;
   var availableRadiusPx = Math.max(8, 0.5 * Math.min(width, height) - paddingPx);
-  var fitScale = availableRadiusPx / sceneRadius;
+  perspectiveDistance = 8 * sceneRadius;
+  var maximumProjectionScale = viewProjection === "perspective"
+    ? perspectiveDistance / (perspectiveDistance - sceneRadius)
+    : 1;
+  var fitScale = availableRadiusPx / (sceneRadius * maximumProjectionScale);
 
   // Rotation-safe fit: at this scale (or smaller), all points remain in view.
   maxScale = 20 * fitScale;
@@ -388,99 +437,13 @@ function render3DTrajectory(d33dModule, width, height) {
     }
   }
 
-  var strip3d = lineStrips3D()
-    .x(function(d) { return d.x; })
-    .y(function(d) { return d.y; })
-    .z(function(d) { return d.z; })
-    .origin(origin)
-    .scale(scale)
-    .rotateX(angleX)
-    .rotateY(angleY);
-  if (typeof strip3d.rotateZ === "function") {
-    strip3d.rotateZ(angleZ);
-  }
-
-  var pts3d = points3D()
-    .x(function(d) { return d.x; })
-    .y(function(d) { return d.y; })
-    .z(function(d) { return d.z; })
-    .origin(origin)
-    .scale(scale)
-    .rotateX(angleX)
-    .rotateY(angleY);
-  if (typeof pts3d.rotateZ === "function") {
-    pts3d.rotateZ(angleZ);
-  }
-
-  var ax3d = lines3D()
-    .x(function(d) { return d.x; })
-    .y(function(d) { return d.y; })
-    .z(function(d) { return d.z; })
-    .origin(origin)
-    .scale(scale)
-    .rotateX(angleX)
-    .rotateY(angleY);
-  if (typeof ax3d.rotateZ === "function") {
-    ax3d.rotateZ(angleZ);
-  }
-
-  function syncProjectors() {
-    strip3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
-    pts3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
-    ax3d.origin(origin).scale(scale).rotateX(angleX).rotateY(angleY);
-    if (typeof strip3d.rotateZ === "function") {
-      strip3d.rotateZ(angleZ);
-    }
-    if (typeof pts3d.rotateZ === "function") {
-      pts3d.rotateZ(angleZ);
-    }
-    if (typeof ax3d.rotateZ === "function") {
-      ax3d.rotateZ(angleZ);
-    }
-  }
-
-  function rotateX3d(p, a) {
-    var s = Math.sin(a);
-    var c = Math.cos(a);
-    return { x: p.x, y: p.y * c - p.z * s, z: p.y * s + p.z * c };
-  }
-
-  function rotateY3d(p, a) {
-    var s = Math.sin(a);
-    var c = Math.cos(a);
-    return { x: p.z * s + p.x * c, y: p.y, z: p.z * c - p.x * s };
-  }
-
-  function rotateZ3d(p, a) {
-    var s = Math.sin(a);
-    var c = Math.cos(a);
-    return { x: p.x * c - p.y * s, y: p.x * s + p.y * c, z: p.z };
-  }
-
-  function manualProjectPoint(d) {
-    var afterZ = rotateZ3d({ x: d.x, y: d.y, z: d.z }, angleZ);
-    var afterY = rotateY3d(afterZ, angleY);
-    var rotated = rotateX3d(afterY, angleX);
-
-    return {
-      x: d.x,
-      y: d.y,
-      z: d.z,
-      group: d.group,
-      type: d.type,
-      rotated: rotated,
-      projected: {
-        x: origin.x + scale * rotated.x,
-        y: origin.y + scale * rotated.y
-      }
-    };
-  }
-
   function draw() {
-    syncProjectors();
+    var basis = cameraBasis();
 
     if (showAxes) {
-      var transformedAxes = ax3d.data(axes);
+      var transformedAxes = axes.map(function(axis) {
+        return [projectScenePoint(axis[0], basis), projectScenePoint(axis[1], basis)];
+      });
 
       svg.selectAll("line.axis")
         .data(transformedAxes)
@@ -531,8 +494,8 @@ function render3DTrajectory(d33dModule, width, height) {
 
         var projectedTickSegments = axisTicks.segments.map(function(s) {
           return {
-            a: manualProjectPoint(s.a).projected,
-            b: manualProjectPoint(s.b).projected
+            a: projectScenePoint(s.a, basis).projected,
+            b: projectScenePoint(s.b, basis).projected
           };
         });
 
@@ -550,7 +513,7 @@ function render3DTrajectory(d33dModule, width, height) {
         var projectedTickLabels = axisTicks.labels.map(function(l) {
           return {
             text: l.text,
-            projected: manualProjectPoint(l.p).projected
+            projected: projectScenePoint(l.p, basis).projected
           };
         });
 
@@ -579,8 +542,8 @@ function render3DTrajectory(d33dModule, width, height) {
     if (showBoxed) {
       var projectedBoxEdges = boxEdges.map(function(e) {
         return {
-          a: manualProjectPoint(e.a).projected,
-          b: manualProjectPoint(e.b).projected
+          a: projectScenePoint(e.a, basis).projected,
+          b: projectScenePoint(e.b, basis).projected
         };
       });
 
@@ -601,7 +564,7 @@ function render3DTrajectory(d33dModule, width, height) {
           text: a.text,
           fontSize: a.fontSize,
           fill: a.fill,
-          projected: manualProjectPoint(a.p).projected
+          projected: projectScenePoint(a.p, basis).projected
         };
       });
 
@@ -619,8 +582,8 @@ function render3DTrajectory(d33dModule, width, height) {
       if (showTicks) {
         var projectedBoxTickSegments = boxTicks.segments.map(function(s) {
           return {
-            a: manualProjectPoint(s.a).projected,
-            b: manualProjectPoint(s.b).projected
+            a: projectScenePoint(s.a, basis).projected,
+            b: projectScenePoint(s.b, basis).projected
           };
         });
 
@@ -638,7 +601,7 @@ function render3DTrajectory(d33dModule, width, height) {
         var projectedBoxTickLabels = boxTicks.labels.map(function(l) {
           return {
             text: l.text,
-            projected: manualProjectPoint(l.p).projected
+            projected: projectScenePoint(l.p, basis).projected
           };
         });
 
@@ -663,16 +626,12 @@ function render3DTrajectory(d33dModule, width, height) {
       svg.selectAll("text.box-tick-label").remove();
     }
 
-    var lineInput = [];
-    for (var li = 0; li < lineGroups.length; li++) {
-      lineInput.push(lineGroups[li].values);
-    }
-    var transformedLineStrips = strip3d.data(lineInput);
-
-    var lineRenderData = [];
-    for (var lr = 0; lr < transformedLineStrips.length; lr++) {
-      lineRenderData.push({ strip: transformedLineStrips[lr], group: lineGroups[lr].group });
-    }
+    var lineRenderData = lineGroups.map(function(group) {
+      return {
+        group: group.group,
+        projected: group.values.map(function(point) { return projectScenePoint(point, basis).projected; })
+      };
+    });
 
     svg.selectAll("path.trajectory")
       .data(lineRenderData)
@@ -683,11 +642,14 @@ function render3DTrajectory(d33dModule, width, height) {
       .attr("stroke-width", 3)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
-      .attr("d", function(d) { return strip3d.draw(d.strip); });
+      .attr("d", function(d) {
+        return d.projected.map(function(point, index) {
+          return (index ? "L" : "M") + point.x + "," + point.y;
+        }).join("");
+      });
 
-    var transformedPoints = USE_MANUAL_POINT_PROJECTION
-      ? pointData.map(function(d) { return manualProjectPoint(d); })
-      : pts3d.data(pointData);
+    var transformedPoints = pointData.map(function(point) { return projectScenePoint(point, basis); })
+      .sort(function(a, b) { return d3.ascending(a.depth, b.depth); });
 
     svg.selectAll("circle.point")
       .data(transformedPoints)
@@ -719,9 +681,8 @@ function render3DTrajectory(d33dModule, width, height) {
 
   var startX = 0;
   var startY = 0;
-  var startAngleX = angleX;
-  var startAngleY = angleY;
-  var startAngleZ = angleZ;
+  var startForward = cameraForward;
+  var startBasis = cameraBasis();
 
   svg.call(
     d3.drag()
@@ -729,15 +690,19 @@ function render3DTrajectory(d33dModule, width, height) {
         svg.style("cursor", "grabbing");
         startX = event.x;
         startY = event.y;
-        startAngleX = angleX;
-        startAngleY = angleY;
-        startAngleZ = angleZ;
+        startForward = cameraForward;
+        startBasis = cameraBasis();
       })
       .on("drag", function(event) {
         var dx = event.x - startX;
         var dy = event.y - startY;
-        angleZ = startAngleZ + dx * 0.01;
-        angleX = startAngleX - dy * 0.01;
+        // Horizontal drag yaws; vertical drag pitches. The camera-basis
+        // approach has no Euler-angle reset or roll ambiguity.
+        cameraForward = unit(rotate(
+          rotate(startForward, cameraUpHint, dx * 0.01),
+          startBasis.right,
+          -dy * 0.01
+        ));
         draw();
       })
       .on("end", function() {
@@ -756,11 +721,7 @@ function render3DTrajectory(d33dModule, width, height) {
     svg.on("wheel", null);
   }
 }
-
-if (window.d33d && window.d33d.lineStrips3D) {
-  render3DTrajectory(window.d33d, $WIDTH, $HEIGHT);
-  return;
-}
+render3DTrajectory($WIDTH, $HEIGHT);
 END
 
 #============================================================
@@ -791,6 +752,7 @@ my $jsSurfacePlotPart = q:to/END/;
   var boxRatios = $BOX_RATIOS;
   var viewPoint = $VIEW_POINT;
   var viewVertical = $VIEW_VERTICAL;
+  var viewProjection = $VIEW_PROJECTION;
   var scale = $SCALE, initialScale = scale;
   var zoomingEnabled = $ZOOMING_ENABLED, showAxes = $AXES, showBoxed = $BOXED, showTicks = $TICKS;
   var origin = { x: width / 2, y: height / 2 };
@@ -850,6 +812,16 @@ my $jsSurfacePlotPart = q:to/END/;
     }
   });
 
+  var sceneRadiusSq = 0;
+  surfaces.forEach(function(surface) {
+    surface.scenePoints.forEach(function(point) {
+      sceneRadiusSq = Math.max(sceneRadiusSq, dot(point, point));
+    });
+  });
+  sceneRadiusSq = Math.max(sceneRadiusSq,
+    100 * (boxRatios[0] * boxRatios[0] + boxRatios[1] * boxRatios[1] + boxRatios[2] * boxRatios[2]));
+  var perspectiveDistance = 8 * Math.max(1e-9, Math.sqrt(sceneRadiusSq));
+
   // Camera basis: view-point looks from the center toward the viewer, while
   // view-vertical selects the direction that remains up on screen.
   var cameraForward = unit({ x: viewPoint[0], y: viewPoint[1], z: viewPoint[2] });
@@ -862,7 +834,15 @@ my $jsSurfacePlotPart = q:to/END/;
   }
   function project(p) {
     var basis = cameraBasis();
-    return { x: origin.x + scale * dot(p, basis.right), y: origin.y - scale * dot(p, basis.up), depth: dot(p, cameraForward) };
+    var depth = dot(p, cameraForward);
+    var perspectiveScale = viewProjection === "perspective"
+      ? perspectiveDistance / Math.max(1e-9, perspectiveDistance - depth)
+      : 1;
+    return {
+      x: origin.x + scale * perspectiveScale * dot(p, basis.right),
+      y: origin.y - scale * perspectiveScale * dot(p, basis.up),
+      depth: depth
+    };
   }
   function path(face) {
     return face.map(function(p, i) { var q = project(p); return (i ? "L" : "M") + q.x + "," + q.y; }).join("") + "Z";

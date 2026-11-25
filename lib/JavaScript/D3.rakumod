@@ -106,6 +106,8 @@ multi js-d3-radial-axis-plot($data, *%args) {
 #| Multiple sets of points (or lines) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".
 #| The values of "type" are expected to be one of "line" or "point".
+#| The C<view-projection> option selects orthographic (default) or perspective
+#| projection; C<view-point> and C<view-vertical> control the initial camera.
 proto js-d3-list-point-plot3d($data, |) is export {*}
 
 multi js-d3-list-point-plot3d($data, *%args) {
@@ -132,6 +134,8 @@ our &js-d3-list-plot3D is export = &js-d3-list-plot3d;
 #| Multiple lines (or sets of points) can be specified as a list of dictionaries.
 #| Each with has the keys "x", "y", "z", "group", and "type".
 #| The values of "type" are expected to be one of "line" or "point".
+#| The C<view-projection> option selects orthographic (default) or perspective
+#| projection; C<view-point> and C<view-vertical> control the initial camera.
 proto js-d3-list-line-plot3d($data, |) is export {*}
 
 multi js-d3-list-line-plot3d($data, *%args) {

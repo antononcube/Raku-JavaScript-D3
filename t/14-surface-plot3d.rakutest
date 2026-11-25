@@ -4,7 +4,7 @@ use Test;
 use JSON::Fast;
 use JavaScript::D3;
 
-plan 26;
+plan 30;
 
 my @surface = [[0, 0, 1], [1, 0, 0], [0, 1, 0]];
 my $plot = js-d3-list-plot3D(@surface);
@@ -55,6 +55,12 @@ like $view-options, / 'selector.split(".")[1]' /, 'frame redraws retain the sele
 like $plot, / 'surface-tick-label' /, 'ticks are enabled by default';
 like $plot, / 'd3.ticks(bounds.x0, bounds.x1, 4)' /, 'ticks are derived from the x data range';
 unlike js-d3-list-plot3D(@surface, :!ticks), / 'showTicks = true' /, 'ticks can be disabled';
+
+my $perspective-surface = js-d3-list-plot3D(@surface, :format<asis>, view-projection => 'perspective');
+like $perspective-surface, / 'var viewProjection = "perspective";' /, 'surface plot emits perspective projection';
+ok $perspective-surface.contains('var perspectiveDistance = 8 * Math.max'), 'surface plot sets a perspective camera distance';
+like $plot, / 'var viewProjection = "perspective";' /, 'surface plots default to perspective projection';
+dies-ok { js-d3-list-plot3D(@surface, view-projection => 'oblique') }, 'surface rejects unknown view projections';
 
 dies-ok { js-d3-list-plot3D(@surface, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
 dies-ok { js-d3-list-plot3D(@surface, view-point => [0, 0, 0]) }, 'zero view point is rejected';

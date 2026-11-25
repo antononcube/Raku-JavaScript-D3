@@ -1,0 +1,55 @@
+#!/usr/bin/env raku
+use v6.d;
+use Test;
+use JavaScript::D3;
+
+plan 26;
+
+my @cube-points = (
+    { x => -1, y => -1, z => -1 },
+    { x => 1, y => -1, z => -1 },
+    { x => 1, y => 1, z => 1 },
+    { x => -1, y => 1, z => 1 },
+);
+
+my $points = js-d3-list-point-plot3d(
+    @cube-points,
+    :format<asis>,
+    :boxed,
+    :axes,
+    view-point => [9, 8, 7],
+    view-vertical => [0, 1, 0],
+);
+
+like $points, / 'var viewPoint = asNumberTriplet([9,8,7]' /, 'point plot emits the requested camera direction';
+like $points, / 'var viewVertical = asNumberTriplet([0,1,0]' /, 'point plot emits the requested camera up direction';
+like $points, / 'function cameraBasis()' /, 'point plot derives a camera basis';
+like $points, / 'function projectScenePoint' /, 'point plot defines one scene projector';
+like $points, / 'projectScenePoint(axis[0], basis)' /, 'axes use the shared scene projector';
+like $points, / 'projectScenePoint(e.a, basis)' /, 'box edges use the shared scene projector';
+like $points, / 'projectScenePoint(point, basis)' /, 'points use the shared scene projector';
+like $points, / 'cameraForward = unit(rotate(' /, 'drag interaction updates the camera direction';
+unlike $points, / 'lineStrips3D' /, 'point plot no longer uses d3-3d line projection';
+unlike $points, / 'points3D' /, 'point plot no longer uses d3-3d point projection';
+unlike $points, / 'angleZ' /, 'point plot no longer rolls by an Euler Z angle';
+unlike $points, / 'window.d33d' /, 'point plot no longer requires the d3-3d global';
+unlike js-d3-list-point-plot3d(@cube-points, :format<html>), / 'd3-3d' /, 'standalone point plots do not load d3-3d';
+
+my $lines = js-d3-list-line-plot3d(@cube-points, :format<asis>);
+like $lines, / 'path.trajectory' /, 'line plot renders trajectories';
+like $lines, / 'projected: group.values.map' /, 'line plot uses the shared scene projector';
+
+my $perspective = js-d3-list-point-plot3d(@cube-points, :format<asis>, view-projection => 'perspective');
+like $perspective, / 'var viewProjection = "perspective";' /, 'point plot accepts perspective projection';
+like $perspective, / 'var perspectiveDistance = 1;' /, 'point plot defines a perspective camera distance';
+ok $perspective.contains('perspectiveDistance / Math.max'), 'point plot scales near geometry in perspective mode';
+like js-d3-list-point-plot3d(@cube-points, :format<asis>), / 'var viewProjection = "perspective";' /, 'perspective projection is the default';
+like js-d3-list-point-plot3d(@cube-points, :format<asis>, view-projection => 'orthographic'), / 'var viewProjection = "orthographic";' /, 'orthographic projection remains available';
+
+dies-ok { js-d3-list-point-plot3d([]) }, 'empty point data is rejected';
+dies-ok { js-d3-list-point-plot3d([{ x => 1, y => 2 }]) }, 'point records without z are rejected';
+dies-ok { js-d3-list-point-plot3d(@cube-points, box-ratios => [1, 0, 1]) }, 'non-positive box ratios are rejected';
+dies-ok { js-d3-list-point-plot3d(@cube-points, view-point => [0, 0, 0]) }, 'zero view point is rejected';
+dies-ok { js-d3-list-point-plot3d(@cube-points, view-vertical => [0, 0, 0]) }, 'zero view vertical is rejected';
+dies-ok { js-d3-list-point-plot3d(@cube-points, view-projection => 'oblique') }, 'unknown view projection is rejected';
+
