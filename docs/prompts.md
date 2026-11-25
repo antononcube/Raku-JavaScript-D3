@@ -265,3 +265,37 @@ The box-whisker layer should take the boolean option :horizontal.
 ```text
 I want to have unified, consistent behaviour of Bin2DChart in "./lib/JavaScript/D3/Charts.rakumod" for the two methods "rectbin" and "hexbin". For some reason the code in$jsRectbinChartPart  in "./lib/JavaScript/D3/CodeSnippets.rakumod" uses row- and column counts to determine tile size. On the other hand $jsHexbinChartPart uses tile size (i.e. hex-bin radius). Make both codes use the arugemt $bin-size of Bin2DChart. 
 ```
+
+---
+
+## Audit 3D plotting
+
+```text
+Next, I think the 3D box `js-d3-list-point-plot3d(@data, :boxed)`does not have the right projection. 
+Maybe, it is not just the box, but all 3D plotting is projected wrongly. 
+Examine or audit the code "./lib/JavaScript/D3/CodeSnippets3D.rakumod" and tell me what you think. 
+Do not implement any fixes yet.
+```
+
+### Answer
+
+Implemented the 3D projection fixes.
+
+- Point, line, axes, box, ticks, and labels now share one orthographic camera-basis projector.
+- `:view-point` and `:view-vertical` now control the initial trajectory view.
+- Dragging is yaw/pitch camera movement, not Z-axis roll.
+- Built-in 3D plots no longer depend on `d3-3d`.
+- Added input validation for data, ratios, and camera vectors.
+
+Changed: [odeSnippets3D.rakumod, Plots3D.rakumod, JavaScript/D3.rakumod, and new trajectory tests.
+
+Validation: module syntax checks, generated JavaScript parsing with Node, focused 3D tests, and all project `.rakutest` files pass.
+
+----
+
+## View-projection implementation 
+
+
+```text
+Implement the addtional projection "perspective". Implement the option `view-projection` that can take the values `Whatever`, "orthographic", and "perspecive".
+```
