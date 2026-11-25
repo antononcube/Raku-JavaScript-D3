@@ -700,7 +700,7 @@ our multi Bin2DChart(@data where @data.all ~~ Positional, *%args) {
 
 our multi Bin2DChart(@data where @data.all ~~ Map,
                      :$method is copy = Whatever,
-                     :hextile-size(:hex-tile-radius(:$hex-bin-radius)) is copy = Whatever,
+                     :tile-size(:bin-radius(:$bin-size)) is copy = Whatever,
                      Str :$background = 'white',
                      Str :$color = 'steelblue',
                      UInt:D :$width = 600,
@@ -762,7 +762,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
             .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$HEX_RADIUS', $hex-bin-radius ~~ Numeric:D ?? $hex-bin-radius !! 10)
+            .subst(:g, '$HEX_RADIUS', $bin-size ~~ Numeric:D ?? $bin-size !! 10)
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);

@@ -189,7 +189,7 @@ proto js-d3-density2d-chart($data, |) is export {*}
 
 multi js-d3-density2d-chart($data,
                             :$method = Whatever,
-                            :hextile-size(:hex-tile-radius(:$hex-bin-radius)) is copy = Whatever,
+                            :tile-size(:bin-radius(:$bin-size)) is copy = Whatever,
                             Str :$background= 'white',
                             Str :$color= 'steelblue',
                             :$width = 600, :$height = 400,
@@ -205,7 +205,7 @@ multi js-d3-density2d-chart($data,
     JavaScript::D3::Charts::Bin2DChart(
         $data,
         :$method,
-        :$hex-bin-radius,
+        :$bin-size,
         :$background,
         :$color,
         :$width, :$height,
