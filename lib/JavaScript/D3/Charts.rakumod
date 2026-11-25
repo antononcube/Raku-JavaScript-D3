@@ -739,8 +739,8 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
 
     $method = 'rectbin' if $method.isa(Whatever);
     die 'The argument method is expected to be one of rectbin, hexbin, or an alias of either.'
-    unless $method ~~ Str:D && $method.lc ∈ <rect rectangle rectbin hex hexagon hexbin hextile>;
-    $method = $method.lc ∈ <rect rectangle rectbin> ?? 'rectbin' !! 'hexbin';
+    unless $method ~~ Str:D && $method.lc ∈ <rect rectangle rectbin tile hex hexagon hexbin hextile>;
+    $method = $method.lc ∈ <rect rectangle rectbin tile> ?? 'rectbin' !! 'hexbin';
 
     my $jsData = to-json(@data, :!pretty);
     my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
