@@ -699,6 +699,8 @@ our multi Bin2DChart(@data where @data.all ~~ Positional, *%args) {
 }
 
 our multi Bin2DChart(@data where @data.all ~~ Map,
+                     :$method is copy = Whatever,
+                     :hextile-size(:hex-tile-radius(:$hex-bin-radius)) is copy = Whatever,
                      Str :$background = 'white',
                      Str :$color = 'steelblue',
                      UInt:D :$width = 600,
@@ -713,8 +715,8 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
                      :y-label-color(:$y-axis-label-color) is copy = Whatever,
                      :y-label-font-size(:$y-axis-label-font-size) is copy = Whatever,
                      :$grid-lines is copy = False,
+                     Bool:D :$axes = True,
                      :$margins is copy = Whatever,
-                     :$method is copy = Whatever,
                      Str :$format = 'jupyter',
                      :$div-id = Whatever
                      ) {
@@ -740,7 +742,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
     $method = $method.lc ∈ <rect rectangle rectbin> ?? 'rectbin' !! 'hexbin';
 
     my $jsData = to-json(@data, :!pretty);
-    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines),
+    my $jsChart = [JavaScript::D3::CodeSnippets::GetPlotPreparationCode($format, |$grid-lines, :$axes),
                    $method eq 'rectbin'
                    ?? JavaScript::D3::CodeSnippets::GetRectbinChartPart()
                    !! JavaScript::D3::CodeSnippets::GetHexbinChartPart()].join("\n");
@@ -760,6 +762,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
             .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
+            .subst(:g, '$HEX_RADIUS', $hex-bin-radius ~~ Numeric:D ?? $hex-bin-radius !! 10)
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);

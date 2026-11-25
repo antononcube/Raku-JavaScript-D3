@@ -188,6 +188,8 @@ multi js-d3-bubble-chart($data, *%args) {
 proto js-d3-density2d-chart($data, |) is export {*}
 
 multi js-d3-density2d-chart($data,
+                            :$method = Whatever,
+                            :hextile-size(:hex-tile-radius(:$hex-bin-radius)) is copy = Whatever,
                             Str :$background= 'white',
                             Str :$color= 'steelblue',
                             :$width = 600, :$height = 400,
@@ -196,21 +198,24 @@ multi js-d3-density2d-chart($data,
                             Str :x-label(:$x-axis-label) = '',
                             Str :y-label(:$y-axis-label) = '',
                             :$grid-lines = False,
+                            Bool:D :$axes = True,
                             :$margins = Whatever,
-                            :$method = Whatever,
                             Str :$format = 'jupyter',
-                            :$div-id = Whatever) {
-    JavaScript::D3::Charts::Bin2DChart($data,
-            :$background,
-            :$color,
-            :$width, :$height,
-            :$title,
-            :$title-color,
-            :$x-axis-label, :$y-axis-label,
-            :$grid-lines,
-            :$margins,
-            :$method,
-            :$format, :$div-id);
+                            :$div-id = Whatever,) {
+    JavaScript::D3::Charts::Bin2DChart(
+        $data,
+        :$method,
+        :$hex-bin-radius,
+        :$background,
+        :$color,
+        :$width, :$height,
+        :$title,
+        :$title-color,
+        :$x-axis-label, :$y-axis-label,
+        :$grid-lines,
+        :$axes
+        :$margins,
+        :$format, :$div-id);
 }
 
 #============================================================

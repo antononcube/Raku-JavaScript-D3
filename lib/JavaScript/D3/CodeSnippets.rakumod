@@ -1389,7 +1389,7 @@ our sub GetTooltipMultiBubbleChartPart() {
 my $jsHexbinChartPart = q:to/END/;
 // Hexagonal binning implemented with D3 scales and data joins only.
 // The optional hexbin plug-in is not included in D3 v7.
-const hexRadius = 10;
+const hexRadius = $HEX_RADIUS;
 const hexRowStep = Math.sqrt(3) * hexRadius;
 const hexBins = new Map();
 
