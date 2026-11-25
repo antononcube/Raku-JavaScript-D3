@@ -684,7 +684,8 @@ our multi BubbleChart(@data is copy where @data.all ~~ Map,
 # Bind2D
 #============================================================
 
-#| Makes a bin 2D chart.
+#| Makes a bin 2D chart. The bin size is measured in plot pixels: it is the
+#| rectangle side length for C<rectbin> and the radius for C<hexbin>.
 our proto Bin2DChart($data, |) is export {*}
 
 our multi Bin2DChart($data where $data ~~ Seq, *%args) {
@@ -762,7 +763,7 @@ our multi Bin2DChart(@data where @data.all ~~ Map,
             .subst(:g, '$Y_AXIS_LABEL_FONT_SIZE', $y-axis-label-font-size)
             .subst(:g, '$Y_AXIS_LABEL_FILL', '"' ~ $y-axis-label-color ~ '"')
             .subst(:g, '$Y_AXIS_LABEL', '"' ~ $y-axis-label ~ '"')
-            .subst(:g, '$HEX_RADIUS', $bin-size ~~ Numeric:D ?? $bin-size !! 10)
+            .subst(:g, '$BIN_SIZE', $bin-size ~~ Numeric:D ?? $bin-size !! 10)
             .subst(:g, '$MARGINS', to-json($margins):!pretty);
 
     return JavaScript::D3::CodeSnippets::WrapIt($res, :$format, :$div-id);

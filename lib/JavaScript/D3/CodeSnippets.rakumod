@@ -1389,7 +1389,7 @@ our sub GetTooltipMultiBubbleChartPart() {
 my $jsHexbinChartPart = q:to/END/;
 // Hexagonal binning implemented with D3 scales and data joins only.
 // The optional hexbin plug-in is not included in D3 v7.
-const hexRadius = $HEX_RADIUS;
+const hexRadius = $BIN_SIZE;
 const hexRowStep = Math.sqrt(3) * hexRadius;
 const hexBins = new Map();
 
@@ -1434,21 +1434,16 @@ END
 
 my $jsRectbinChartPart = q:to/END/;
 // Rectangular binning implemented with D3 scales and a keyed data join only.
-const rectColumns = Math.max(1, Math.round(Math.sqrt(data.length * width / Math.max(height, 1))));
-const rectRows = Math.max(1, Math.round(data.length / rectColumns));
-const rectXSpan = xMax - xMin || 1;
-const rectYSpan = yMax - yMin || 1;
-const rectXStep = rectXSpan / rectColumns;
-const rectYStep = rectYSpan / rectRows;
+const rectBinSize = $BIN_SIZE;
 const rectBins = new Map();
 
 data.forEach(function(d) {
-  const column = Math.min(rectColumns - 1, Math.max(0, Math.floor((+d.x - xMin) / rectXSpan * rectColumns)));
-  const row = Math.min(rectRows - 1, Math.max(0, Math.floor((+d.y - yMin) / rectYSpan * rectRows)));
+  const column = Math.floor(x(+d.x) / rectBinSize);
+  const row = Math.floor(y(+d.y) / rectBinSize);
   const key = column + "," + row;
   let bin = rectBins.get(key);
   if (!bin) {
-    bin = { x0: xMin + column * rectXStep, y0: yMin + row * rectYStep, count: 0 };
+    bin = { column: column, row: row, count: 0 };
     rectBins.set(key, bin);
   }
   bin.count += 1;
@@ -1463,10 +1458,10 @@ svg.append("g")
   .selectAll("rect")
   .data(rectangleData)
   .join("rect")
-    .attr("x", function(d) { return x(d.x0); })
-    .attr("y", function(d) { return y(d.y0 + rectYStep); })
-    .attr("width", Math.max(0, x(xMin + rectXStep) - x(xMin)))
-    .attr("height", Math.max(0, y(yMin) - y(yMin + rectYStep)))
+    .attr("x", function(d) { return d.column * rectBinSize; })
+    .attr("y", function(d) { return d.row * rectBinSize; })
+    .attr("width", rectBinSize)
+    .attr("height", rectBinSize)
     .attr("fill", function(d) { return rectangleColor(d.count); })
     .attr("stroke", $FILL_COLOR)
     .attr("stroke-width", 0.25);

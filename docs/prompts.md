@@ -257,3 +257,11 @@ js-d3-combine(
 ```text
 The box-whisker layer should take the boolean option :horizontal.
 ```
+
+---
+
+## Consistent bin-size argument of density charts
+
+```text
+I want to have unified, consistent behaviour of Bin2DChart in "./lib/JavaScript/D3/Charts.rakumod" for the two methods "rectbin" and "hexbin". For some reason the code in$jsRectbinChartPart  in "./lib/JavaScript/D3/CodeSnippets.rakumod" uses row- and column counts to determine tile size. On the other hand $jsHexbinChartPart uses tile size (i.e. hex-bin radius). Make both codes use the arugemt $bin-size of Bin2DChart. 
+```
